@@ -1,17 +1,17 @@
 package envutil
 
 import (
-	"io/ioutil"
-	"os"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 
+	"github.com/bitrise-io/envman/pathutil"
 	"gopkg.in/yaml.v2"
-	"github.com/gkiki90/envman/pathutil"
 )
 
 type EnvYMLStruct struct {
-	Key string `yml:"key"`
+	Key   string `yml:"key"`
 	Value string `yml:"value"`
 }
 
@@ -30,9 +30,9 @@ func ReadEnvListFromFile(path string) (EnvListYMLStruct, error) {
 	}
 
 	bytes, err := ioutil.ReadFile(path)
-    if err != nil {
-        return EnvListYMLStruct{}, err
-    }
+	if err != nil {
+		return EnvListYMLStruct{}, err
+	}
 
 	var envlist EnvListYMLStruct
 	err = yaml.Unmarshal(bytes, &envlist)
@@ -74,5 +74,3 @@ func WriteEnvListToFile(fpath string, envlist EnvListYMLStruct) error {
 
 	return nil
 }
-
-
