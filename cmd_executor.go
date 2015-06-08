@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"fmt"
 	"os"
 	"os/exec"
 )
@@ -13,14 +12,12 @@ type commandModel struct {
 }
 
 func executeCmd(commandToRun commandModel) error {
-	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
-	//fmt.Println("cmd: ", cmd)
-
 	cmdEnvs := []string{}
 	for key, value := range commandToRun.Environments {
 		cmdEnvs = append(cmdEnvs, key+"="+value)
 	}
 
+	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

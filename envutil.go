@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -19,7 +18,6 @@ type environmentsStruct struct {
 func readEnvMapFromFile(path string) (envMap, error) {
 	isExists, err := pathutil.IsPathExists(path)
 	if err != nil {
-		fmt.Println("Failed to check path, err: %s", err)
 		return envMap{}, err
 	}
 	if isExists == false {
