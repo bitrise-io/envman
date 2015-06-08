@@ -5,18 +5,6 @@ import (
 	"runtime"
 )
 
-const envlistName string = "environment_variables.yml"
-
-var envmanDir string = userHomeDir() + "/.envman/"
-
-var EnvlistPath string = envmanDir + envlistName
-
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func IsPathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -28,7 +16,7 @@ func IsPathExists(path string) (bool, error) {
 	return false, err
 }
 
-func userHomeDir() string {
+func UserHomeDir() string {
 	if runtime.GOOS == "windows" {
 		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
 		if home == "" {
@@ -39,16 +27,7 @@ func userHomeDir() string {
 	return os.Getenv("HOME")
 }
 
-func CreateEnvmanDir() error {
-	path := envmanDir
-	exist, _ := IsPathExists(path)
-	if exist {
-		return nil
-	}
-	return createDir(path)
-}
-
-func createDir(path string) error {
+func CreateDir(path string) error {
 	err := os.MkdirAll(path, 0755)
 	return err
 }
