@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"os"
 	"os/exec"
 )
@@ -14,7 +14,7 @@ type commandStruct struct {
 
 func executeCmd(commandToRun commandStruct) error {
 	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
-	fmt.Println("cmd: ", cmd)
+	//fmt.Println("cmd: ", cmd)
 
 	cmdEnvs := []string{}
 	for key, value := range commandToRun.Environments {
