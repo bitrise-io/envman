@@ -6,19 +6,18 @@ import (
 	"os/exec"
 )
 
-type EnvironmentKeyValue struct {
+type environmentKeyValue struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-type CommandModel struct {
+type commandModel struct {
 	Command      string                `json:"command"`
 	Argumentums  []string              `json:"argumentums"`
-	Environments []EnvironmentKeyValue `json:"environments"`
+	Environments []environmentKeyValue `json:"environments"`
 }
 
-func executeCmd(commandToRun CommandModel) error {
-
+func executeCmd(commandToRun commandModel) error {
 	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
 	fmt.Println("cmd: ", cmd)
 

@@ -1,4 +1,4 @@
-package envutil
+package main
 
 import (
 	"errors"
@@ -6,44 +6,44 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bitrise-io/envman/pathutil"
+	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
 
-type EnvYMLStruct struct {
+type envYMLStruct struct {
 	Key   string `yml:"key"`
 	Value string `yml:"value"`
 }
 
-type EnvListYMLStruct struct {
-	Envlist []EnvYMLStruct `yml:"environment_variables"`
+type envListYMLStruct struct {
+	Envlist []envYMLStruct `yml:"environment_variables"`
 }
 
-func ReadEnvListFromFile(path string) (EnvListYMLStruct, error) {
+func readEnvListFromFile(path string) (envListYMLStruct, error) {
 	isExists, err := pathutil.IsPathExists(path)
 	if err != nil {
 		fmt.Println("Failed to check path, err: %s", err)
-		return EnvListYMLStruct{}, err
+		return envListYMLStruct{}, err
 	}
 	if isExists == false {
-		return EnvListYMLStruct{}, errors.New("No environemt variable list found")
+		return envListYMLStruct{}, errors.New("No environemt variable list found")
 	}
 
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return EnvListYMLStruct{}, err
+		return envListYMLStruct{}, err
 	}
 
-	var envlist EnvListYMLStruct
+	var envlist envListYMLStruct
 	err = yaml.Unmarshal(bytes, &envlist)
 	if err != nil {
-		return EnvListYMLStruct{}, err
+		return envListYMLStruct{}, err
 	}
 
 	return envlist, nil
 }
 
-func generateFormattedYMLForEnvList(envlist EnvListYMLStruct) ([]byte, error) {
+func generateFormattedYMLForEnvList(envlist envListYMLStruct) ([]byte, error) {
 	bytes, err := yaml.Marshal(envlist)
 	if err != nil {
 		return []byte{}, err
@@ -51,7 +51,7 @@ func generateFormattedYMLForEnvList(envlist EnvListYMLStruct) ([]byte, error) {
 	return bytes, nil
 }
 
-func WriteEnvListToFile(fpath string, envlist EnvListYMLStruct) error {
+func writeEnvListToFile(fpath string, envlist envListYMLStruct) error {
 	if fpath == "" {
 		return errors.New("No path provided")
 	}
