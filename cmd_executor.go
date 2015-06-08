@@ -1,33 +1,24 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"os"
 	"os/exec"
 )
 
-type environmentKeyValue struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+type commandStruct struct {
+	Command      string
+	Argumentums  []string
+	Environments envMap
 }
 
-type commandModel struct {
-	Command      string                `json:"command"`
-	Argumentums  []string              `json:"argumentums"`
-	Environments []environmentKeyValue `json:"environments"`
-}
-
-func executeCmd(commandToRun commandModel) error {
+func executeCmd(commandToRun commandStruct) error {
 	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
-	fmt.Println("cmd: ", cmd)
+	//fmt.Println("cmd: ", cmd)
 
 	cmdEnvs := []string{}
-	envLength := len(commandToRun.Environments)
-	if envLength > 0 {
-		cmdEnvs = make([]string, envLength, envLength)
-		for idx, aEnvPair := range commandToRun.Environments {
-			cmdEnvs[idx] = aEnvPair.Key + "=" + aEnvPair.Value
-		}
+	for key, value := range commandToRun.Environments {
+		cmdEnvs = append(cmdEnvs, key+"="+value)
 	}
 
 	cmd.Stdin = os.Stdin

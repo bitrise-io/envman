@@ -10,59 +10,59 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type envYMLStruct struct {
-	Key   string `yml:"key"`
-	Value string `yml:"value"`
+type envMap map[string]string
+
+type environmentsStruct struct {
+	Environments envMap `yml:"environments"`
 }
 
-type envListYMLStruct struct {
-	Envlist []envYMLStruct `yml:"environment_variables"`
-}
-
-func readEnvListFromFile(path string) (envListYMLStruct, error) {
+func readEnvMapFromFile(path string) (envMap, error) {
 	isExists, err := pathutil.IsPathExists(path)
 	if err != nil {
 		fmt.Println("Failed to check path, err: %s", err)
-		return envListYMLStruct{}, err
+		return envMap{}, err
 	}
 	if isExists == false {
-		return envListYMLStruct{}, errors.New("No environemt variable list found")
+		return envMap{}, errors.New("No environemt variable list found")
 	}
 
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		return envListYMLStruct{}, err
+		return envMap{}, err
 	}
 
-	var envlist envListYMLStruct
-	err = yaml.Unmarshal(bytes, &envlist)
+	var envs environmentsStruct
+	err = yaml.Unmarshal(bytes, &envs)
 	if err != nil {
-		return envListYMLStruct{}, err
+		return envMap{}, err
 	}
 
-	return envlist, nil
+	return envs.Environments, nil
 }
 
-func generateFormattedYMLForEnvList(envlist envListYMLStruct) ([]byte, error) {
-	bytes, err := yaml.Marshal(envlist)
+func generateFormattedYMLForEnvMap(environments envMap) ([]byte, error) {
+	var envs environmentsStruct
+	envs.Environments = environments
+
+	bytes, err := yaml.Marshal(envs)
 	if err != nil {
 		return []byte{}, err
 	}
 	return bytes, nil
 }
 
-func writeEnvListToFile(fpath string, envlist envListYMLStruct) error {
-	if fpath == "" {
+func writeEnvMapToFile(path string, environments envMap) error {
+	if path == "" {
 		return errors.New("No path provided")
 	}
 
-	file, err := os.Create(fpath)
+	file, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	jsonContBytes, err := generateFormattedYMLForEnvList(envlist)
+	jsonContBytes, err := generateFormattedYMLForEnvMap(environments)
 	if err != nil {
 		return err
 	}
