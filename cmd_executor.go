@@ -1,25 +1,25 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
-	"fmt"
 	//"github.com/codeskyblue/go-sh"
 )
 
 type EnvironmentKeyValue struct {
-	Key string `json:"key"`
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 type CommandModel struct {
-	Command string `json:"command"`
-	Argumentums []string `json:"argumentums"`
+	Command      string                `json:"command"`
+	Argumentums  []string              `json:"argumentums"`
 	Environments []EnvironmentKeyValue `json:"environments"`
 }
 
 func executeCmd(commandToRun CommandModel) error {
-	
+
 	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
 	fmt.Println("cmd: ", cmd)
 
@@ -40,20 +40,20 @@ func executeCmd(commandToRun CommandModel) error {
 	//fmt.Println(cmd.Env)
 
 	return cmd.Run()
-	
+
 	/*
-	session := sh.NewSession()
-	
-	envLength := len(commandToRun.Environments)
-	if envLength > 0 {
-		for _, aEnvPair := range commandToRun.Environments {
-			session.SetEnv(aEnvPair.Key, aEnvPair.Value)
+		session := sh.NewSession()
+
+		envLength := len(commandToRun.Environments)
+		if envLength > 0 {
+			for _, aEnvPair := range commandToRun.Environments {
+				session.SetEnv(aEnvPair.Key, aEnvPair.Value)
+			}
 		}
-	}
 
-	fmt.Println(session.Env)
+		fmt.Println(session.Env)
 
-	session.Command(commandToRun.Command, commandToRun.Argumentums).Run()
+		session.Command(commandToRun.Command, commandToRun.Argumentums).Run()
 	*/
 
 	return nil
