@@ -6,13 +6,13 @@ import (
 	"os/exec"
 )
 
-type commandStruct struct {
+type commandModel struct {
 	Command      string
 	Argumentums  []string
 	Environments envMap
 }
 
-func executeCmd(commandToRun commandStruct) error {
+func executeCmd(commandToRun commandModel) error {
 	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
 	//fmt.Println("cmd: ", cmd)
 
