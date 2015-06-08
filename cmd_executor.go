@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	//"github.com/codeskyblue/go-sh"
 )
 
 type EnvironmentKeyValue struct {
@@ -37,24 +36,5 @@ func executeCmd(commandToRun CommandModel) error {
 	cmd.Stderr = os.Stderr
 	cmd.Env = append(os.Environ(), cmdEnvs...)
 
-	//fmt.Println(cmd.Env)
-
 	return cmd.Run()
-
-	/*
-		session := sh.NewSession()
-
-		envLength := len(commandToRun.Environments)
-		if envLength > 0 {
-			for _, aEnvPair := range commandToRun.Environments {
-				session.SetEnv(aEnvPair.Key, aEnvPair.Value)
-			}
-		}
-
-		fmt.Println(session.Env)
-
-		session.Command(commandToRun.Command, commandToRun.Argumentums).Run()
-	*/
-
-	return nil
 }
