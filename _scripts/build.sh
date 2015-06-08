@@ -11,7 +11,7 @@ set -v
 go fmt
 
 # Test
-go test ./...
+go test -v ./...
 
 # Build
 go build
