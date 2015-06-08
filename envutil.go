@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/bitrise-io/envman/pathutil"
+	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
 
