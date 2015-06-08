@@ -11,6 +11,7 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
+# Go get
 go get ./...
 
 bash _scripts/build.sh
