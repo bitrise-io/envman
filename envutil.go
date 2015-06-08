@@ -21,7 +21,7 @@ func readEnvMapFromFile(path string) (envMap, error) {
 		return envMap{}, err
 	}
 	if isExists == false {
-		return envMap{}, errors.New("No environemt variable list found")
+		return envMap{}, errors.New("No environment variable list found")
 	}
 
 	bytes, err := ioutil.ReadFile(path)
