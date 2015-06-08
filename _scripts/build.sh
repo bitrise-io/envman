@@ -5,23 +5,15 @@ set -e
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${THIS_SCRIPT_DIR}/.."
 
-set +e
+set -v
 
-echo "-> Fmt"
+# Format
 go fmt
 
-echo "-> Testing"
-go test ./...
-if [[ $? -ne 0 ]]; then
-	echo " [!] Tests Failed"
-	exit 1
-fi
+# Test
+go test -v ./...
 
-echo "-> Building"
+# Build
 go build
-if [[ $? -ne 0 ]]; then
-	echo " [!] Build Failed!"
-	exit 1
-fi
 
-echo " (i) DONE - OK"
+# DONE - OK
