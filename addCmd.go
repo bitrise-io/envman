@@ -7,7 +7,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func addCommand(c *cli.Context) {
+func addCmd(c *cli.Context) {
 	key := c.String("key")
 	value := c.String("value")
 	if stdinValue != "" {
@@ -37,5 +37,5 @@ func addCommand(c *cli.Context) {
 	}
 
 	// Print new environment list
-	printCommand(c)
+	printCmd(c)
 }

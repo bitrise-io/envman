@@ -49,8 +49,9 @@ func loadEnvMap() (envMap, error) {
 func loadEnvMapOrCreate() (envMap, error) {
 	environments, err := loadEnvMap()
 	if err != nil {
-		if err == errors.New("No environemt variable list found") {
+		if err.Error() == "No environment variable list found" {
 			err = createEnvmanDir()
+			return envMap{}, nil
 		}
 		return envMap{}, err
 	}

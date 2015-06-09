@@ -1,11 +1,6 @@
 package main
 
-import (
-	"os"
-	"path"
-
-	"github.com/codegangsta/cli"
-)
+import "github.com/codegangsta/cli"
 
 func init() {
 	cli.AppHelpTemplate = `

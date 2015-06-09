@@ -6,7 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func runCommand(c *cli.Context) {
+func runCmd(c *cli.Context) {
 	environments, err := loadEnvMap()
 	if err != nil {
 		log.Fatalln("Failed to export environment variable list, err:", err)
