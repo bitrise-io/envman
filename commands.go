@@ -12,20 +12,20 @@ var (
 				flKey,
 				flValue,
 			},
-			Action: add,
+			Action: addCommand,
 		},
 		{
 			Name:      "print",
 			ShortName: "p",
 			Usage:     "Prints the stored environment variables",
-			Action:    print,
+			Action:    printCommand,
 		},
 		{
 			Name:            "run",
 			ShortName:       "r",
 			Usage:           "Runs the specified command with stored environments",
 			SkipFlagParsing: true,
-			Action:          run,
+			Action:          runCommand,
 		},
 	}
 )

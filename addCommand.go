@@ -7,7 +7,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func add(c *cli.Context) {
+func addCommand(c *cli.Context) {
 	key := c.String("key")
 	value := c.String("value")
 	if stdinValue != "" {
@@ -35,4 +35,7 @@ func add(c *cli.Context) {
 	if err != nil {
 		log.Fatalln("Failed to create store envlist, err:", err)
 	}
+
+	// Print new environment list
+	printCommand(c)
 }

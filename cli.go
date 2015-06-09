@@ -11,7 +11,7 @@ import (
 )
 
 // Run the Envman CLI.
-func Run() {
+func run() {
 	// Read piped data
 	if !terminal.IsTerminal(0) {
 		bytes, err := ioutil.ReadAll(os.Stdin)
@@ -25,7 +25,7 @@ func Run() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Usage = "Environment varaibale manager"
-	app.Version = "0.0.1"
+	app.Version = VERSION
 
 	app.Author = ""
 	app.Email = ""
