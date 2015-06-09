@@ -12,15 +12,25 @@ func runCommand(c *cli.Context) {
 		log.Fatalln("Failed to export environment variable list, err:", err)
 	}
 
-	doCmdEnvs := environments
-	doCommand := c.Args()[0]
-	doArgs := c.Args()[1:]
+	if len(c.Args()) > 0 {
+		doCmdEnvs := environments
+		doCommand := c.Args()[0]
 
-	cmdToSend := commandModel{
-		Command:      doCommand,
-		Environments: doCmdEnvs,
-		Argumentums:  doArgs,
+		doArgs := []string{}
+		if len(c.Args()) > 1 {
+			doArgs = c.Args()[1:]
+		}
+
+		cmdToSend := commandModel{
+			Command:      doCommand,
+			Environments: doCmdEnvs,
+			Argumentums:  doArgs,
+		}
+
+		if err := executeCmd(cmdToSend); err != nil {
+			log.Fatalln("Failed to execute command, err:", err)
+		}
+	} else {
+		log.Fatalln("No command specified")
 	}
-
-	executeCmd(cmdToSend)
 }
