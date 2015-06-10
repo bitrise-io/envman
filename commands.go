@@ -27,5 +27,12 @@ var (
 			SkipFlagParsing: true,
 			Action:          runCmd,
 		},
+		{
+			Name:            "clear",
+			ShortName:       "c",
+			Usage:           "Clears the envman provided enviroment variables",
+			SkipFlagParsing: true,
+			Action:          clearCmd,
+		},
 	}
 )

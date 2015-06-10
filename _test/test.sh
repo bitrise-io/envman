@@ -7,6 +7,12 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
+# CLEAR_CMD TESTS
+# Clears envman provided environment variables
+# (should print "Empty environment variable list")
+envman clear
+envman print
+
 # ADD_CMD TESTS
 # Add new environment variable 
 # (list should contains: BITRISE:bitrise)
