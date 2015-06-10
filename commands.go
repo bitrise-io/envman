@@ -28,11 +28,16 @@ var (
 			Action:          runCmd,
 		},
 		{
-			Name:            "clear",
-			ShortName:       "c",
-			Usage:           "Clears the envman provided enviroment variables",
-			SkipFlagParsing: true,
-			Action:          clearCmd,
+			Name:      "clear",
+			ShortName: "c",
+			Usage:     "Clears the envman provided enviroment variables",
+			Action:    clearCmd,
+		},
+		{
+			Name:      "init",
+			ShortName: "i",
+			Usage:     "Create an empty .envstore file into the current directory",
+			Action:    initCmd,
 		},
 	}
 )
