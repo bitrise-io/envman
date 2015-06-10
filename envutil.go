@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -13,6 +14,65 @@ type envMap map[string]string
 
 type environmentsStruct struct {
 	Environments envMap `yml:"environments"`
+}
+
+const (
+	envMapName string = ".envstore.yml"
+)
+
+var (
+	envmanDir  string = pathutil.UserHomeDir() + "/.envman/"
+	envMapPath string = envmanDir + envMapName
+	stdinValue string
+)
+
+func createEnvmanDir() error {
+	exist, err := pathutil.IsPathExists(envmanDir)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return nil
+	}
+	return os.MkdirAll(envmanDir, 0755)
+}
+
+func loadEnvMap() (envMap, error) {
+	environments, err := readEnvMapFromFile(envMapPath)
+	if err != nil {
+		return envMap{}, err
+	}
+
+	return environments, nil
+}
+
+func loadEnvMapOrCreate() (envMap, error) {
+	environments, err := loadEnvMap()
+	if err != nil {
+		if err.Error() == "No environment variable list found" {
+			err = createEnvmanDir()
+			return envMap{}, nil
+		}
+		return envMap{}, err
+	}
+	return environments, nil
+}
+
+func updateOrAddToEnvlist(environments envMap, newEnv envMap) (envMap, error) {
+	newEnvironments := make(envMap)
+	for key, value := range environments {
+		newEnvironments[key] = value
+	}
+	for key, value := range newEnv {
+		newEnvironments[key] = value
+	}
+
+	err := writeEnvMapToFile(envMapPath, newEnvironments)
+	if err != nil {
+		fmt.Println("Failed to create store envlist, err:%s", err)
+	}
+
+	return newEnvironments, nil
 }
 
 func readEnvMapFromFile(path string) (envMap, error) {
