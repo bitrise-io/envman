@@ -51,6 +51,7 @@ func run() {
 		currentEnvStorePath = ensuredPath
 		return nil
 	}
+
 	app.Flags = flags
 	app.Commands = commands
 
@@ -67,7 +68,6 @@ func envStorePath() (string, error) {
 	workPath := path.Join(workDir, envStoreName)
 
 	paths := []string{workPath, defaultEnvStorePath}
-
 	for _, path := range paths {
 		exist, err := pathutil.IsPathExists(path)
 		if err != nil || !exist {

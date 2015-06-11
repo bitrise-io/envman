@@ -15,3 +15,12 @@ set -v
 go get ./...
 
 bash _scripts/build.sh
+
+# Tests
+bash _test/test.sh
+
+
+
+#
+# ==> DONE - OK
+#
