@@ -1,20 +1,20 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 )
+
+var printCmdLog *log.Entry = log.WithFields(log.Fields{"f": "printCmd.go"})
 
 func printCmd(c *cli.Context) {
 	environments, err := loadEnvMap()
 	if err != nil {
-		log.Fatalln("Failed to export environment variable list, err:", err)
+		printCmdLog.Fatal("Failed to export environment variable list, err:", err)
 	}
 	if len(environments) == 0 {
-		fmt.Println("Empty environment variable list")
+		printCmdLog.Info("Empty environment variable list")
 	} else {
-		fmt.Println(environments)
+		printCmdLog.Info(environments)
 	}
 }

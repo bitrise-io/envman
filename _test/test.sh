@@ -7,27 +7,48 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
-# CLEAR_CMD TESTS
-# Clears envman provided environment variables
-# (should print "Empty environment variable list")
+# **************************
+# Init in default envman dir
+# **************************
+envman init
+envman print
+echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN
+envman add --key BITRISE --value bitrise
+envman run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
 envman clear
 envman print
 
-# ADD_CMD TESTS
-# Add new environment variable 
-# (list should contains: BITRISE:bitrise)
-envman add --key BITRISE --value bitrise
+# **********************
+# Init in specified path
+# **********************
+envman --path /Users/godrei/dev/.envstore.yml init
+envman --path /Users/godrei/dev/.envstore.yml print
+echo "bitrise from stdin" | envman --path /Users/godrei/dev/.envstore.yml add --key BITRISE_FROM_STDIN
+envman --path /Users/godrei/dev/.envstore.yml add --key BITRISE --value "bitrise with path flag"
+envman --path /Users/godrei/dev/.envstore.yml run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
+envman --path /Users/godrei/dev/.envstore.yml clear
+envman --path /Users/godrei/dev/.envstore.yml print
 
-# Add new environment variable from pipe 
-# (list should contains: BITRISE_FROM_STDIN=bitrise from stdin)
+# ****************************************************
+# Init in current path, if .envstore.yml exist (exist)
+# ****************************************************
+cd /Users/godrei/dev/
+envman init
+envman print
 echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN
-
-# PRINT_CMD TESTS
-# Print out environment variables
-# (should print added environment variables)
+envman add --key BITRISE --value "bitrise from current path"
+envman run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
+envman clear
 envman print
 
-# RUN_CMD TESTS
-# Run specified command 
-# (should print "Bitrise value: bitrise")
+# ********************************************************
+# Init in current path, if .envstore.yml exist (not exist)
+# ********************************************************
+cd /Users/godrei
+envman init
+envman print
+echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN
+envman add --key BITRISE --value "bitrise"
 envman run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
+envman clear
+envman print

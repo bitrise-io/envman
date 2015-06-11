@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
-
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 )
 
+var clearCmdLog *log.Entry = log.WithFields(log.Fields{"f": "clearCmd.go"})
+
 func clearCmd(c *cli.Context) {
-	err := writeEnvMapToFile(envMapPath, envMap{})
+	err := writeEnvMapToFile(currentEnvStorePath, envMap{})
 	if err != nil {
-		fmt.Println("Failed to clear envlist, err:%s", err)
+		clearCmdLog.Error("Failed to clear envlist, err:%s", err)
 	}
 }

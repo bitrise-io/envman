@@ -1,15 +1,16 @@
 package main
 
 import (
-	"log"
-
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 )
+
+var runCmdLog *log.Entry = log.WithFields(log.Fields{"f": "runCmd.go"})
 
 func runCmd(c *cli.Context) {
 	environments, err := loadEnvMap()
 	if err != nil {
-		log.Fatalln("Failed to export environment variable list, err:", err)
+		runCmdLog.Fatalln("Failed to export environment variable list, err:", err)
 	}
 
 	if len(c.Args()) > 0 {
@@ -28,9 +29,9 @@ func runCmd(c *cli.Context) {
 		}
 
 		if err := executeCmd(cmdToSend); err != nil {
-			log.Fatalln("Failed to execute command, err:", err)
+			runCmdLog.Fatalln("Failed to execute command, err:", err)
 		}
 	} else {
-		log.Fatalln("No command specified")
+		runCmdLog.Fatalln("No command specified")
 	}
 }

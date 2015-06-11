@@ -2,43 +2,60 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 
+	//log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
 
 type envMap map[string]string
 
-type environmentsStruct struct {
+type environmentsModel struct {
 	Environments envMap `yml:"environments"`
 }
 
 const (
-	envMapName string = ".envstore.yml"
+	envStoreName string = ".envstore.yml"
 )
 
 var (
-	envmanDir  string = pathutil.UserHomeDir() + "/.envman/"
-	envMapPath string = envmanDir + envMapName
-	stdinValue string
+	defaultEnvmanDir    string = pathutil.UserHomeDir() + "/.envman/"
+	defaultEnvStorePath string = defaultEnvmanDir + envStoreName
+	currentEnvStorePath string
+	stdinValue          string
 )
 
-func createEnvmanDir() error {
-	exist, err := pathutil.IsPathExists(envmanDir)
+//var envutilLog *log.Entry = log.WithFields(log.Fields{"f": "envutil.go"})
+
+func createDeafultEnvmanDir() error {
+	dir, _ := path.Split(defaultEnvStorePath)
+	exist, err := pathutil.IsPathExists(dir)
 	if err != nil {
 		return err
 	}
 	if exist {
 		return nil
 	}
-	return os.MkdirAll(envmanDir, 0755)
+	return os.MkdirAll(dir, 0755)
+}
+
+func createEnvmanDir() error {
+	dir, _ := path.Split(currentEnvStorePath)
+	exist, err := pathutil.IsPathExists(dir)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return nil
+	}
+	return os.MkdirAll(dir, 0755)
 }
 
 func loadEnvMap() (envMap, error) {
-	environments, err := readEnvMapFromFile(envMapPath)
+	environments, err := readEnvMapFromFile(currentEnvStorePath)
 	if err != nil {
 		return envMap{}, err
 	}
@@ -51,7 +68,7 @@ func loadEnvMapOrCreate() (envMap, error) {
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
 			err = createEnvmanDir()
-			return envMap{}, nil
+			return envMap{}, err
 		}
 		return envMap{}, err
 	}
@@ -67,9 +84,9 @@ func updateOrAddToEnvlist(environments envMap, newEnv envMap) (envMap, error) {
 		newEnvironments[key] = value
 	}
 
-	err := writeEnvMapToFile(envMapPath, newEnvironments)
+	err := writeEnvMapToFile(currentEnvStorePath, newEnvironments)
 	if err != nil {
-		fmt.Println("Failed to create store envlist, err:%s", err)
+		return envMap{}, err
 	}
 
 	return newEnvironments, nil
@@ -89,7 +106,7 @@ func readEnvMapFromFile(path string) (envMap, error) {
 		return envMap{}, err
 	}
 
-	var envs environmentsStruct
+	var envs environmentsModel
 	err = yaml.Unmarshal(bytes, &envs)
 	if err != nil {
 		return envMap{}, err
@@ -99,7 +116,7 @@ func readEnvMapFromFile(path string) (envMap, error) {
 }
 
 func generateFormattedYMLForEnvMap(environments envMap) ([]byte, error) {
-	var envs environmentsStruct
+	var envs environmentsModel
 	envs.Environments = environments
 
 	bytes, err := yaml.Marshal(envs)

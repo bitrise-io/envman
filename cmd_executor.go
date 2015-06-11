@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 	"os/exec"
+
+	//log "github.com/Sirupsen/logrus"
 )
 
 type commandModel struct {
