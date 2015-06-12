@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"code.google.com/p/go.crypto/ssh/terminal"
 	log "github.com/Sirupsen/logrus"
@@ -12,7 +14,13 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-var cliLog *log.Entry = log.WithFields(log.Fields{"f": "cli.go"})
+const envStoreName string = ".envstore.yml"
+
+var (
+	cliLog                  *log.Entry = log.WithFields(log.Fields{"f": "cli.go"})
+	stdinValue              string
+	currentEnvStoreFilePath string // !!! keep in mind this should be like {SOME_DIR/envstore.yml}
+)
 
 // Run the Envman CLI.
 func run() {
@@ -35,20 +43,26 @@ func run() {
 	app.Email = ""
 
 	app.Before = func(c *cli.Context) error {
-		var err error
-		if c.String("path") == "" {
-			currentEnvStorePath, err = envStorePath()
-			return err
+		// Befor parsing cli, and running command
+		// we need to decide wich path will be used by envman
+		flagPath := c.String("path")
+		if flagPath == "" {
+			currentPath, err := ensureEnvStoreInCurrentPath()
+			if err != nil {
+				cliLog.Error(err)
+			}
+			currentEnvStoreFilePath = currentPath
+			cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
+			return nil
 		}
 
-		ensuredPath, err := ensureEnvStorePath(c.String("path"))
-		if err != nil {
-			cliLog.Error(err)
-			currentEnvStorePath, err = envStorePath()
-			return err
+		if err := validatePath(flagPath); err != nil {
+			cliLog.Fatal("Failed to set envman work path to: %s, err: %s", flagPath, err)
+			return nil
 		}
 
-		currentEnvStorePath = ensuredPath
+		currentEnvStoreFilePath = flagPath
+		cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
 		return nil
 	}
 
@@ -60,26 +74,44 @@ func run() {
 	}
 }
 
-func envStorePath() (string, error) {
-	workDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+/*
+Check if current path contains .envstore.yml
+Output :
+	@string: current path
+	@error:
+*/
+func ensureEnvStoreInCurrentPath() (string, error) {
+	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		cliLog.Fatal(err)
-	}
-	workPath := path.Join(workDir, envStoreName)
-
-	paths := []string{workPath, defaultEnvStorePath}
-	for _, path := range paths {
-		exist, err := pathutil.IsPathExists(path)
-		if err != nil || !exist {
-			continue
-		}
-		return path, nil
+		return currentDir, err
 	}
 
-	err = createDeafultEnvmanDir()
+	currentPath := path.Join(currentDir, envStoreName)
+	exist, err := pathutil.IsPathExists(currentPath)
 	if err != nil {
-		cliLog.Fatal(err)
+		return currentPath, err
+	}
+	if !exist {
+		err = errors.New(".envstore.yml dos not exist in current path: " + currentPath)
+		return currentPath, err
 	}
 
-	return defaultEnvStorePath, nil
+	return currentPath, nil
+}
+
+/*
+Check if path is valid (i.e is not empty, and not a directory)
+Output:
+	@bool valid
+	@error (path is empty or directory)
+*/
+func validatePath(pth string) error {
+	if pth == "" {
+		return errors.New("No path sepcified, should be like {SOME_DIR/envstore.yml}")
+	}
+	_, file := path.Split(pth)
+	if file == "" || !strings.Contains(file, envStoreName) {
+		return errors.New("EnvStore not found, path should be like {SOME_DIR/envstore.yml}")
+	}
+	return nil
 }

@@ -8,7 +8,7 @@ import (
 var clearCmdLog *log.Entry = log.WithFields(log.Fields{"f": "clearCmd.go"})
 
 func clearCmd(c *cli.Context) {
-	err := writeEnvMapToFile(currentEnvStorePath, envMap{})
+	err := writeEnvMapToFile(currentEnvStoreFilePath, envMap{})
 	if err != nil {
 		clearCmdLog.Error("Failed to clear envlist, err:%s", err)
 	}

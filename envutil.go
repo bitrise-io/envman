@@ -4,7 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"path"
+	//"path"
 
 	//log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
@@ -17,45 +17,10 @@ type environmentsModel struct {
 	Environments envMap `yml:"environments"`
 }
 
-const (
-	envStoreName string = ".envstore.yml"
-)
-
-var (
-	defaultEnvmanDir    string = pathutil.UserHomeDir() + "/.envman/"
-	defaultEnvStorePath string = defaultEnvmanDir + envStoreName
-	currentEnvStorePath string
-	stdinValue          string
-)
-
 //var envutilLog *log.Entry = log.WithFields(log.Fields{"f": "envutil.go"})
 
-func createDeafultEnvmanDir() error {
-	dir, _ := path.Split(defaultEnvStorePath)
-	exist, err := pathutil.IsPathExists(dir)
-	if err != nil {
-		return err
-	}
-	if exist {
-		return nil
-	}
-	return os.MkdirAll(dir, 0755)
-}
-
-func createEnvmanDir() error {
-	dir, _ := path.Split(currentEnvStorePath)
-	exist, err := pathutil.IsPathExists(dir)
-	if err != nil {
-		return err
-	}
-	if exist {
-		return nil
-	}
-	return os.MkdirAll(dir, 0755)
-}
-
 func loadEnvMap() (envMap, error) {
-	environments, err := readEnvMapFromFile(currentEnvStorePath)
+	environments, err := readEnvMapFromFile(currentEnvStoreFilePath)
 	if err != nil {
 		return envMap{}, err
 	}
@@ -67,7 +32,7 @@ func loadEnvMapOrCreate() (envMap, error) {
 	environments, err := loadEnvMap()
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
-			err = createEnvmanDir()
+			_, err = initAtPath(currentEnvStoreFilePath)
 			return envMap{}, err
 		}
 		return envMap{}, err
@@ -84,7 +49,7 @@ func updateOrAddToEnvlist(environments envMap, newEnv envMap) (envMap, error) {
 		newEnvironments[key] = value
 	}
 
-	err := writeEnvMapToFile(currentEnvStorePath, newEnvironments)
+	err := writeEnvMapToFile(currentEnvStoreFilePath, newEnvironments)
 	if err != nil {
 		return envMap{}, err
 	}

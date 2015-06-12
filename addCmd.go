@@ -39,6 +39,6 @@ func addCmd(c *cli.Context) {
 	}
 
 	// Print new environment list
-	addCmdLog.Info("Environment added, path:", currentEnvStorePath)
+	addCmdLog.Info("Environment added, path:", currentEnvStoreFilePath)
 	printCmd(c)
 }
