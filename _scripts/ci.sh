@@ -14,7 +14,7 @@ set -v
 # Go get
 go get ./...
 
-bash _scripts/build.sh
+bash _scripts/install.sh
 
 # Tests
 bash _test/test.sh
