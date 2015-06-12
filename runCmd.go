@@ -10,7 +10,7 @@ var runCmdLog *log.Entry = log.WithFields(log.Fields{"f": "runCmd.go"})
 func runCmd(c *cli.Context) {
 	environments, err := loadEnvMap()
 	if err != nil {
-		runCmdLog.Fatalln("Failed to export environment variable list, err:", err)
+		runCmdLog.Fatal("Failed to export environment variable list, err:", err)
 	}
 
 	if len(c.Args()) > 0 {
@@ -29,9 +29,9 @@ func runCmd(c *cli.Context) {
 		}
 
 		if err := executeCmd(cmdToSend); err != nil {
-			runCmdLog.Fatalln("Failed to execute command, err:", err)
+			runCmdLog.Fatal("Failed to execute command, err:", err)
 		}
 	} else {
-		runCmdLog.Fatalln("No command specified")
+		runCmdLog.Fatal("No command specified")
 	}
 }

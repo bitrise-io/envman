@@ -21,6 +21,14 @@ func initCmd(c *cli.Context) {
 	initCmdLog.Info("Envman initialized at:", workPath)
 }
 
+/*
+Initialize envman in specified path. Creates empty envstore if does not exist.
+Input:
+	@pth string - the path, where envstore should be created
+Output:
+	@string - the input path
+	@error - the error of initialization
+*/
 func initAtPath(pth string) (string, error) {
 	if err := validatePath(pth); err != nil {
 		return "", err

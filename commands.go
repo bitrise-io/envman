@@ -5,6 +5,12 @@ import "github.com/codegangsta/cli"
 var (
 	commands = []cli.Command{
 		{
+			Name:      "init",
+			ShortName: "i",
+			Usage:     "Create an empty .envstore file into the current directory",
+			Action:    initCmd,
+		},
+		{
 			Name:      "add",
 			ShortName: "a",
 			Usage:     "Add new or update environment variable",
@@ -32,12 +38,6 @@ var (
 			ShortName: "c",
 			Usage:     "Clears the envman provided enviroment variables",
 			Action:    clearCmd,
-		},
-		{
-			Name:      "init",
-			ShortName: "i",
-			Usage:     "Create an empty .envstore file into the current directory",
-			Action:    initCmd,
 		},
 	}
 )

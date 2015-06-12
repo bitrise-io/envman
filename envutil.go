@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	//"path"
 
 	//log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"

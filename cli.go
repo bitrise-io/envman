@@ -36,7 +36,7 @@ func run() {
 	// Parse cl
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
-	app.Usage = "Environment varaibale manager"
+	app.Usage = "Environment variable manager"
 	app.Version = VERSION
 
 	app.Author = ""
@@ -77,8 +77,8 @@ func run() {
 /*
 Check if current path contains .envstore.yml
 Output :
-	@string: current path
-	@error:
+	@string: - current envman work path
+	@error: - error
 */
 func ensureEnvStoreInCurrentPath() (string, error) {
 	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -101,9 +101,10 @@ func ensureEnvStoreInCurrentPath() (string, error) {
 
 /*
 Check if path is valid (i.e is not empty, and not a directory)
+Input:
+	@pth string - the path to validate
 Output:
-	@bool valid
-	@error (path is empty or directory)
+	@error - path is empty or not valid envstore file path
 */
 func validatePath(pth string) error {
 	if pth == "" {
