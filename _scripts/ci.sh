@@ -11,7 +11,19 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
+
+export PATH=$PATH:$GOPATH/bin
+
 # Go get
 go get ./...
 
-bash _scripts/build.sh
+bash _scripts/install.sh
+
+# Tests
+bash _test/test.sh
+
+
+
+#
+# ==> DONE - OK
+#
