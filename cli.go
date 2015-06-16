@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"code.google.com/p/go.crypto/ssh/terminal"
 	log "github.com/Sirupsen/logrus"
@@ -47,11 +46,15 @@ func run() {
 		// we need to decide wich path will be used by envman
 		flagPath := c.String("path")
 		if flagPath == "" {
-			currentPath, err := ensureEnvStoreInCurrentPath()
-			if err != nil {
-				cliLog.Error(err)
+			if os.Getenv("ENVMAN_ENVSTORE_PATH") != "" {
+				currentEnvStoreFilePath = os.Getenv("ENVMAN_ENVSTORE_PATH")
+			} else {
+				currentPath, err := ensureEnvStoreInCurrentPath()
+				if err != nil {
+					cliLog.Error(err)
+				}
+				currentEnvStoreFilePath = currentPath
 			}
-			currentEnvStoreFilePath = currentPath
 			cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
 			return nil
 		}
@@ -108,11 +111,11 @@ Output:
 */
 func validatePath(pth string) error {
 	if pth == "" {
-		return errors.New("No path sepcified, should be like {SOME_DIR/envstore.yml}")
+		return errors.New("No path sepcified, should be like {SOME_DIR/.envstore.yml}")
 	}
 	_, file := path.Split(pth)
-	if file == "" || !strings.Contains(file, envStoreName) {
-		return errors.New("EnvStore not found, path should be like {SOME_DIR/envstore.yml}")
+	if file == "" {
+		return errors.New("EnvStore not found")
 	}
 	return nil
 }
