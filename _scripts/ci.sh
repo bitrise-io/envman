@@ -11,6 +11,9 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
+
+export PATH=$PATH:$GOPATH/bin
+
 # Go get
 go get ./...
 
