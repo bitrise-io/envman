@@ -13,7 +13,7 @@ go fmt
 # Test
 go test -v ./...
 
-# Build
-go build
+# Install
+go install
 
 # DONE - OK

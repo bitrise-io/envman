@@ -2,43 +2,24 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 
+	//log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
 
 type envMap map[string]string
 
-type environmentsStruct struct {
+type environmentsModel struct {
 	Environments envMap `yml:"environments"`
 }
 
-const (
-	envMapName string = ".envstore.yml"
-)
-
-var (
-	envmanDir  string = pathutil.UserHomeDir() + "/.envman/"
-	envMapPath string = envmanDir + envMapName
-	stdinValue string
-)
-
-func createEnvmanDir() error {
-	exist, err := pathutil.IsPathExists(envmanDir)
-	if err != nil {
-		return err
-	}
-	if exist {
-		return nil
-	}
-	return os.MkdirAll(envmanDir, 0755)
-}
+//var envutilLog *log.Entry = log.WithFields(log.Fields{"f": "envutil.go"})
 
 func loadEnvMap() (envMap, error) {
-	environments, err := readEnvMapFromFile(envMapPath)
+	environments, err := readEnvMapFromFile(currentEnvStoreFilePath)
 	if err != nil {
 		return envMap{}, err
 	}
@@ -50,8 +31,8 @@ func loadEnvMapOrCreate() (envMap, error) {
 	environments, err := loadEnvMap()
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
-			err = createEnvmanDir()
-			return envMap{}, nil
+			_, err = initAtPath(currentEnvStoreFilePath)
+			return envMap{}, err
 		}
 		return envMap{}, err
 	}
@@ -67,9 +48,9 @@ func updateOrAddToEnvlist(environments envMap, newEnv envMap) (envMap, error) {
 		newEnvironments[key] = value
 	}
 
-	err := writeEnvMapToFile(envMapPath, newEnvironments)
+	err := writeEnvMapToFile(currentEnvStoreFilePath, newEnvironments)
 	if err != nil {
-		fmt.Println("Failed to create store envlist, err:%s", err)
+		return envMap{}, err
 	}
 
 	return newEnvironments, nil
@@ -89,7 +70,7 @@ func readEnvMapFromFile(path string) (envMap, error) {
 		return envMap{}, err
 	}
 
-	var envs environmentsStruct
+	var envs environmentsModel
 	err = yaml.Unmarshal(bytes, &envs)
 	if err != nil {
 		return envMap{}, err
@@ -99,7 +80,7 @@ func readEnvMapFromFile(path string) (envMap, error) {
 }
 
 func generateFormattedYMLForEnvMap(environments envMap) ([]byte, error) {
-	var envs environmentsStruct
+	var envs environmentsModel
 	envs.Environments = environments
 
 	bytes, err := yaml.Marshal(envs)

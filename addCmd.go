@@ -1,11 +1,13 @@
 package main
 
 import (
-	"log"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 )
+
+var addCmdLog *log.Entry = log.WithFields(log.Fields{"f": "addCmd.go"})
 
 func addCmd(c *cli.Context) {
 	key := c.String("key")
@@ -17,25 +19,26 @@ func addCmd(c *cli.Context) {
 
 	// Validate input
 	if key == "" {
-		log.Fatalln("Invalid environment variable key")
+		addCmdLog.Fatal("Invalid environment variable key")
 	}
 	if value == "" {
-		log.Fatalln("Invalid environment variable value")
+		addCmdLog.Fatal("Invalid environment variable value")
 	}
 
 	// Load envs, or create if not exist
 	environments, err := loadEnvMapOrCreate()
 	if err != nil {
-		log.Fatalln("Failed to load envlist, err:", err)
+		addCmdLog.Fatal("Failed to load envlist, err:", err)
 	}
 
 	// Add or update envlist
 	newEnv := envMap{key: value}
 	environments, err = updateOrAddToEnvlist(environments, newEnv)
 	if err != nil {
-		log.Fatalln("Failed to create store envlist, err:", err)
+		addCmdLog.Fatal("Failed to create store envlist, err:", err)
 	}
 
 	// Print new environment list
+	addCmdLog.Info("Environment added, path:", currentEnvStoreFilePath)
 	printCmd(c)
 }
