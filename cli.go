@@ -18,7 +18,7 @@ const envStoreName string = ".envstore.yml"
 var (
 	cliLog                  *log.Entry = log.WithFields(log.Fields{"f": "cli.go"})
 	stdinValue              string
-	currentEnvStoreFilePath string // !!! keep in mind this should be like {SOME_DIR/envstore.yml}
+	currentEnvStoreFilePath string
 )
 
 // Run the Envman CLI.
@@ -111,11 +111,11 @@ Output:
 */
 func validatePath(pth string) error {
 	if pth == "" {
-		return errors.New("No path sepcified, should be like {SOME_DIR/.envstore.yml}")
+		return errors.New("No path sepcified, should be like {SOME_DIR/ENVSTORE.yml}")
 	}
 	_, file := path.Split(pth)
 	if file == "" {
-		return errors.New("EnvStore not found")
+		return errors.New("ENVSTORE not found")
 	}
 	return nil
 }
