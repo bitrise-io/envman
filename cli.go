@@ -13,6 +13,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
+const ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
 const envStoreName string = ".envstore.yml"
 
 var (
@@ -44,10 +45,10 @@ func run() {
 	app.Before = func(c *cli.Context) error {
 		// Befor parsing cli, and running command
 		// we need to decide wich path will be used by envman
-		flagPath := c.String("path")
+		flagPath := c.String(PATH_KEY)
 		if flagPath == "" {
-			if os.Getenv("ENVMAN_ENVSTORE_PATH") != "" {
-				currentEnvStoreFilePath = os.Getenv("ENVMAN_ENVSTORE_PATH")
+			if os.Getenv(ENVMAN_ENVSTORE_PATH_KEY) != "" {
+				currentEnvStoreFilePath = os.Getenv(ENVMAN_ENVSTORE_PATH_KEY)
 			} else {
 				currentPath, err := ensureEnvStoreInCurrentPath()
 				if err != nil {

@@ -17,6 +17,8 @@ var (
 			Flags: []cli.Flag{
 				flKey,
 				flValue,
+				flValueFile,
+				flIsExpand,
 			},
 			Action: addCmd,
 		},

@@ -5,103 +5,108 @@ import (
 	"io/ioutil"
 	"os"
 
-	//log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
 
-type envMap map[string]string
+var envutilLog *log.Entry = log.WithFields(log.Fields{"f": "envutil.go"})
 
-type environmentsModel struct {
-	Environments envMap `yml:"environments"`
-}
-
-//var envutilLog *log.Entry = log.WithFields(log.Fields{"f": "envutil.go"})
-
-func loadEnvMap() (envMap, error) {
-	environments, err := readEnvMapFromFile(currentEnvStoreFilePath)
+/*
+	File storage methods
+*/
+func loadEnvMap() ([]envModel, error) {
+	envsYML, err := readEnvMapFromFile(currentEnvStoreFilePath)
 	if err != nil {
-		return envMap{}, err
+		return []envModel{}, err
 	}
 
-	return environments, nil
+	return convertToEnvModelArray(envsYML), nil
 }
 
-func loadEnvMapOrCreate() (envMap, error) {
-	environments, err := loadEnvMap()
+func loadEnvMapOrCreate() ([]envModel, error) {
+	envModels, err := loadEnvMap()
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
 			_, err = initAtPath(currentEnvStoreFilePath)
-			return envMap{}, err
+			return []envModel{}, err
 		}
-		return envMap{}, err
+		return []envModel{}, err
 	}
-	return environments, nil
+	return envModels, nil
 }
 
-func updateOrAddToEnvlist(environments envMap, newEnv envMap) (envMap, error) {
-	newEnvironments := make(envMap)
-	for key, value := range environments {
-		newEnvironments[key] = value
-	}
-	for key, value := range newEnv {
-		newEnvironments[key] = value
+func updateOrAddToEnvlist(envs []envModel, env envModel) ([]envModel, error) {
+	var newEnvs []envModel
+	exist := false
+
+	for _, eModel := range envs {
+		if eModel.Key == env.Key {
+			exist = true
+			newEnvs = append(newEnvs, env)
+		} else {
+			newEnvs = append(newEnvs, eModel)
+		}
 	}
 
-	err := writeEnvMapToFile(currentEnvStoreFilePath, newEnvironments)
+	if exist == false {
+		newEnvs = append(newEnvs, env)
+	}
+
+	err := writeEnvMapToFile(currentEnvStoreFilePath, newEnvs)
 	if err != nil {
-		return envMap{}, err
+		return []envModel{}, err
 	}
 
-	return newEnvironments, nil
+	return newEnvs, nil
 }
 
-func readEnvMapFromFile(path string) (envMap, error) {
-	isExists, err := pathutil.IsPathExists(path)
+func readEnvMapFromFile(pth string) (envsYMLModel, error) {
+	isExists, err := pathutil.IsPathExists(pth)
 	if err != nil {
-		return envMap{}, err
+		return envsYMLModel{}, err
 	}
 	if isExists == false {
-		return envMap{}, errors.New("No environment variable list found")
+		return envsYMLModel{}, errors.New("No environment variable list found")
 	}
 
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := ioutil.ReadFile(pth)
 	if err != nil {
-		return envMap{}, err
+		return envsYMLModel{}, err
 	}
 
-	var envs environmentsModel
-	err = yaml.Unmarshal(bytes, &envs)
+	var envsModel envsYMLModel
+	err = yaml.Unmarshal(bytes, &envsModel)
 	if err != nil {
-		return envMap{}, err
+		return envsYMLModel{}, err
 	}
 
-	return envs.Environments, nil
+	return envsModel, nil
 }
 
-func generateFormattedYMLForEnvMap(environments envMap) ([]byte, error) {
-	var envs environmentsModel
-	envs.Environments = environments
+func generateFormattedYMLForEnvModels(envs []envModel) ([]byte, error) {
+	envYML := convertToEnvsYMLModel(envs)
 
-	bytes, err := yaml.Marshal(envs)
+	bytes, err := yaml.Marshal(envYML)
 	if err != nil {
 		return []byte{}, err
 	}
+
 	return bytes, nil
 }
 
-func writeEnvMapToFile(path string, environments envMap) error {
-	if path == "" {
+func writeEnvMapToFile(pth string, envs []envModel) error {
+	if pth == "" {
 		return errors.New("No path provided")
 	}
 
-	file, err := os.Create(path)
+	file, err := os.Create(pth)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	jsonContBytes, err := generateFormattedYMLForEnvMap(environments)
+	jsonContBytes, err := generateFormattedYMLForEnvModels(envs)
 	if err != nil {
 		return err
 	}

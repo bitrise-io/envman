@@ -7,15 +7,30 @@ import (
 	//log "github.com/Sirupsen/logrus"
 )
 
+//var cmdexecutorLog *log.Entry = log.WithFields(log.Fields{"f": "cmdexecutor.go"})
+
 type commandModel struct {
 	Command      string
 	Argumentums  []string
-	Environments envMap
+	Environments []envModel
+}
+
+func ExpandEnvsInString(inp string) string {
+	return os.ExpandEnv(inp)
 }
 
 func executeCmd(commandToRun commandModel) error {
 	cmdEnvs := []string{}
-	for key, value := range commandToRun.Environments {
+	for _, eModel := range commandToRun.Environments {
+		var value string
+		key := eModel.Key
+		if eModel.IsExpand {
+			value = ExpandEnvsInString(eModel.Value)
+		} else {
+			value = eModel.Value
+		}
+
+		os.Setenv(key, value)
 		cmdEnvs = append(cmdEnvs, key+"="+value)
 	}
 
