@@ -3,11 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
-
-	//log "github.com/Sirupsen/logrus"
 )
-
-//var cmdexecutorLog *log.Entry = log.WithFields(log.Fields{"f": "cmdexecutor.go"})
 
 type commandModel struct {
 	Command      string

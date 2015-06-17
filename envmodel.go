@@ -6,15 +6,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-/*
-environments:
-  - MY_KEY1 : first value
-    is_Expand : true
-  - MY_KEY2 : secund value
-  - MY_KEy3 : third value
-*/
-
-var envmodelLog *log.Entry = log.WithFields(log.Fields{"f": "envmodel.go"})
+const (
+	IS_EXPAND_KEY string = "is_expand"
+	TRUE_KEY      string = "true"
+	FALSE_KEY     string = "false"
+)
 
 /*
 	This is the model of ENVIRONMENT in envman, for methods
@@ -28,10 +24,6 @@ type envModel struct {
 /*
 	This is the model of ENVIRONMENT in envman, for storing in file
 */
-const IS_EXPAND_KEY string = "is_expand"
-const TRUE_KEY string = "true"
-const FALSE_KEY string = "false"
-
 type envMap map[string]string
 
 type envMapArray []envMap
@@ -75,7 +67,7 @@ func isExpand(value string) bool {
 	} else {
 		expand, err := strconv.ParseBool(value)
 		if err != nil {
-			envmodelLog.Error("Failed to parse bool value, err: ", err)
+			log.Errorln("Failed to parse value:", err)
 			return true
 		}
 		return expand

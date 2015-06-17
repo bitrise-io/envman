@@ -5,12 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
-
-var envutilLog *log.Entry = log.WithFields(log.Fields{"f": "envutil.go"})
 
 /*
 	File storage methods

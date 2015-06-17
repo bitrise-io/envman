@@ -2,20 +2,22 @@ package main
 
 import "github.com/codegangsta/cli"
 
-const PATH_KEY string = "path"
-const P_KEY string = "p"
+const (
+	PATH_KEY string = "path"
+	P_KEY    string = "p"
 
-const KEY_KEY string = "key"
-const K_KEY string = "k"
+	KEY_KEY string = "key"
+	K_KEY   string = "k"
 
-const VALUE_KEY string = "value"
-const V_KEY string = "v"
+	VALUE_KEY string = "value"
+	V_KEY     string = "v"
 
-const VALUE_FILE_KEY string = "valuefile"
-const VF_KEY string = "vf"
+	VALUE_FILE_KEY string = "valuefile"
+	VF_KEY         string = "vf"
 
-const EXPAND_KEY string = "expand"
-const E_KEY string = "e"
+	EXPAND_KEY string = "expand"
+	E_KEY      string = "e"
+)
 
 var (
 	// App flags

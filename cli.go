@@ -13,22 +13,25 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-const ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
-const envStoreName string = ".envstore.yml"
+const (
+	ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
+	envStoreName             string = ".envstore.yml"
+)
 
 var (
-	cliLog                  *log.Entry = log.WithFields(log.Fields{"f": "cli.go"})
 	stdinValue              string
 	currentEnvStoreFilePath string
 )
 
 // Run the Envman CLI.
 func run() {
+	log.SetLevel(log.DebugLevel)
+
 	// Read piped data
 	if !terminal.IsTerminal(0) {
 		bytes, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			cliLog.Fatal("Failed to read stdin, err:", err)
+			log.Fatalln("Failed to read stdin:", err)
 		}
 		stdinValue = string(bytes)
 	}
@@ -52,21 +55,20 @@ func run() {
 			} else {
 				currentPath, err := ensureEnvStoreInCurrentPath()
 				if err != nil {
-					cliLog.Error(err)
+					log.Debugln(err)
 				}
 				currentEnvStoreFilePath = currentPath
 			}
-			cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
+			log.Infoln("Work path:", currentEnvStoreFilePath)
 			return nil
 		}
 
 		if err := validatePath(flagPath); err != nil {
-			cliLog.Fatal("Failed to set envman work path to: %s, err: %s", flagPath, err)
-			return nil
+			log.Fatalln("Failed to set envman work path:", err)
 		}
 
 		currentEnvStoreFilePath = flagPath
-		cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
+		log.Infoln("Work path:", currentEnvStoreFilePath)
 		return nil
 	}
 
@@ -74,7 +76,7 @@ func run() {
 	app.Commands = commands
 
 	if err := app.Run(os.Args); err != nil {
-		cliLog.Fatal(err)
+		log.Fatalln("Envman finished:", err)
 	}
 }
 
@@ -96,7 +98,7 @@ func ensureEnvStoreInCurrentPath() (string, error) {
 		return currentPath, err
 	}
 	if !exist {
-		err = errors.New(".envstore.yml dos not exist in current path: " + currentPath)
+		err = errors.New("EnvStore not found in path:" + currentPath)
 		return currentPath, err
 	}
 
@@ -112,11 +114,11 @@ Output:
 */
 func validatePath(pth string) error {
 	if pth == "" {
-		return errors.New("No path sepcified, should be like {SOME_DIR/ENVSTORE.yml}")
+		return errors.New("No path sepcified")
 	}
 	_, file := path.Split(pth)
 	if file == "" {
-		return errors.New("ENVSTORE not found")
+		return errors.New("EnvStore not found in path:" + pth)
 	}
 	return nil
 }

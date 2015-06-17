@@ -6,15 +6,13 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-var initCmdLog *log.Entry = log.WithFields(log.Fields{"f": "initCmd.go"})
-
 func initCmd(c *cli.Context) {
-	workPath, err := initAtPath(currentEnvStoreFilePath)
+	_, err := initAtPath(currentEnvStoreFilePath)
 	if err != nil {
-		initCmdLog.Fatal(err)
+		log.Fatalln(err)
 	}
 
-	initCmdLog.Info("Envman initialized at:", workPath)
+	log.Infoln("Envman initialized")
 }
 
 /*
