@@ -20,7 +20,7 @@ func addCmd(c *cli.Context) {
 	} else if c.String(VALUE_FILE_KEY) != "" {
 		v, err := loadValueFromFile(c.String(VALUE_FILE_KEY))
 		if err != nil {
-			log.Fatalln("Failed to read file value: ", err)
+			log.Fatal("Failed to read file value: ", err)
 		}
 		value = v
 	}

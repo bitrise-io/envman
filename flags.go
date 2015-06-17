@@ -6,6 +6,9 @@ const (
 	PATH_KEY string = "path"
 	P_KEY    string = "p"
 
+	LOG_LEVEL_KEY string = "log-level"
+	L_KEY         string = "l"
+
 	KEY_KEY string = "key"
 	K_KEY   string = "k"
 
@@ -13,7 +16,7 @@ const (
 	V_KEY     string = "v"
 
 	VALUE_FILE_KEY string = "valuefile"
-	VF_KEY         string = "vf"
+	VF_KEY         string = "f"
 
 	EXPAND_KEY string = "expand"
 	E_KEY      string = "e"
@@ -24,31 +27,37 @@ var (
 	flPath = cli.StringFlag{
 		Name:  PATH_KEY + ", " + P_KEY,
 		Value: "",
-		Usage: "envman's working path, this is file path, with format {SOME_DIR/envstore.yml}",
+		Usage: "Envman's working path (SOME_DIR/envstore.yml)",
+	}
+	flLogLevel = cli.StringFlag{
+		Name:  LOG_LEVEL_KEY + ", " + L_KEY,
+		Value: "info",
+		Usage: "Log level (options: debug, info, warn, error, fatal, panic)",
 	}
 	flags = []cli.Flag{
 		flPath,
+		flLogLevel,
 	}
 
 	// Command flags
 	flKey = cli.StringFlag{
 		Name:  KEY_KEY + ", " + K_KEY,
 		Value: "",
-		Usage: "key of the environment variable",
+		Usage: "Key of the environment variable",
 	}
 	flValue = cli.StringFlag{
 		Name:  VALUE_KEY + ", " + V_KEY,
 		Value: "",
-		Usage: "value of the environment variable",
+		Usage: "Value of the environment variable",
 	}
 	flValueFile = cli.StringFlag{
 		Name:  VALUE_FILE_KEY + ", " + VF_KEY,
 		Value: "",
-		Usage: "path of the environment variable value",
+		Usage: "Path of the environment variable value",
 	}
 	flIsExpand = cli.StringFlag{
 		Name:  EXPAND_KEY + ", " + E_KEY,
 		Value: "",
-		Usage: "defines if should replace environment variables",
+		Usage: "Set true if should replace environment variables",
 	}
 )

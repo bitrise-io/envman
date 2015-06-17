@@ -25,7 +25,7 @@ func runCmd(c *cli.Context) {
 			Argumentums:  doArgs,
 		}
 
-		log.Debugln("Executing comand:", cmdToExecute)
+		log.Info("Executing comand:", cmdToExecute)
 
 		if err := executeCmd(cmdToExecute); err != nil {
 			log.Fatal("Failed to execute comand:", err)

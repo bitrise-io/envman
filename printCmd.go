@@ -8,7 +8,7 @@ import (
 func printCmd(c *cli.Context) {
 	environments, err := loadEnvMap()
 	if err != nil {
-		log.Fatalln("Failed to print:", err)
+		log.Fatal("Failed to print:", err)
 	}
 
 	log.Info("EnvStore:", environments)

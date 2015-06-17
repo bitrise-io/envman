@@ -9,10 +9,10 @@ import (
 func initCmd(c *cli.Context) {
 	_, err := initAtPath(currentEnvStoreFilePath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
-	log.Infoln("Envman initialized")
+	log.Info("Envman initialized")
 }
 
 /*

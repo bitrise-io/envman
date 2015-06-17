@@ -9,15 +9,15 @@ import (
 func clearCmd(c *cli.Context) {
 	isExists, err := pathutil.IsPathExists(currentEnvStoreFilePath)
 	if err != nil {
-		log.Fatalln("Failed to clear EnvStore:", err)
+		log.Fatal("Failed to clear EnvStore:", err)
 	}
 	if !isExists {
-		log.Fatalln("EnvStore not found in path:", currentEnvStoreFilePath)
+		log.Fatal("EnvStore not found in path:", currentEnvStoreFilePath)
 	}
 
 	err = writeEnvMapToFile(currentEnvStoreFilePath, []envModel{})
 	if err != nil {
-		log.Fatalln("Failed to clear EnvStore:", err)
+		log.Fatal("Failed to clear EnvStore:", err)
 	}
 	log.Info("EnvStore cleared")
 }

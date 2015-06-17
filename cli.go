@@ -9,7 +9,6 @@ import (
 
 	"code.google.com/p/go.crypto/ssh/terminal"
 	log "github.com/Sirupsen/logrus"
-	"github.com/bitrise-io/go-pathutil"
 	"github.com/codegangsta/cli"
 )
 
@@ -31,7 +30,7 @@ func run() {
 	if !terminal.IsTerminal(0) {
 		bytes, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			log.Fatalln("Failed to read stdin:", err)
+			log.Fatal("Failed to read stdin:", err)
 		}
 		stdinValue = string(bytes)
 	}
@@ -46,6 +45,12 @@ func run() {
 	app.Email = ""
 
 	app.Before = func(c *cli.Context) error {
+		level, err := log.ParseLevel(c.String("log-level"))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		log.SetLevel(level)
+
 		// Befor parsing cli, and running command
 		// we need to decide wich path will be used by envman
 		flagPath := c.String(PATH_KEY)
@@ -53,22 +58,22 @@ func run() {
 			if os.Getenv(ENVMAN_ENVSTORE_PATH_KEY) != "" {
 				currentEnvStoreFilePath = os.Getenv(ENVMAN_ENVSTORE_PATH_KEY)
 			} else {
-				currentPath, err := ensureEnvStoreInCurrentPath()
+				currentPath, err := envStoreInCurrentPath()
 				if err != nil {
-					log.Debugln(err)
+					log.Fatal("Failed to set envman work path in current dir:", err)
 				}
 				currentEnvStoreFilePath = currentPath
 			}
-			log.Infoln("Work path:", currentEnvStoreFilePath)
+			log.Info("Work path:", currentEnvStoreFilePath)
 			return nil
 		}
 
 		if err := validatePath(flagPath); err != nil {
-			log.Fatalln("Failed to set envman work path:", err)
+			log.Fatal("Failed to set envman work path:", err)
 		}
 
 		currentEnvStoreFilePath = flagPath
-		log.Infoln("Work path:", currentEnvStoreFilePath)
+		log.Info("Work path:", currentEnvStoreFilePath)
 		return nil
 	}
 
@@ -76,7 +81,7 @@ func run() {
 	app.Commands = commands
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatalln("Envman finished:", err)
+		log.Fatal("Envman finished:", err)
 	}
 }
 
@@ -86,22 +91,13 @@ Output :
 	@string: - current envman work path
 	@error: - error
 */
-func ensureEnvStoreInCurrentPath() (string, error) {
+func envStoreInCurrentPath() (string, error) {
 	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		return currentDir, err
 	}
 
 	currentPath := path.Join(currentDir, envStoreName)
-	exist, err := pathutil.IsPathExists(currentPath)
-	if err != nil {
-		return currentPath, err
-	}
-	if !exist {
-		err = errors.New("EnvStore not found in path:" + currentPath)
-		return currentPath, err
-	}
-
 	return currentPath, nil
 }
 

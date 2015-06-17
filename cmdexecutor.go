@@ -26,7 +26,10 @@ func executeCmd(commandToRun commandModel) error {
 			value = eModel.Value
 		}
 
-		os.Setenv(key, value)
+		err := os.Setenv(key, value)
+		if err != nil {
+			return err
+		}
 		cmdEnvs = append(cmdEnvs, key+"="+value)
 	}
 
