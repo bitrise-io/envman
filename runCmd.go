@@ -8,13 +8,12 @@ import (
 var runCmdLog *log.Entry = log.WithFields(log.Fields{"f": "runCmd.go"})
 
 func runCmd(c *cli.Context) {
-	environments, err := loadEnvMap()
+	doCmdEnvs, err := loadEnvMap()
 	if err != nil {
 		runCmdLog.Fatal("Failed to export environment variable list, err:", err)
 	}
 
 	if len(c.Args()) > 0 {
-		doCmdEnvs := environments
 		doCommand := c.Args()[0]
 
 		doArgs := []string{}

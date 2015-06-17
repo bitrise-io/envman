@@ -1,10 +1,6 @@
 package main
 
 import (
-	//"os"
-	//"path"
-	//"path/filepath"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
 	"github.com/codegangsta/cli"
@@ -22,12 +18,7 @@ func initCmd(c *cli.Context) {
 }
 
 /*
-Initialize envman in specified path. Creates empty envstore if does not exist.
-Input:
-	@pth string - the path, where envstore should be created
-Output:
-	@string - the input path
-	@error - the error of initialization
+	Initialize envman in specified path. Creates empty envstore if does not exist.
 */
 func initAtPath(pth string) (string, error) {
 	if err := validatePath(pth); err != nil {
@@ -40,7 +31,7 @@ func initAtPath(pth string) (string, error) {
 	}
 
 	if exist == false {
-		err = writeEnvMapToFile(pth, envMap{})
+		err = writeEnvMapToFile(pth, []envModel{})
 		if err != nil {
 			return "", err
 		}

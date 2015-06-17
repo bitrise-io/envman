@@ -22,8 +22,6 @@ bash _scripts/install.sh
 # Tests
 bash _test/test.sh
 
-
-
 #
 # ==> DONE - OK
 #
