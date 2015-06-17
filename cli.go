@@ -9,26 +9,28 @@ import (
 
 	"code.google.com/p/go.crypto/ssh/terminal"
 	log "github.com/Sirupsen/logrus"
-	"github.com/bitrise-io/go-pathutil"
 	"github.com/codegangsta/cli"
 )
 
-const ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
-const envStoreName string = ".envstore.yml"
+const (
+	ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
+	envStoreName             string = ".envstore.yml"
+)
 
 var (
-	cliLog                  *log.Entry = log.WithFields(log.Fields{"f": "cli.go"})
 	stdinValue              string
 	currentEnvStoreFilePath string
 )
 
 // Run the Envman CLI.
 func run() {
+	log.SetLevel(log.DebugLevel)
+
 	// Read piped data
 	if !terminal.IsTerminal(0) {
 		bytes, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			cliLog.Fatal("Failed to read stdin, err:", err)
+			log.Fatal("Failed to read stdin:", err)
 		}
 		stdinValue = string(bytes)
 	}
@@ -43,6 +45,12 @@ func run() {
 	app.Email = ""
 
 	app.Before = func(c *cli.Context) error {
+		level, err := log.ParseLevel(c.String("log-level"))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		log.SetLevel(level)
+
 		// Befor parsing cli, and running command
 		// we need to decide wich path will be used by envman
 		flagPath := c.String(PATH_KEY)
@@ -50,23 +58,22 @@ func run() {
 			if os.Getenv(ENVMAN_ENVSTORE_PATH_KEY) != "" {
 				currentEnvStoreFilePath = os.Getenv(ENVMAN_ENVSTORE_PATH_KEY)
 			} else {
-				currentPath, err := ensureEnvStoreInCurrentPath()
+				currentPath, err := envStoreInCurrentPath()
 				if err != nil {
-					cliLog.Error(err)
+					log.Fatal("Failed to set envman work path in current dir:", err)
 				}
 				currentEnvStoreFilePath = currentPath
 			}
-			cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
+			log.Info("Work path:", currentEnvStoreFilePath)
 			return nil
 		}
 
 		if err := validatePath(flagPath); err != nil {
-			cliLog.Fatal("Failed to set envman work path to: %s, err: %s", flagPath, err)
-			return nil
+			log.Fatal("Failed to set envman work path:", err)
 		}
 
 		currentEnvStoreFilePath = flagPath
-		cliLog.Info("Envman work path : %v", currentEnvStoreFilePath)
+		log.Info("Work path:", currentEnvStoreFilePath)
 		return nil
 	}
 
@@ -74,7 +81,7 @@ func run() {
 	app.Commands = commands
 
 	if err := app.Run(os.Args); err != nil {
-		cliLog.Fatal(err)
+		log.Fatal("Envman finished:", err)
 	}
 }
 
@@ -84,22 +91,13 @@ Output :
 	@string: - current envman work path
 	@error: - error
 */
-func ensureEnvStoreInCurrentPath() (string, error) {
+func envStoreInCurrentPath() (string, error) {
 	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		return currentDir, err
 	}
 
 	currentPath := path.Join(currentDir, envStoreName)
-	exist, err := pathutil.IsPathExists(currentPath)
-	if err != nil {
-		return currentPath, err
-	}
-	if !exist {
-		err = errors.New(".envstore.yml dos not exist in current path: " + currentPath)
-		return currentPath, err
-	}
-
 	return currentPath, nil
 }
 
@@ -112,11 +110,11 @@ Output:
 */
 func validatePath(pth string) error {
 	if pth == "" {
-		return errors.New("No path sepcified, should be like {SOME_DIR/ENVSTORE.yml}")
+		return errors.New("No path sepcified")
 	}
 	_, file := path.Split(pth)
 	if file == "" {
-		return errors.New("ENVSTORE not found")
+		return errors.New("EnvStore not found in path:" + pth)
 	}
 	return nil
 }

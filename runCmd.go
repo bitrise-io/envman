@@ -5,12 +5,10 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-var runCmdLog *log.Entry = log.WithFields(log.Fields{"f": "runCmd.go"})
-
 func runCmd(c *cli.Context) {
 	doCmdEnvs, err := loadEnvMap()
 	if err != nil {
-		runCmdLog.Fatal("Failed to export environment variable list, err:", err)
+		log.Fatal("Failed to load EnvStore:", err)
 	}
 
 	if len(c.Args()) > 0 {
@@ -21,16 +19,20 @@ func runCmd(c *cli.Context) {
 			doArgs = c.Args()[1:]
 		}
 
-		cmdToSend := commandModel{
+		cmdToExecute := commandModel{
 			Command:      doCommand,
 			Environments: doCmdEnvs,
 			Argumentums:  doArgs,
 		}
 
-		if err := executeCmd(cmdToSend); err != nil {
-			runCmdLog.Fatal("Failed to execute command, err:", err)
+		log.Info("Executing comand:", cmdToExecute)
+
+		if err := executeCmd(cmdToExecute); err != nil {
+			log.Fatal("Failed to execute comand:", err)
 		}
+
+		log.Info("Comand executed")
 	} else {
-		runCmdLog.Fatal("No command specified")
+		log.Fatal("No comand specified")
 	}
 }

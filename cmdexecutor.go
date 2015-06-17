@@ -3,11 +3,7 @@ package main
 import (
 	"os"
 	"os/exec"
-
-	//log "github.com/Sirupsen/logrus"
 )
-
-//var cmdexecutorLog *log.Entry = log.WithFields(log.Fields{"f": "cmdexecutor.go"})
 
 type commandModel struct {
 	Command      string
@@ -30,7 +26,10 @@ func executeCmd(commandToRun commandModel) error {
 			value = eModel.Value
 		}
 
-		os.Setenv(key, value)
+		err := os.Setenv(key, value)
+		if err != nil {
+			return err
+		}
 		cmdEnvs = append(cmdEnvs, key+"="+value)
 	}
 

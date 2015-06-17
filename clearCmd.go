@@ -6,23 +6,18 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-var clearCmdLog *log.Entry = log.WithFields(log.Fields{"f": "clearCmd.go"})
-
 func clearCmd(c *cli.Context) {
 	isExists, err := pathutil.IsPathExists(currentEnvStoreFilePath)
 	if err != nil {
-		clearCmdLog.Error("Failed to clear envlist, err:%s", err)
-		return
+		log.Fatal("Failed to clear EnvStore:", err)
 	}
 	if !isExists {
-		clearCmdLog.Info("No EnvStore found at path: ", currentEnvStoreFilePath)
-		return
+		log.Fatal("EnvStore not found in path:", currentEnvStoreFilePath)
 	}
 
 	err = writeEnvMapToFile(currentEnvStoreFilePath, []envModel{})
 	if err != nil {
-		clearCmdLog.Error("Failed to clear envlist, err:%s", err)
-		return
+		log.Fatal("Failed to clear EnvStore:", err)
 	}
-	clearCmdLog.Info("Envstore cleared at path: ", currentEnvStoreFilePath)
+	log.Info("EnvStore cleared")
 }
