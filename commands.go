@@ -18,7 +18,6 @@ var (
 				flKey,
 				flValue,
 				flValueFile,
-				flIsExpand,
 			},
 			Action: addCmd,
 		},

@@ -1,24 +1,11 @@
 package main
 
-import (
-	"strconv"
-
-	log "github.com/Sirupsen/logrus"
-)
-
-const (
-	IS_EXPAND_KEY string = "is_expand"
-	TRUE_KEY      string = "true"
-	FALSE_KEY     string = "false"
-)
-
 /*
 	This is the model of ENVIRONMENT in envman, for methods
 */
 type envModel struct {
-	Key      string
-	Value    string
-	IsExpand bool
+	Key   string
+	Value string
 }
 
 /*
@@ -26,10 +13,8 @@ type envModel struct {
 */
 type envMap map[string]string
 
-type envMapArray []envMap
-
 type envsYMLModel struct {
-	Envs envMapArray `yml:"environments"`
+	Envs envMap `yml:"environments"`
 }
 
 /*
@@ -38,40 +23,12 @@ type envsYMLModel struct {
 func convertToEnvModelArray(envYML envsYMLModel) []envModel {
 	var envModels []envModel
 
-	for _, envMap := range envYML.Envs {
-		envModel := convertToEnvModel(envMap)
-		envModels = append(envModels, envModel)
+	for key, value := range envYML.Envs {
+		eModel := envModel{key, value}
+		envModels = append(envModels, eModel)
 	}
 
 	return envModels
-}
-
-func convertToEnvModel(eMap envMap) envModel {
-	var eModel envModel
-
-	for key, value := range eMap {
-		if key != IS_EXPAND_KEY {
-			eModel.Key = key
-			eModel.Value = value
-		}
-	}
-
-	eModel.IsExpand = isExpand(eMap[IS_EXPAND_KEY])
-
-	return eModel
-}
-
-func isExpand(value string) bool {
-	if value == "" {
-		return true
-	} else {
-		expand, err := strconv.ParseBool(value)
-		if err != nil {
-			log.Errorln("Failed to parse value:", err)
-			return true
-		}
-		return expand
-	}
 }
 
 /*
@@ -79,25 +36,11 @@ func isExpand(value string) bool {
 */
 func convertToEnvsYMLModel(eModels []envModel) envsYMLModel {
 	var envYML envsYMLModel
-	var envMaps []envMap
+	envYML.Envs = make(envMap)
 
 	for _, eModel := range eModels {
-		eMap := convertToEnvMap(eModel)
-		envMaps = append(envMaps, eMap)
+		envYML.Envs[eModel.Key] = eModel.Value
 	}
 
-	envYML.Envs = envMaps
 	return envYML
-}
-
-func convertToEnvMap(eModel envModel) envMap {
-	eMap := make(envMap)
-
-	if eModel.IsExpand == false {
-		eMap[IS_EXPAND_KEY] = FALSE_KEY
-	}
-
-	eMap[eModel.Key] = eModel.Value
-
-	return eMap
 }

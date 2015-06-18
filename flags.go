@@ -17,9 +17,6 @@ const (
 
 	VALUE_FILE_KEY string = "valuefile"
 	VF_KEY         string = "f"
-
-	EXPAND_KEY string = "expand"
-	E_KEY      string = "e"
 )
 
 var (
@@ -54,10 +51,5 @@ var (
 		Name:  VALUE_FILE_KEY + ", " + VF_KEY,
 		Value: "",
 		Usage: "Path of the environment variable value",
-	}
-	flIsExpand = cli.StringFlag{
-		Name:  EXPAND_KEY + ", " + E_KEY,
-		Value: "",
-		Usage: "Set true if should replace environment variables",
 	}
 )

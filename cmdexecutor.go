@@ -27,14 +27,8 @@ func commandEnvs(envs []envModel) ([]string, error) {
 	}
 
 	for _, eModel := range envs {
-		var value string
 		key := eModel.Key
-		if eModel.IsExpand {
-			value = expandEnvsInString(eModel.Value)
-		} else {
-			value = eModel.Value
-		}
-
+		value := expandEnvsInString(eModel.Value)
 		cmdEnvs = append(cmdEnvs, key+"="+value)
 	}
 
