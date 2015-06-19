@@ -20,6 +20,11 @@ go get ./...
 bash _scripts/install.sh
 
 # Tests
+go get github.com/kisielk/errcheck
+go install github.com/kisielk/errcheck
+
+errcheck ./
+
 bash _test/test.sh
 
 #
