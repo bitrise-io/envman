@@ -25,8 +25,8 @@ envman print
 #************************#
 envman --path "$HOME/.envman/test/.envstore.yml" init
 envman --path "$HOME/.envman/test/.envstore.yml" print
-echo "bitrise from stdin" | envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE_FROM_STDIN 
-envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE --value "bitrise with path flag" 
+echo "bitrise from stdin" | envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE_FROM_STDIN --expand false
+envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE --value "bitrise with path flag" --expand false
 envman --path "$HOME/.envman/test/.envstore.yml" run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
 envman --path "$HOME/.envman/test/.envstore.yml" print
 
@@ -37,7 +37,7 @@ envman --path "$HOME/.envman/test/.envstore.yml" print
 cd "$HOME/.envman/test/"
 envman init
 envman print
-echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN
+echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN --expand false
 envman add --key BITRISE --value "bitrise from current path"
 envman run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
 envman print
@@ -54,7 +54,7 @@ mkdir -p "$HOME/.envman/test-emtpy"
 cd "$HOME/.envman/test-emtpy"
 envman init
 envman print
-echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN
+echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN --expand false
 envman add --key BITRISE --value "bitrise"
 envman run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
 envman print

@@ -18,7 +18,7 @@ func expandEnvsInString(inp string) string {
 func commandEnvs(envs []envModel) ([]string, error) {
 	cmdEnvs := []string{}
 
-	// Exporting envs to bash_profile is required for expanding envs
+	// Exporting envs is required for expanding envs
 	for _, eModel := range envs {
 		err := os.Setenv(eModel.Key, eModel.Value)
 		if err != nil {
@@ -27,9 +27,15 @@ func commandEnvs(envs []envModel) ([]string, error) {
 	}
 
 	for _, eModel := range envs {
-		key := eModel.Key
-		value := expandEnvsInString(eModel.Value)
-		cmdEnvs = append(cmdEnvs, key+"="+value)
+		var value string
+
+		if eModel.IsExpand {
+			value = expandEnvsInString(eModel.Value)
+		} else {
+			value = eModel.Value
+		}
+
+		cmdEnvs = append(cmdEnvs, eModel.Key+"="+value)
 	}
 
 	return append(os.Environ(), cmdEnvs...), nil

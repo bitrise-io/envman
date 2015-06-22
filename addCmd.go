@@ -10,6 +10,7 @@ import (
 
 func addCmd(c *cli.Context) {
 	key := c.String(KEY_KEY)
+	expand := isExpand(c.String(EXPAND_KEY))
 	var value string
 
 	if stdinValue != "" {
@@ -40,7 +41,7 @@ func addCmd(c *cli.Context) {
 	}
 
 	// Add or update envlist
-	newEnv := envModel{key, value}
+	newEnv := envModel{key, value, expand}
 	environments, err = updateOrAddToEnvlist(environments, newEnv)
 	if err != nil {
 		log.Fatal("Failed to create EnvStore:", err)
