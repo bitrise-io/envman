@@ -35,15 +35,15 @@ func runCmd(c *cli.Context) {
 			Argumentums:  doArgs,
 		}
 
-		log.Info("Executing comand:", cmdToExecute)
+		log.Info("Executing command:", cmdToExecute)
 
 		err = runWithEnvs(cmdToExecute)
 		if err != nil {
-			log.Fatal("Failed to execute comand:", err)
+			log.Fatal("Failed to execute command:", err)
 		}
 
-		log.Info("Comand executed")
+		log.Info("Command executed")
 	} else {
-		log.Fatal("No comand specified")
+		log.Fatal("No command specified")
 	}
 }
