@@ -27,12 +27,12 @@ var (
 	flPath = cli.StringFlag{
 		Name:  PATH_KEY + ", " + P_KEY,
 		Value: "",
-		Usage: "Envman's working path (SOME_DIR/envstore.yml)",
+		Usage: "Envman's working path (SOME_DIR/envstore.yml).",
 	}
 	flLogLevel = cli.StringFlag{
 		Name:  LOG_LEVEL_KEY + ", " + L_KEY,
 		Value: "info",
-		Usage: "Log level (options: debug, info, warn, error, fatal, panic)",
+		Usage: "Log level (options: debug, info, warn, error, fatal, panic).",
 	}
 	flags = []cli.Flag{
 		flPath,
@@ -43,21 +43,21 @@ var (
 	flKey = cli.StringFlag{
 		Name:  KEY_KEY + ", " + K_KEY,
 		Value: "",
-		Usage: "Key of the environment variable",
+		Usage: "Key of the environment variable.",
 	}
 	flValue = cli.StringFlag{
 		Name:  VALUE_KEY + ", " + V_KEY,
 		Value: "",
-		Usage: "Value of the environment variable",
+		Usage: "Value of the environment variable.",
 	}
 	flValueFile = cli.StringFlag{
 		Name:  VALUE_FILE_KEY + ", " + VF_KEY,
 		Value: "",
-		Usage: "Path of the environment variable value",
+		Usage: "Path of the environment variable value.",
 	}
 	flIsExpand = cli.StringFlag{
 		Name:  EXPAND_KEY + ", " + E_KEY,
-		Value: "",
-		Usage: "Set true if should replace environment variables",
+		Value: "true",
+		Usage: "If true, replaces ${var} or $var in the string according to the values of the current environment variables.",
 	}
 )
