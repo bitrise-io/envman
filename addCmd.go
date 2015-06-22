@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"strings"
 
@@ -8,7 +9,45 @@ import (
 	"github.com/codegangsta/cli"
 )
 
+func addEnv(key string, value string, expand bool) error {
+	// Validate input
+	if key == "" {
+		return errors.New("Empty key")
+	}
+	if value == "" {
+		return errors.New("Empty value")
+	}
+	value = strings.Replace(value, "\n", "", -1)
+
+	// Load envs, or create if not exist
+	environments, err := loadEnvMapOrCreate()
+	if err != nil {
+		return err
+	}
+
+	// Add or update envlist
+	newEnv := envModel{key, value, expand}
+	environments, err = updateOrAddToEnvlist(environments, newEnv)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func loadValueFromFile(pth string) (string, error) {
+	buf, err := ioutil.ReadFile(pth)
+	if err != nil {
+		return "", err
+	}
+
+	str := string(buf)
+	return str, nil
+}
+
 func addCmd(c *cli.Context) {
+	log.Info("Work path:", currentEnvStoreFilePath)
+
 	key := c.String(KEY_KEY)
 	expand := isExpand(c.String(EXPAND_KEY))
 	var value string
@@ -25,39 +64,15 @@ func addCmd(c *cli.Context) {
 		value = v
 	}
 
-	// Validate input
-	if key == "" {
-		log.Fatal("Empty key")
-	}
-	if value == "" {
-		log.Fatal("Empty value")
-	}
-	value = strings.Replace(value, "\n", "", -1)
-
-	// Load envs, or create if not exist
-	environments, err := loadEnvMapOrCreate()
+	err := addEnv(key, value, expand)
 	if err != nil {
-		log.Fatal("Failed to load EnvStore:", err)
+		log.Fatal("Failed to add env:", err)
 	}
 
-	// Add or update envlist
-	newEnv := envModel{key, value, expand}
-	environments, err = updateOrAddToEnvlist(environments, newEnv)
-	if err != nil {
-		log.Fatal("Failed to create EnvStore:", err)
-	}
-
-	// Print new environment list
 	log.Info("Env added")
-	printCmd(c)
-}
 
-func loadValueFromFile(pth string) (string, error) {
-	buf, err := ioutil.ReadFile(pth)
+	err = printEnvs()
 	if err != nil {
-		return "", err
+		log.Fatal("Failed to print:", err)
 	}
-
-	str := string(buf)
-	return str, nil
 }

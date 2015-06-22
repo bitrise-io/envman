@@ -26,7 +26,7 @@ func loadEnvMapOrCreate() ([]envModel, error) {
 	envModels, err := loadEnvMap()
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
-			_, err = initAtPath(currentEnvStoreFilePath)
+			err = initAtPath(currentEnvStoreFilePath)
 			return []envModel{}, err
 		}
 		return []envModel{}, err

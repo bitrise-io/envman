@@ -64,7 +64,7 @@ func run() {
 				}
 				currentEnvStoreFilePath = currentPath
 			}
-			log.Info("Work path:", currentEnvStoreFilePath)
+
 			return nil
 		}
 
@@ -73,7 +73,7 @@ func run() {
 		}
 
 		currentEnvStoreFilePath = flagPath
-		log.Info("Work path:", currentEnvStoreFilePath)
+
 		return nil
 	}
 

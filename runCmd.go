@@ -5,13 +5,23 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func runCmd(c *cli.Context) {
-	doCmdEnvs, err := loadEnvMap()
-	if err != nil {
-		log.Fatal("Failed to load EnvStore:", err)
+func runWithEnvs(cmd commandModel) error {
+	if err := executeCmd(cmd); err != nil {
+		return err
 	}
 
+	return nil
+}
+
+func runCmd(c *cli.Context) {
+	log.Info("Work path:", currentEnvStoreFilePath)
+
 	if len(c.Args()) > 0 {
+		doCmdEnvs, err := loadEnvMap()
+		if err != nil {
+			log.Fatal("Failed to load EnvStore:", err)
+		}
+
 		doCommand := c.Args()[0]
 
 		doArgs := []string{}
@@ -27,7 +37,8 @@ func runCmd(c *cli.Context) {
 
 		log.Info("Executing comand:", cmdToExecute)
 
-		if err := executeCmd(cmdToExecute); err != nil {
+		err = runWithEnvs(cmdToExecute)
+		if err != nil {
 			log.Fatal("Failed to execute comand:", err)
 		}
 

@@ -3,7 +3,8 @@ package main
 import "github.com/codegangsta/cli"
 
 func init() {
-	cli.AppHelpTemplate = `{{.Usage}}
+	cli.AppHelpTemplate = `
+{{.Usage}}
 
 Usage: {{.Name}} {{if .Flags}}[OPTIONS] {{end}}COMMAND [arg...]
 
