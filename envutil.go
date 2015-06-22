@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/go-pathutil"
 	"gopkg.in/yaml.v2"
 )
@@ -25,7 +26,7 @@ func loadEnvMapOrCreate() ([]envModel, error) {
 	envModels, err := loadEnvMap()
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
-			_, err = initAtPath(currentEnvStoreFilePath)
+			err = initAtPath(currentEnvStoreFilePath)
 			return []envModel{}, err
 		}
 		return []envModel{}, err
@@ -101,7 +102,12 @@ func writeEnvMapToFile(pth string, envs []envModel) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			log.Fatalln("Failed to close file:", err)
+		}
+	}()
 
 	jsonContBytes, err := generateFormattedYMLForEnvModels(envs)
 	if err != nil {

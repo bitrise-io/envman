@@ -11,33 +11,47 @@ type commandModel struct {
 	Environments []envModel
 }
 
-func ExpandEnvsInString(inp string) string {
+func expandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
-func executeCmd(commandToRun commandModel) error {
+func commandEnvs(envs []envModel) ([]string, error) {
 	cmdEnvs := []string{}
-	for _, eModel := range commandToRun.Environments {
+
+	// Exporting envs is required for expanding envs
+	for _, eModel := range envs {
+		err := os.Setenv(eModel.Key, eModel.Value)
+		if err != nil {
+			return cmdEnvs, err
+		}
+	}
+
+	for _, eModel := range envs {
 		var value string
-		key := eModel.Key
+
 		if eModel.IsExpand {
-			value = ExpandEnvsInString(eModel.Value)
+			value = expandEnvsInString(eModel.Value)
 		} else {
 			value = eModel.Value
 		}
 
-		err := os.Setenv(key, value)
-		if err != nil {
-			return err
-		}
-		cmdEnvs = append(cmdEnvs, key+"="+value)
+		cmdEnvs = append(cmdEnvs, eModel.Key+"="+value)
+	}
+
+	return append(os.Environ(), cmdEnvs...), nil
+}
+
+func executeCmd(commandToRun commandModel) error {
+	cmdEnvs, err := commandEnvs(commandToRun.Environments)
+	if err != nil {
+		return err
 	}
 
 	cmd := exec.Command(commandToRun.Command, commandToRun.Argumentums...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Env = append(os.Environ(), cmdEnvs...)
+	cmd.Env = cmdEnvs
 
 	return cmd.Run()
 }
