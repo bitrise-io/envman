@@ -11,16 +11,12 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
-
 export PATH=$PATH:$GOPATH/bin
-
-# Go get
-go get ./...
+export GOPATH="${THIS_SCRIPT_DIR}/../Godeps/_workspace"
 
 bash _scripts/install.sh
 
 # Tests
-go get github.com/kisielk/errcheck
 go install github.com/kisielk/errcheck
 
 errcheck ./
