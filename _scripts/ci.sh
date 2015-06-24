@@ -11,11 +11,15 @@ cd "${THIS_SCRIPT_DIR}/.."
 
 set -v
 
+export PATH="$PATH:$GOPATH/bin"
+# export GOPATH="${THIS_SCRIPT_DIR}/../Godeps/_workspace"
+# echo "GOPATH: $GOPATH"
+# mkdir $GOPATH/bin
+# export PATH=$PATH:$GOPATH/bin
 
-export PATH=$PATH:$GOPATH/bin
-
-# Go get
-go get ./...
+go get github.com/tools/godep
+go install github.com/tools/godep
+godep restore
 
 bash _scripts/install.sh
 
