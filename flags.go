@@ -25,9 +25,10 @@ const (
 var (
 	// App flags
 	flPath = cli.StringFlag{
-		Name:  PATH_KEY + ", " + P_KEY,
-		Value: "",
-		Usage: "Envman's working path (SOME_DIR/envstore.yml).",
+		Name:   PATH_KEY + ", " + P_KEY,
+		EnvVar: "ENVMAN_ENVSTORE_PATH",
+		Value:  "",
+		Usage:  "Envman's working path (SOME_DIR/envstore.yml).",
 	}
 	flLogLevel = cli.StringFlag{
 		Name:  LOG_LEVEL_KEY + ", " + L_KEY,
