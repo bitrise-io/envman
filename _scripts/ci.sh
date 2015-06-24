@@ -27,7 +27,7 @@ bash _scripts/install.sh
 go get github.com/kisielk/errcheck
 go install github.com/kisielk/errcheck
 
-errcheck ./
+errcheck -asserts=true -blank=true ./...
 
 bash _test/test.sh
 
