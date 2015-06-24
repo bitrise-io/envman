@@ -9,13 +9,13 @@ cd "${THIS_SCRIPT_DIR}/.."
 # Script for Continuous Integration
 #
 
-# export PATH=$PATH:$GOPATH/bin
+set -v
+
+export PATH="$PATH:$GOPATH/bin"
 # export GOPATH="${THIS_SCRIPT_DIR}/../Godeps/_workspace"
 # echo "GOPATH: $GOPATH"
 # mkdir $GOPATH/bin
 # export PATH=$PATH:$GOPATH/bin
-
-set -v
 
 go get github.com/tools/godep
 go install github.com/tools/godep
