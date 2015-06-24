@@ -18,6 +18,7 @@ cd "${THIS_SCRIPT_DIR}/.."
 set -v
 
 go get github.com/tools/godep
+go install github.com/tools/godep
 godep restore
 
 bash _scripts/install.sh
