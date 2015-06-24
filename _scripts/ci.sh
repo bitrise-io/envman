@@ -13,6 +13,7 @@ set -v
 
 export PATH=$PATH:$GOPATH/bin
 export GOPATH="${THIS_SCRIPT_DIR}/../Godeps/_workspace"
+export PATH=$PATH:$GOPATH/bin
 
 bash _scripts/install.sh
 
