@@ -22,7 +22,10 @@ var (
 )
 
 func isPipedData() bool {
-	stat, _ := os.Stdin.Stat()
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		return true
 	}
