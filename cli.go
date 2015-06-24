@@ -22,7 +22,10 @@ var (
 )
 
 func isPipedData() bool {
-	stat, _ := os.Stdin.Stat()
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		return true
 	}
@@ -43,9 +46,6 @@ func run() {
 		} else {
 			log.Error("Failed to read stdin:", err)
 		}
-		log.Infoln("data is being piped to stdin")
-	} else {
-		log.Infoln("stdin is from a terminal")
 	}
 
 	// Parse cl
