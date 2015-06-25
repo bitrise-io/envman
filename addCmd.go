@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"io/ioutil"
-	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
@@ -17,7 +16,6 @@ func addEnv(key string, value string, expand bool) error {
 	if value == "" {
 		return errors.New("Empty value")
 	}
-	value = strings.Replace(value, "\n", "", -1)
 
 	// Load envs, or create if not exist
 	environments, err := loadEnvMapOrCreate()
