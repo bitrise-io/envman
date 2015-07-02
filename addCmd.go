@@ -49,7 +49,7 @@ func addCmd(c *cli.Context) {
 
 	if stdinValue != "" {
 		value = stdinValue
-	} else if c.IsSet(VALUE_KEY) == false {
+	} else if c.IsSet(VALUE_KEY) {
 		value = c.String(VALUE_KEY)
 	} else if c.String(VALUE_FILE_KEY) != "" {
 		v, err := loadValueFromFile(c.String(VALUE_FILE_KEY))
