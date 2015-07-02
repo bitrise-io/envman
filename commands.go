@@ -7,13 +7,13 @@ var (
 		{
 			Name:      "init",
 			ShortName: "i",
-			Usage:     "Create an empty ENVSTORE into ENVMAN_WORK_DIR (i.e. create ENVMAN_WORK_PATH)",
+			Usage:     "Create an empty .envstore.yml into the current working directory, or to the path specified by the --path flag.",
 			Action:    initCmd,
 		},
 		{
 			Name:      "add",
 			ShortName: "a",
-			Usage:     "Add new or update an exist environment variable",
+			Usage:     "Add new, or update an exist environment variable.",
 			Flags: []cli.Flag{
 				flKey,
 				flValue,
@@ -25,19 +25,19 @@ var (
 		{
 			Name:      "clear",
 			ShortName: "c",
-			Usage:     "Clears the envman provided enviroment variables",
+			Usage:     "Clear the envstore.",
 			Action:    clearCmd,
 		},
 		{
 			Name:      "print",
 			ShortName: "p",
-			Usage:     "Prints out the environment variables in ENVMAN_WORK_PATH",
+			Usage:     "Print out the environment variables in envstore.",
 			Action:    printCmd,
 		},
 		{
 			Name:            "run",
 			ShortName:       "r",
-			Usage:           "Runs the specified command with environment variables in ENVSTORE",
+			Usage:           "Run the specified command with the environment variables stored in the envstore.",
 			SkipFlagParsing: true,
 			Action:          runCmd,
 		},

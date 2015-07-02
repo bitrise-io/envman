@@ -3,24 +3,33 @@ package main
 import "github.com/codegangsta/cli"
 
 func init() {
-	cli.AppHelpTemplate = `
-{{.Usage}}
+	cli.AppHelpTemplate = `NAME: {{.Name}} - {{.Usage}}
 
-Usage: {{.Name}} {{if .Flags}}[OPTIONS] {{end}}COMMAND [arg...]
+USAGE: {{.Name}} {{if .Flags}}[OPTIONS] {{end}}COMMAND [arg...]
 
-Version: {{.Version}}{{if or .Author .Email}}
+VERSION: {{.Version}}{{if or .Author .Email}}
 
-Author:{{if .Author}}
+AUTHOR:{{if .Author}}
   {{.Author}}{{if .Email}} - <{{.Email}}>{{end}}{{else}}
   {{.Email}}{{end}}{{end}}
 {{if .Flags}}
-Options:
+GLOBAL OPTIONS:
   {{range .Flags}}{{.}}
   {{end}}{{end}}
-Commands:
+COMMANDS:
   {{range .Commands}}{{.Name}}{{with .ShortName}}, {{.}}{{end}}{{ "\t" }}{{.Usage}}
   {{end}}
-Run '{{.Name}} COMMAND --help' for more information on a command.
+COMMAND HELP: {{.Name}} COMMAND --help/-h
 
 `
+
+	cli.HelpFlag = cli.BoolFlag{
+		Name:  "help, h",
+		Usage: "Show help.",
+	}
+
+	cli.VersionFlag = cli.BoolFlag{
+		Name:  "version, v",
+		Usage: "Print the version.",
+	}
 }
