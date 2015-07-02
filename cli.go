@@ -110,6 +110,7 @@ func envStoreInCurrentPath() (string, error) {
 		return currentDir, err
 	}
 
+	currentDir = "./"
 	currentPath := path.Join(currentDir, envStoreName)
 	return currentPath, nil
 }
