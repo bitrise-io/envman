@@ -59,13 +59,13 @@ func convertToEnvModel(eMap envMap) envModel {
 	return eModel
 }
 
-func isExpand(value string) bool {
-	if value == "" {
+func isExpand(s string) bool {
+	if s == "" {
 		return true
 	} else {
-		expand, err := strconv.ParseBool(value)
+		expand, err := strconv.ParseBool(s)
 		if err != nil {
-			log.Errorln("Failed to parse value:", err)
+			log.Errorln("isExpand: Failed to parse input:", err)
 			return true
 		}
 		return expand
