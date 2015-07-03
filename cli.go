@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
-	defaultEnvStoreName      string = ".envstore.yml"
+	defaultEnvStoreName string = ".envstore.yml"
 )
 
 var (
