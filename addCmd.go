@@ -11,7 +11,7 @@ import (
 func addEnv(key string, value string, expand bool) error {
 	// Validate input
 	if key == "" {
-		return errors.New("Empty key")
+		return errors.New("Key is not specified, required.")
 	}
 
 	// Load envs, or create if not exist
