@@ -26,10 +26,8 @@ type envModel struct {
 */
 type envMap map[string]string
 
-type envMapArray []envMap
-
 type envsYMLModel struct {
-	Envs envMapArray `yml:"environments"`
+	Envs []envMap `yml:"environments"`
 }
 
 /*
