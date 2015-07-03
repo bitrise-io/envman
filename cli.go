@@ -13,7 +13,7 @@ import (
 
 const (
 	ENVMAN_ENVSTORE_PATH_KEY string = "ENVMAN_ENVSTORE_PATH"
-	envStoreName             string = ".envstore.yml"
+	defaultEnvStoreName      string = ".envstore.yml"
 )
 
 var (
@@ -97,7 +97,7 @@ Output :
 	@error: - error
 */
 func envStorePathInCurrentDir() (string, error) {
-	return filepath.Abs(path.Join("./", envStoreName))
+	return filepath.Abs(path.Join("./", defaultEnvStoreName))
 }
 
 /*
