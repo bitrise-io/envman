@@ -13,9 +13,6 @@ func addEnv(key string, value string, expand bool) error {
 	if key == "" {
 		return errors.New("Empty key")
 	}
-	if value == "" {
-		return errors.New("Empty value")
-	}
 
 	// Load envs, or create if not exist
 	environments, err := loadEnvMapOrCreate()
@@ -52,7 +49,7 @@ func addCmd(c *cli.Context) {
 
 	if stdinValue != "" {
 		value = stdinValue
-	} else if c.String(VALUE_KEY) != "" {
+	} else if c.IsSet(VALUE_KEY) {
 		value = c.String(VALUE_KEY)
 	} else if c.String(VALUE_FILE_KEY) != "" {
 		v, err := loadValueFromFile(c.String(VALUE_FILE_KEY))

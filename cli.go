@@ -66,26 +66,18 @@ func run() {
 
 		// Befor parsing cli, and running command
 		// we need to decide wich path will be used by envman
-		flagPath := c.String(PATH_KEY)
-		if flagPath == "" {
-			if os.Getenv(ENVMAN_ENVSTORE_PATH_KEY) != "" {
-				currentEnvStoreFilePath = os.Getenv(ENVMAN_ENVSTORE_PATH_KEY)
-			} else {
-				currentPath, err := envStoreInCurrentPath()
-				if err != nil {
-					log.Fatal("Failed to set envman work path in current dir:", err)
-				}
-				currentEnvStoreFilePath = currentPath
+		currentEnvStoreFilePath = c.String(PATH_KEY)
+		if currentEnvStoreFilePath == "" {
+			currentEnvStoreFilePath, err = envStorePathInCurrentDir()
+			if err != nil {
+				log.Fatal("Failed to set envman work path in current dir:", err)
 			}
-
 			return nil
 		}
 
-		if err := validatePath(flagPath); err != nil {
+		if err := validatePath(currentEnvStoreFilePath); err != nil {
 			log.Fatal("Failed to set envman work path:", err)
 		}
-
-		currentEnvStoreFilePath = flagPath
 
 		return nil
 	}
@@ -104,14 +96,8 @@ Output :
 	@string: - current envman work path
 	@error: - error
 */
-func envStoreInCurrentPath() (string, error) {
-	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return currentDir, err
-	}
-
-	currentPath := path.Join(currentDir, envStoreName)
-	return currentPath, nil
+func envStorePathInCurrentDir() (string, error) {
+	return filepath.Abs(path.Join("./", envStoreName))
 }
 
 /*

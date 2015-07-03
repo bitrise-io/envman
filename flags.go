@@ -28,7 +28,7 @@ var (
 		Name:   PATH_KEY + ", " + P_KEY,
 		EnvVar: "ENVMAN_ENVSTORE_PATH",
 		Value:  "",
-		Usage:  "Envman's working path (SOME_DIR/envstore.yml).",
+		Usage:  "Path of the envstore.",
 	}
 	flLogLevel = cli.StringFlag{
 		Name:  LOG_LEVEL_KEY + ", " + L_KEY,
@@ -44,17 +44,17 @@ var (
 	flKey = cli.StringFlag{
 		Name:  KEY_KEY + ", " + K_KEY,
 		Value: "",
-		Usage: "Key of the environment variable.",
+		Usage: "Key of the environment variable. Empty string (\"\") is NOT accepted.",
 	}
 	flValue = cli.StringFlag{
 		Name:  VALUE_KEY + ", " + V_KEY,
 		Value: "",
-		Usage: "Value of the environment variable.",
+		Usage: "Value of the environment variable. Empty string is accepted.",
 	}
 	flValueFile = cli.StringFlag{
 		Name:  VALUE_FILE_KEY + ", " + VF_KEY,
 		Value: "",
-		Usage: "Path of the environment variable value.",
+		Usage: "Path of a file which contains the environment variable's value to be stored.",
 	}
 	flIsExpand = cli.StringFlag{
 		Name:  EXPAND_KEY + ", " + E_KEY,
