@@ -13,29 +13,29 @@ import (
 /*
 	File storage methods
 */
-func loadEnvMap() ([]envModel, error) {
+func loadEnvMap() ([]EnvModel, error) {
 	envsYML, err := readEnvMapFromFile(currentEnvStoreFilePath)
 	if err != nil {
-		return []envModel{}, err
+		return []EnvModel{}, err
 	}
 
-	return convertToEnvModelArray(envsYML), nil
+	return envsYML.convertToEnvModelArray(), nil
 }
 
-func loadEnvMapOrCreate() ([]envModel, error) {
+func loadEnvMapOrCreate() ([]EnvModel, error) {
 	envModels, err := loadEnvMap()
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
 			err = initAtPath(currentEnvStoreFilePath)
-			return []envModel{}, err
+			return []EnvModel{}, err
 		}
-		return []envModel{}, err
+		return []EnvModel{}, err
 	}
 	return envModels, nil
 }
 
-func updateOrAddToEnvlist(envs []envModel, env envModel) ([]envModel, error) {
-	var newEnvs []envModel
+func updateOrAddToEnvlist(envs []EnvModel, env EnvModel) ([]EnvModel, error) {
+	var newEnvs []EnvModel
 	exist := false
 
 	for _, eModel := range envs {
@@ -53,7 +53,7 @@ func updateOrAddToEnvlist(envs []envModel, env envModel) ([]envModel, error) {
 
 	err := writeEnvMapToFile(currentEnvStoreFilePath, newEnvs)
 	if err != nil {
-		return []envModel{}, err
+		return []EnvModel{}, err
 	}
 
 	return newEnvs, nil
@@ -82,7 +82,7 @@ func readEnvMapFromFile(pth string) (envsYMLModel, error) {
 	return envsModel, nil
 }
 
-func generateFormattedYMLForEnvModels(envs []envModel) ([]byte, error) {
+func generateFormattedYMLForEnvModels(envs []EnvModel) ([]byte, error) {
 	envYML := convertToEnvsYMLModel(envs)
 
 	bytes, err := yaml.Marshal(envYML)
@@ -93,7 +93,7 @@ func generateFormattedYMLForEnvModels(envs []envModel) ([]byte, error) {
 	return bytes, nil
 }
 
-func writeEnvMapToFile(pth string, envs []envModel) error {
+func writeEnvMapToFile(pth string, envs []EnvModel) error {
 	if pth == "" {
 		return errors.New("No path provided")
 	}

@@ -9,17 +9,15 @@ import (
 )
 
 func clearEnvs() error {
-	isExists, err := pathutil.IsPathExists(currentEnvStoreFilePath)
-	if err != nil {
+
+	if isExists, err := pathutil.IsPathExists(currentEnvStoreFilePath); err != nil {
 		return err
-	}
-	if !isExists {
+	} else if !isExists {
 		errMsg := "EnvStore not found in path:" + currentEnvStoreFilePath
 		return errors.New(errMsg)
 	}
 
-	err = writeEnvMapToFile(currentEnvStoreFilePath, []envModel{})
-	if err != nil {
+	if err := writeEnvMapToFile(currentEnvStoreFilePath, []EnvModel{}); err != nil {
 		return err
 	}
 
@@ -29,8 +27,7 @@ func clearEnvs() error {
 func clearCmd(c *cli.Context) {
 	log.Info("Work path:", currentEnvStoreFilePath)
 
-	err := clearEnvs()
-	if err != nil {
+	if err := clearEnvs(); err != nil {
 		log.Fatal("Failed to clear EnvStore:", err)
 	}
 

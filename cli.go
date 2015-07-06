@@ -108,7 +108,7 @@ Output:
 */
 func validatePath(pth string) error {
 	if pth == "" {
-		return errors.New("No path sepcified")
+		return errors.New("No path specified")
 	}
 	_, file := path.Split(pth)
 	if file == "" {

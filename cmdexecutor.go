@@ -8,23 +8,15 @@ import (
 type commandModel struct {
 	Command      string
 	Argumentums  []string
-	Environments []envModel
+	Environments []EnvModel
 }
 
 func expandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
-func commandEnvs(envs []envModel) ([]string, error) {
+func commandEnvs(envs []EnvModel) ([]string, error) {
 	cmdEnvs := []string{}
-
-	// Exporting envs is required for expanding envs
-	for _, eModel := range envs {
-		err := os.Setenv(eModel.Key, eModel.Value)
-		if err != nil {
-			return cmdEnvs, err
-		}
-	}
 
 	for _, eModel := range envs {
 		var value string
@@ -35,10 +27,13 @@ func commandEnvs(envs []envModel) ([]string, error) {
 			value = eModel.Value
 		}
 
+		if err := os.Setenv(eModel.Key, eModel.Value); err != nil {
+			return []string{}, err
+		}
 		cmdEnvs = append(cmdEnvs, eModel.Key+"="+value)
 	}
 
-	return append(os.Environ(), cmdEnvs...), nil
+	return os.Environ(), nil
 }
 
 func executeCmd(commandToRun commandModel) error {

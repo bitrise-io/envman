@@ -17,7 +17,7 @@ func initAtPath(pth string) error {
 	}
 
 	if exist == false {
-		err = writeEnvMapToFile(pth, []envModel{})
+		err = writeEnvMapToFile(pth, []EnvModel{})
 		if err != nil {
 			return err
 		}
