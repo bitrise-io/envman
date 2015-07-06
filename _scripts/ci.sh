@@ -18,7 +18,7 @@ go get github.com/tools/godep
 go install github.com/tools/godep
 godep restore
 
-# Intsall stepman
+# Intsall envman
 godep go install
 
 # Check for unhandled errors
@@ -26,7 +26,7 @@ go get github.com/kisielk/errcheck
 go install github.com/kisielk/errcheck
 errcheck -asserts=true -blank=true ./...
 
-go test -v ./...
+godep go test -v ./...
 
 #
 # ==> DONE - OK
