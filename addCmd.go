@@ -22,8 +22,7 @@ func addEnv(key string, value string, expand bool) error {
 
 	// Add or update envlist
 	newEnv := EnvModel{key, value, expand}
-	environments, err = updateOrAddToEnvlist(environments, newEnv)
-	if err != nil {
+	if _, err = updateOrAddToEnvlist(environments, newEnv); err != nil {
 		return err
 	}
 

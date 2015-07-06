@@ -7,26 +7,20 @@ import (
 )
 
 func initAtPath(pth string) error {
-	exist, err := pathutil.IsPathExists(pth)
-	if err != nil {
+	if exist, err := pathutil.IsPathExists(pth); err != nil {
 		return err
-	}
-
-	if exist == false {
-		err = writeEnvMapToFile(pth, []EnvModel{})
-		if err != nil {
+	} else if exist == false {
+		if err := writeEnvMapToFile(pth, []EnvModel{}); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
 func initCmd(c *cli.Context) {
 	log.Info("Work path:", currentEnvStoreFilePath)
 
-	err := initAtPath(currentEnvStoreFilePath)
-	if err != nil {
+	if err := initAtPath(currentEnvStoreFilePath); err != nil {
 		log.Fatal(err)
 	}
 

@@ -5,14 +5,6 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func runWithEnvs(cmd commandModel) error {
-	if err := executeCmd(cmd); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func runCmd(c *cli.Context) {
 	log.Info("Work path:", currentEnvStoreFilePath)
 
@@ -37,8 +29,7 @@ func runCmd(c *cli.Context) {
 
 		log.Info("Executing command:", cmdToExecute)
 
-		err = runWithEnvs(cmdToExecute)
-		if err != nil {
+		if err := executeCmd(cmdToExecute); err != nil {
 			log.Fatal("Failed to execute command:", err)
 		}
 

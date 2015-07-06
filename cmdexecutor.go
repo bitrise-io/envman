@@ -16,8 +16,6 @@ func expandEnvsInString(inp string) string {
 }
 
 func commandEnvs(envs []EnvModel) ([]string, error) {
-	cmdEnvs := []string{}
-
 	for _, eModel := range envs {
 		var value string
 
@@ -27,12 +25,10 @@ func commandEnvs(envs []EnvModel) ([]string, error) {
 			value = eModel.Value
 		}
 
-		if err := os.Setenv(eModel.Key, eModel.Value); err != nil {
+		if err := os.Setenv(eModel.Key, value); err != nil {
 			return []string{}, err
 		}
-		cmdEnvs = append(cmdEnvs, eModel.Key+"="+value)
 	}
-
 	return os.Environ(), nil
 }
 

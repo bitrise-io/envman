@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 )
@@ -21,15 +22,13 @@ func printEnvs() error {
 		}
 	}
 
-	//log.Info("EnvStore:", environments)
 	return nil
 }
 
 func printCmd(c *cli.Context) {
 	log.Info("Work path:", currentEnvStoreFilePath)
 
-	err := printEnvs()
-	if err != nil {
+	if err := printEnvs(); err != nil {
 		log.Fatal("Failed to print:", err)
 	}
 }

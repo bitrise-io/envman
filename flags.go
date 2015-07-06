@@ -20,6 +20,12 @@ const (
 
 	EXPAND_KEY       string = "expand"
 	EXPAND_KEY_SHORT string = "e"
+
+	HELP_KEY       string = "help"
+	HELP_KEY_SHORT string = "h"
+
+	VERSION_KEY       string = "version"
+	VERSION_KEY_SHORT string = "v"
 )
 
 var (
@@ -62,3 +68,16 @@ var (
 		Usage: "If true, replaces ${var} or $var in the string according to the values of the current environment variables.",
 	}
 )
+
+func init() {
+	// Override default help and version flags
+	cli.HelpFlag = cli.BoolFlag{
+		Name:  HELP_KEY + ", " + HELP_KEY_SHORT,
+		Usage: "Show help.",
+	}
+
+	cli.VersionFlag = cli.BoolFlag{
+		Name:  VERSION_KEY + ", " + VERSION_KEY_SHORT,
+		Usage: "Print the version.",
+	}
+}

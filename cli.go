@@ -20,11 +20,9 @@ var (
 )
 
 func isPipedData() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
+	if stat, err := os.Stdin.Stat(); err != nil {
 		return false
-	}
-	if (stat.Mode() & os.ModeCharDevice) == 0 {
+	} else if (stat.Mode() & os.ModeCharDevice) == 0 {
 		return true
 	}
 	return false
@@ -35,23 +33,22 @@ func envStorePathInCurrentDir() (string, error) {
 }
 
 func before(c *cli.Context) error {
-	level, err := log.ParseLevel(c.String("log-level"))
-	if err != nil {
+	if level, err := log.ParseLevel(c.String("log-level")); err != nil {
 		log.Fatal(err.Error())
+	} else {
+		log.SetLevel(level)
 	}
-	log.SetLevel(level)
 
 	// Befor parsing cli, and running command
 	// we need to decide wich path will be used by envman
 	currentEnvStoreFilePath = c.String(PATH_KEY)
 	if currentEnvStoreFilePath == "" {
-		currentEnvStoreFilePath, err = envStorePathInCurrentDir()
-		if err != nil {
+		if path, err := envStorePathInCurrentDir(); err != nil {
 			log.Fatal("Failed to set envman work path in current dir:", err)
+		} else {
+			currentEnvStoreFilePath = path
 		}
-		return nil
 	}
-
 	return nil
 }
 
@@ -61,13 +58,10 @@ func run() {
 
 	// Read piped data
 	if isPipedData() {
-		bytes, err := ioutil.ReadAll(os.Stdin)
-		if err == nil {
-			if len(bytes) > 0 {
-				stdinValue = string(bytes)
-			}
-		} else {
+		if bytes, err := ioutil.ReadAll(os.Stdin); err != nil {
 			log.Error("Failed to read stdin:", err)
+		} else if len(bytes) > 0 {
+			stdinValue = string(bytes)
 		}
 	}
 
@@ -75,7 +69,7 @@ func run() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Usage = "Environment variable manager"
-	app.Version = VERSION
+	app.Version = "0.0.5"
 
 	app.Author = ""
 	app.Email = ""
