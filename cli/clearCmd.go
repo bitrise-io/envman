@@ -1,22 +1,23 @@
-package main
+package cli
 
 import (
 	"errors"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/go-pathutil"
 	"github.com/codegangsta/cli"
 )
 
 func clearEnvs() error {
-	if isExists, err := pathutil.IsPathExists(currentEnvStoreFilePath); err != nil {
+	if isExists, err := pathutil.IsPathExists(envman.CurrentEnvStoreFilePath); err != nil {
 		return err
 	} else if !isExists {
-		errMsg := "EnvStore not found in path:" + currentEnvStoreFilePath
+		errMsg := "EnvStore not found in path:" + envman.CurrentEnvStoreFilePath
 		return errors.New(errMsg)
 	}
 
-	if err := writeEnvMapToFile(currentEnvStoreFilePath, []EnvModel{}); err != nil {
+	if err := envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, []envman.EnvModel{}); err != nil {
 		return err
 	}
 
@@ -24,7 +25,7 @@ func clearEnvs() error {
 }
 
 func clearCmd(c *cli.Context) {
-	log.Info("Work path:", currentEnvStoreFilePath)
+	log.Info("Work path:", envman.CurrentEnvStoreFilePath)
 
 	if err := clearEnvs(); err != nil {
 		log.Fatal("Failed to clear EnvStore:", err)

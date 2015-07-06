@@ -1,15 +1,16 @@
-package main
+package cli
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/envman/envman"
 	"github.com/codegangsta/cli"
 )
 
 func runCmd(c *cli.Context) {
-	log.Info("Work path:", currentEnvStoreFilePath)
+	log.Info("Work path:", envman.CurrentEnvStoreFilePath)
 
 	if len(c.Args()) > 0 {
-		doCmdEnvs, err := loadEnvMap()
+		doCmdEnvs, err := envman.LoadEnvMap()
 		if err != nil {
 			log.Fatal("Failed to load EnvStore:", err)
 		}
@@ -21,7 +22,7 @@ func runCmd(c *cli.Context) {
 			doArgs = c.Args()[1:]
 		}
 
-		cmdToExecute := commandModel{
+		cmdToExecute := envman.CommandModel{
 			Command:      doCommand,
 			Environments: doCmdEnvs,
 			Argumentums:  doArgs,
@@ -29,7 +30,7 @@ func runCmd(c *cli.Context) {
 
 		log.Info("Executing command:", cmdToExecute)
 
-		if err := executeCmd(cmdToExecute); err != nil {
+		if err := envman.ExecuteCmd(cmdToExecute); err != nil {
 			log.Fatal("Failed to execute command:", err)
 		}
 

@@ -1,10 +1,11 @@
-package main
+package cli
 
 import (
 	"errors"
 	"io/ioutil"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/envman/envman"
 	"github.com/codegangsta/cli"
 )
 
@@ -15,14 +16,14 @@ func addEnv(key string, value string, expand bool) error {
 	}
 
 	// Load envs, or create if not exist
-	environments, err := loadEnvMapOrCreate()
+	environments, err := envman.LoadEnvMapOrCreate()
 	if err != nil {
 		return err
 	}
 
 	// Add or update envlist
-	newEnv := EnvModel{key, value, expand}
-	if _, err = updateOrAddToEnvlist(environments, newEnv); err != nil {
+	newEnv := envman.EnvModel{key, value, expand}
+	if _, err = envman.UpdateOrAddToEnvlist(environments, newEnv); err != nil {
 		return err
 	}
 
@@ -40,10 +41,10 @@ func loadValueFromFile(pth string) (string, error) {
 }
 
 func addCmd(c *cli.Context) {
-	log.Info("Work path:", currentEnvStoreFilePath)
+	log.Info("Work path:", envman.CurrentEnvStoreFilePath)
 
 	key := c.String(KEY_KEY)
-	expand := isExpand(c.String(EXPAND_KEY))
+	expand := envman.IsExpand(c.String(EXPAND_KEY))
 	var value string
 
 	if stdinValue != "" {
