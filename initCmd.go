@@ -7,10 +7,6 @@ import (
 )
 
 func initAtPath(pth string) error {
-	if err := validatePath(pth); err != nil {
-		return err
-	}
-
 	exist, err := pathutil.IsPathExists(pth)
 	if err != nil {
 		return err

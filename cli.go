@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"path"
@@ -31,6 +30,31 @@ func isPipedData() bool {
 	return false
 }
 
+func envStorePathInCurrentDir() (string, error) {
+	return filepath.Abs(path.Join("./", defaultEnvStoreName))
+}
+
+func before(c *cli.Context) error {
+	level, err := log.ParseLevel(c.String("log-level"))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	log.SetLevel(level)
+
+	// Befor parsing cli, and running command
+	// we need to decide wich path will be used by envman
+	currentEnvStoreFilePath = c.String(PATH_KEY)
+	if currentEnvStoreFilePath == "" {
+		currentEnvStoreFilePath, err = envStorePathInCurrentDir()
+		if err != nil {
+			log.Fatal("Failed to set envman work path in current dir:", err)
+		}
+		return nil
+	}
+
+	return nil
+}
+
 // Run the Envman CLI.
 func run() {
 	log.SetLevel(log.DebugLevel)
@@ -56,30 +80,7 @@ func run() {
 	app.Author = ""
 	app.Email = ""
 
-	app.Before = func(c *cli.Context) error {
-		level, err := log.ParseLevel(c.String("log-level"))
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		log.SetLevel(level)
-
-		// Befor parsing cli, and running command
-		// we need to decide wich path will be used by envman
-		currentEnvStoreFilePath = c.String(PATH_KEY)
-		if currentEnvStoreFilePath == "" {
-			currentEnvStoreFilePath, err = envStorePathInCurrentDir()
-			if err != nil {
-				log.Fatal("Failed to set envman work path in current dir:", err)
-			}
-			return nil
-		}
-
-		if err := validatePath(currentEnvStoreFilePath); err != nil {
-			log.Fatal("Failed to set envman work path:", err)
-		}
-
-		return nil
-	}
+	app.Before = before
 
 	app.Flags = flags
 	app.Commands = commands
@@ -87,32 +88,4 @@ func run() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal("Envman finished:", err)
 	}
-}
-
-/*
-Check if current path contains .envstore.yml
-Output :
-	@string: - current envman work path
-	@error: - error
-*/
-func envStorePathInCurrentDir() (string, error) {
-	return filepath.Abs(path.Join("./", defaultEnvStoreName))
-}
-
-/*
-Check if path is valid (i.e is not empty, and not a directory)
-Input:
-	@pth string - the path to validate
-Output:
-	@error - path is empty or not valid envstore file path
-*/
-func validatePath(pth string) error {
-	if pth == "" {
-		return errors.New("No path specified")
-	}
-	_, file := path.Split(pth)
-	if file == "" {
-		return errors.New("EnvStore not found in path:" + pth)
-	}
-	return nil
 }

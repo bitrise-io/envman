@@ -9,7 +9,6 @@ import (
 )
 
 func clearEnvs() error {
-
 	if isExists, err := pathutil.IsPathExists(currentEnvStoreFilePath); err != nil {
 		return err
 	} else if !isExists {
