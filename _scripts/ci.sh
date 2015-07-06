@@ -5,33 +5,28 @@ set -e
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "${THIS_SCRIPT_DIR}/.."
 
+export PATH="$PATH:$GOPATH/bin"
+
 #
 # Script for Continuous Integration
 #
 
 set -v
 
-export PATH="$PATH:$GOPATH/bin"
-# export GOPATH="${THIS_SCRIPT_DIR}/../Godeps/_workspace"
-# echo "GOPATH: $GOPATH"
-# mkdir $GOPATH/bin
-# export PATH=$PATH:$GOPATH/bin
-
+# Install depenecies
 go get github.com/tools/godep
 go install github.com/tools/godep
 godep restore
 
-bash _scripts/install.sh
+# Intsall stepman
+godep go install
 
-# Tests
+# Check for unhandled errors
 go get github.com/kisielk/errcheck
 go install github.com/kisielk/errcheck
-
 errcheck -asserts=true -blank=true ./...
 
 go test -v ./...
-
-bash _test/test.sh
 
 #
 # ==> DONE - OK
