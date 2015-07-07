@@ -19,14 +19,14 @@ go install github.com/tools/godep
 godep restore
 
 # Intsall envman
-godep go install
+go install
 
 # Check for unhandled errors
 go get github.com/kisielk/errcheck
 go install github.com/kisielk/errcheck
 errcheck -asserts=true -blank=true ./...
 
-godep go test -v ./...
+go test -v ./...
 
 #
 # ==> DONE - OK
