@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"io/ioutil"
@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/envman/envman"
 	"github.com/codegangsta/cli"
 )
 
@@ -15,8 +16,7 @@ const (
 )
 
 var (
-	stdinValue              string
-	currentEnvStoreFilePath string
+	stdinValue string
 )
 
 func isPipedData() bool {
@@ -41,19 +41,19 @@ func before(c *cli.Context) error {
 
 	// Befor parsing cli, and running command
 	// we need to decide wich path will be used by envman
-	currentEnvStoreFilePath = c.String(PATH_KEY)
-	if currentEnvStoreFilePath == "" {
+	envman.CurrentEnvStoreFilePath = c.String(PATH_KEY)
+	if envman.CurrentEnvStoreFilePath == "" {
 		if path, err := envStorePathInCurrentDir(); err != nil {
 			log.Fatal("Failed to set envman work path in current dir:", err)
 		} else {
-			currentEnvStoreFilePath = path
+			envman.CurrentEnvStoreFilePath = path
 		}
 	}
 	return nil
 }
 
 // Run the Envman CLI.
-func run() {
+func Run() {
 	log.SetLevel(log.DebugLevel)
 
 	// Read piped data
@@ -69,7 +69,7 @@ func run() {
 	app := cli.NewApp()
 	app.Name = path.Base(os.Args[0])
 	app.Usage = "Environment variable manager"
-	app.Version = "0.0.5"
+	app.Version = "0.0.6"
 
 	app.Author = ""
 	app.Email = ""

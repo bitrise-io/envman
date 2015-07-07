@@ -14,6 +14,6 @@ go fmt
 go test -v ./...
 
 # Install
-go install
+godep go install
 
 # DONE - OK

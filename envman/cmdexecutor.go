@@ -1,11 +1,11 @@
-package main
+package envman
 
 import (
 	"os"
 	"os/exec"
 )
 
-type commandModel struct {
+type CommandModel struct {
 	Command      string
 	Argumentums  []string
 	Environments []EnvModel
@@ -32,7 +32,7 @@ func commandEnvs(envs []EnvModel) ([]string, error) {
 	return os.Environ(), nil
 }
 
-func executeCmd(commandToRun commandModel) error {
+func ExecuteCmd(commandToRun CommandModel) error {
 	cmdEnvs, err := commandEnvs(commandToRun.Environments)
 	if err != nil {
 		return err

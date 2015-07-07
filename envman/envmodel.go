@@ -1,4 +1,4 @@
-package main
+package envman
 
 import (
 	"strconv"
@@ -44,11 +44,11 @@ func (eMap EnvMapItem) convertToEnvModel() EnvModel {
 			eModel.Value = value
 		}
 	}
-	eModel.IsExpand = isExpand(eMap[IS_EXPAND_KEY])
+	eModel.IsExpand = IsExpand(eMap[IS_EXPAND_KEY])
 	return eModel
 }
 
-func isExpand(s string) bool {
+func IsExpand(s string) bool {
 	if s == "" {
 		return true
 	} else {

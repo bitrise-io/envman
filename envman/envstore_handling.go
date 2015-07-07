@@ -1,4 +1,4 @@
-package main
+package envman
 
 import (
 	"errors"
@@ -10,18 +10,33 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func loadEnvMap() ([]EnvModel, error) {
-	if envsYML, err := readEnvMapFromFile(currentEnvStoreFilePath); err != nil {
+var (
+	CurrentEnvStoreFilePath string
+)
+
+func InitAtPath(pth string) error {
+	if exist, err := pathutil.IsPathExists(pth); err != nil {
+		return err
+	} else if exist == false {
+		if err := WriteEnvMapToFile(pth, []EnvModel{}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func LoadEnvMap() ([]EnvModel, error) {
+	if envsYML, err := readEnvMapFromFile(CurrentEnvStoreFilePath); err != nil {
 		return []EnvModel{}, err
 	} else {
 		return envsYML.convertToEnvModelArray(), nil
 	}
 }
 
-func loadEnvMapOrCreate() ([]EnvModel, error) {
-	if envModels, err := loadEnvMap(); err != nil {
+func LoadEnvMapOrCreate() ([]EnvModel, error) {
+	if envModels, err := LoadEnvMap(); err != nil {
 		if err.Error() == "No environment variable list found" {
-			err = initAtPath(currentEnvStoreFilePath)
+			err = InitAtPath(CurrentEnvStoreFilePath)
 			return []EnvModel{}, err
 		}
 		return []EnvModel{}, err
@@ -30,7 +45,7 @@ func loadEnvMapOrCreate() ([]EnvModel, error) {
 	}
 }
 
-func updateOrAddToEnvlist(envs []EnvModel, env EnvModel) ([]EnvModel, error) {
+func UpdateOrAddToEnvlist(envs []EnvModel, env EnvModel) ([]EnvModel, error) {
 	var newEnvs []EnvModel
 	exist := false
 
@@ -47,7 +62,7 @@ func updateOrAddToEnvlist(envs []EnvModel, env EnvModel) ([]EnvModel, error) {
 		newEnvs = append(newEnvs, env)
 	}
 
-	if err := writeEnvMapToFile(currentEnvStoreFilePath, newEnvs); err != nil {
+	if err := WriteEnvMapToFile(CurrentEnvStoreFilePath, newEnvs); err != nil {
 		return []EnvModel{}, err
 	}
 
@@ -83,7 +98,7 @@ func generateFormattedYMLForEnvModels(envs []EnvModel) ([]byte, error) {
 	}
 }
 
-func writeEnvMapToFile(pth string, envs []EnvModel) error {
+func WriteEnvMapToFile(pth string, envs []EnvModel) error {
 	if pth == "" {
 		return errors.New("No path provided")
 	}
