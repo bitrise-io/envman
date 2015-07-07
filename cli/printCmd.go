@@ -1,13 +1,15 @@
-package main
+package cli
 
 import (
 	"fmt"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/envman/envman"
 	"github.com/codegangsta/cli"
 )
 
 func printEnvs() error {
-	environments, err := loadEnvMap()
+	environments, err := envman.LoadEnvMap()
 	if err != nil {
 		return err
 	}
@@ -21,15 +23,13 @@ func printEnvs() error {
 		}
 	}
 
-	//log.Info("EnvStore:", environments)
 	return nil
 }
 
 func printCmd(c *cli.Context) {
-	log.Info("Work path:", currentEnvStoreFilePath)
+	log.Info("Work path:", envman.CurrentEnvStoreFilePath)
 
-	err := printEnvs()
-	if err != nil {
+	if err := printEnvs(); err != nil {
 		log.Fatal("Failed to print:", err)
 	}
 }

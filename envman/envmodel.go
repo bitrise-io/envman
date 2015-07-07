@@ -1,4 +1,4 @@
-package main
+package envman
 
 import (
 	"strconv"
@@ -12,54 +12,43 @@ const (
 	FALSE_KEY     string = "false"
 )
 
-/*
-	This is the model of ENVIRONMENT in envman, for methods
-*/
-type envModel struct {
+// This is the model of ENVIRONMENT in envman, for methods
+type EnvModel struct {
 	Key      string
 	Value    string
 	IsExpand bool
 }
 
-/*
-	This is the model of ENVIRONMENT in envman, for storing in file
-*/
-type envMap map[string]string
+// This is the model of ENVIRONMENT in envman, for storing in file
+type EnvMapItem map[string]string
 
 type envsYMLModel struct {
-	Envs []envMap `yml:"environments"`
+	Envs []EnvMapItem `yml:"environments"`
 }
 
-/*
-	Convert envsYMLModel to envModel array
-*/
-func convertToEnvModelArray(envYML envsYMLModel) []envModel {
-	var envModels []envModel
-
-	for _, envMap := range envYML.Envs {
-		envModel := convertToEnvModel(envMap)
+// Convert envsYMLModel to envModel array
+func (envYML envsYMLModel) convertToEnvModelArray() []EnvModel {
+	var envModels []EnvModel
+	for _, envMapItem := range envYML.Envs {
+		envModel := envMapItem.convertToEnvModel()
 		envModels = append(envModels, envModel)
 	}
-
 	return envModels
 }
 
-func convertToEnvModel(eMap envMap) envModel {
-	var eModel envModel
-
+func (eMap EnvMapItem) convertToEnvModel() EnvModel {
+	var eModel EnvModel
 	for key, value := range eMap {
 		if key != IS_EXPAND_KEY {
 			eModel.Key = key
 			eModel.Value = value
 		}
 	}
-
-	eModel.IsExpand = isExpand(eMap[IS_EXPAND_KEY])
-
+	eModel.IsExpand = IsExpand(eMap[IS_EXPAND_KEY])
 	return eModel
 }
 
-func isExpand(s string) bool {
+func IsExpand(s string) bool {
 	if s == "" {
 		return true
 	} else {
@@ -72,30 +61,23 @@ func isExpand(s string) bool {
 	}
 }
 
-/*
-	Convert envModel array to envsYMLModel
-*/
-func convertToEnvsYMLModel(eModels []envModel) envsYMLModel {
+// Convert envModel array to envsYMLModel
+func convertToEnvsYMLModel(eModels []EnvModel) envsYMLModel {
 	var envYML envsYMLModel
-	var envMaps []envMap
-
+	var envMaps []EnvMapItem
 	for _, eModel := range eModels {
-		eMap := convertToEnvMap(eModel)
+		eMap := eModel.convertToEnvMap()
 		envMaps = append(envMaps, eMap)
 	}
-
 	envYML.Envs = envMaps
 	return envYML
 }
 
-func convertToEnvMap(eModel envModel) envMap {
-	eMap := make(envMap)
-
+func (eModel EnvModel) convertToEnvMap() EnvMapItem {
+	eMap := make(EnvMapItem)
 	if eModel.IsExpand == false {
 		eMap[IS_EXPAND_KEY] = FALSE_KEY
 	}
-
 	eMap[eModel.Key] = eModel.Value
-
 	return eMap
 }

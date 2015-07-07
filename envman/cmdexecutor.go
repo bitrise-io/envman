@@ -1,31 +1,21 @@
-package main
+package envman
 
 import (
 	"os"
 	"os/exec"
 )
 
-type commandModel struct {
+type CommandModel struct {
 	Command      string
 	Argumentums  []string
-	Environments []envModel
+	Environments []EnvModel
 }
 
 func expandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
-func commandEnvs(envs []envModel) ([]string, error) {
-	cmdEnvs := []string{}
-
-	// Exporting envs is required for expanding envs
-	for _, eModel := range envs {
-		err := os.Setenv(eModel.Key, eModel.Value)
-		if err != nil {
-			return cmdEnvs, err
-		}
-	}
-
+func commandEnvs(envs []EnvModel) ([]string, error) {
 	for _, eModel := range envs {
 		var value string
 
@@ -35,13 +25,14 @@ func commandEnvs(envs []envModel) ([]string, error) {
 			value = eModel.Value
 		}
 
-		cmdEnvs = append(cmdEnvs, eModel.Key+"="+value)
+		if err := os.Setenv(eModel.Key, value); err != nil {
+			return []string{}, err
+		}
 	}
-
-	return append(os.Environ(), cmdEnvs...), nil
+	return os.Environ(), nil
 }
 
-func executeCmd(commandToRun commandModel) error {
+func ExecuteCmd(commandToRun CommandModel) error {
 	cmdEnvs, err := commandEnvs(commandToRun.Environments)
 	if err != nil {
 		return err
