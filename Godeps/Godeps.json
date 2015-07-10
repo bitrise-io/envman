@@ -13,6 +13,10 @@
 			"Rev": "4cf3c1e53cf8195bd0a40ddec6a880b4c7774249"
 		},
 		{
+			"ImportPath": "github.com/bitrise-io/goinp/goinp",
+			"Rev": "ad0c973226afeabc918d20bfecc7a041a0f19d27"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-107-g942282e",
 			"Rev": "942282e931e8286aa802a30b01fa7e16befb50f3"
