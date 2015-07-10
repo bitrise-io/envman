@@ -4,8 +4,8 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.8.2-10-g21d4508",
-			"Rev": "21d4508646ae56d79244bd9046c1df63a5fa8c37"
+			"Comment": "v0.8.2-20-gab7e46e",
+			"Rev": "ab7e46ea22bd379e660230844f96d20f1dabc21a"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-pathutil",
@@ -18,8 +18,8 @@
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
-			"Comment": "1.2.0-107-g942282e",
-			"Rev": "942282e931e8286aa802a30b01fa7e16befb50f3"
+			"Comment": "1.2.0-129-gb6d983e",
+			"Rev": "b6d983e02c46cb7b979ec35d11b8d0b0c9574a9e"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
