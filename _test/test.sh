@@ -12,7 +12,7 @@ mkdir -p "$HOME/.envman/test"
 #****************************#
 # Init in default envman dir #
 #****************************#
-envman init -c
+envman init --clear
 envman print
 echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN
 envman add --key BITRISE --value "test bitrise value"
@@ -33,7 +33,7 @@ envman print
 #************************#
 # Init in specified path #
 #************************#
-envman --path "$HOME/.envman/test/.envstore.yml" init -c
+envman --path "$HOME/.envman/test/.envstore.yml" init --clear
 envman --path "$HOME/.envman/test/.envstore.yml" print
 echo "bitrise from stdin" | envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE_FROM_STDIN --no-expand
 envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE --value "test bitrise value" --no-expand
@@ -45,7 +45,7 @@ envman --path "$HOME/.envman/test/.envstore.yml" print
 # Init in current path, if .envstore.yml exist (exist) #
 #******************************************************#
 cd "$HOME/.envman/test/"
-envman init -c
+envman init --clear
 envman print
 echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN --no-expand
 envman add --key BITRISE --value "test bitrise value"
@@ -62,7 +62,7 @@ set -e
 mkdir -p "$HOME/.envman/test-emtpy"
 
 cd "$HOME/.envman/test-emtpy"
-envman init -c
+envman init --clear
 envman print
 echo "bitrise from stdin" | envman add --key BITRISE_FROM_STDIN --no-expand
 envman add --key BITRISE --value "test bitrise value"
