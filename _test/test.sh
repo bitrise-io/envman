@@ -33,11 +33,19 @@ envman print
 #************************#
 # Init in specified path #
 #************************#
+CURRENT_PATH="$(pwd)"
 envman --path "$HOME/.envman/test/.envstore.yml" init --clear
 envman --path "$HOME/.envman/test/.envstore.yml" print
 echo "bitrise from stdin" | envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE_FROM_STDIN --no-expand
 envman --path "$HOME/.envman/test/.envstore.yml" add --key BITRISE --value "test bitrise value" --no-expand
-envman --path "$HOME/.envman/test/.envstore.yml" run bash "$THIS_SCRIPT_DIR/runCmd_test.sh"
+CURRENT_PATH_AFTER_RUN=$(envman --path "$HOME/.envman/test/.envstore.yml" run bash "$THIS_SCRIPT_DIR/subfold/print_pwd.sh")
+set +v
+if [[ "$CURRENT_PATH" != "$CURRENT_PATH_AFTER_RUN" ]] ; then
+    echo "Not the expected working directory path"
+    echo "Current ( $CURRENT_PATH ) after run ( $CURRENT_PATH_AFTER_RUN )"
+    exit 1
+fi
+set -v
 envman --path "$HOME/.envman/test/.envstore.yml" print
 
 
