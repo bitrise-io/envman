@@ -9,12 +9,12 @@
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-pathutil/pathutil",
-			"Comment": "1.1.0-8-g4138b83",
-			"Rev": "4138b83cf2e60179274b49e35f0bde353e062e76"
+			"Comment": "1.1.0-10-g88e3cf1",
+			"Rev": "88e3cf18f4593a4df2f907299447bc00c6f14cf9"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/goinp/goinp",
-			"Rev": "28962e1f8282be10be34b01b0f7efe614c8656eb"
+			"Rev": "f4fc4388757b694d3733279ab4dcefcfc875d189"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
