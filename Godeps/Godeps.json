@@ -8,9 +8,8 @@
 			"Rev": "07d998d174c4e2dc90e2f1989a20724220bca1ff"
 		},
 		{
-			"ImportPath": "github.com/bitrise-io/go-pathutil/pathutil",
-			"Comment": "1.1.0-10-g88e3cf1",
-			"Rev": "88e3cf18f4593a4df2f907299447bc00c6f14cf9"
+			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
+			"Rev": "5b79d81e05d7511dd97dad7f0f4449ad97a7ee51"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/utils",
