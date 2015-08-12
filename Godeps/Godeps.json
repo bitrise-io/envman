@@ -9,11 +9,11 @@
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "b8a3fba94b0cd7ae3f26b4ccac17111643cc4738"
+			"Rev": "ff603527501d4d7fef6108a9d56db4ae7d899d15"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pointers",
-			"Rev": "b8a3fba94b0cd7ae3f26b4ccac17111643cc4738"
+			"Rev": "ff603527501d4d7fef6108a9d56db4ae7d899d15"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/goinp/goinp",
