@@ -8,12 +8,20 @@
 			"Rev": "07d998d174c4e2dc90e2f1989a20724220bca1ff"
 		},
 		{
+			"ImportPath": "github.com/bitrise-io/go-utils/cmdex",
+			"Rev": "44f4e7e8892a641f729540e265a0c526187bda7a"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
+			"Rev": "44f4e7e8892a641f729540e265a0c526187bda7a"
+		},
+		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "ff603527501d4d7fef6108a9d56db4ae7d899d15"
+			"Rev": "44f4e7e8892a641f729540e265a0c526187bda7a"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pointers",
-			"Rev": "ff603527501d4d7fef6108a9d56db4ae7d899d15"
+			"Rev": "44f4e7e8892a641f729540e265a0c526187bda7a"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/goinp/goinp",
