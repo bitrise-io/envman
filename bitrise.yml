@@ -5,6 +5,11 @@ app:
   - BITRISE_BIN_NAME: envman
   - GITHUB_RELEASES_URL: https://github.com/bitrise-io/${BITRISE_BIN_NAME}/releases
 workflows:
+  docker-cleanup-dangling-images:
+    steps:
+    - script:
+        inputs:
+        - content: docker rmi $(docker images -f "dangling=true" -q)
   create-release:
     steps:
     - script:
