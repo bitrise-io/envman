@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/bitrise-io/envman",
 	"GoVersion": "go1.5",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
