@@ -22,4 +22,4 @@ RUN godep restore
 # install
 RUN go install
 
-CMD envman --version
+CMD $PROJ_NAME --version
