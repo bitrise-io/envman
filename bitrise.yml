@@ -81,6 +81,7 @@ workflows:
               #!/bin/bash
               set -v
               set -e
+              go get -u ./...
               rm -rf ./Godeps
               godep save ./...
   ci:
