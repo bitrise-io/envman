@@ -25,7 +25,6 @@ workflows:
     - script:
         inputs:
         - content: docker rmi $(docker images -f "dangling=true" -q)
-
   create-release:
     steps:
     - script:
@@ -59,7 +58,6 @@ workflows:
               f.write(changelog_content)
             end
         - runner_bin: ruby
-
   announce-release:
     steps:
     - script:
@@ -83,7 +81,6 @@ workflows:
 
             You can find it at ${GITHUB_RELEASES_URL}
         - emoji: ":rocket:"
-
   godeps-update:
     steps:
     - script:
@@ -96,11 +93,10 @@ workflows:
             go get -u ./...
             rm -rf ./Godeps
             godep save ./...
-
   ci:
     envs:
     - BITRISE_IO_GO_PATH: "$GOPATH/src/github.com/bitrise-io"
-    - ENVMAN_PATH: $BITRISE_IO_GO_PATH/envman
+    - ENVMAN_PATH: "$BITRISE_IO_GO_PATH/envman"
     steps:
     - git-clone: {}
     - script:
@@ -140,12 +136,15 @@ workflows:
         title: Go Test
         inputs:
         - content: godep go test ./...
-        - working_dir: $ENVMAN_PATH
+        - working_dir: ''
     - script:
         title: Err check
         inputs:
-        - content: errcheck -asserts=true -blank=true $(godep go list ./...)
-        - working_dir: $ENVMAN_PATH
+        - content: |-
+            cd $ENVMAN_PATH
+            errcheck -asserts=true -blank=true $(godep go list ./...)
+            cd $BITRISE_SOURCE_DIR
+        - working_dir: ''
     - script:
         title: Go Lint
         inputs:
@@ -160,7 +159,7 @@ workflows:
               echo "${golint_out}"
               exit 1
             fi
-        - working_dir: $ENVMAN_PATH
+        - working_dir: ''
     - slack:
         run_if: ".IsCI"
         inputs:
