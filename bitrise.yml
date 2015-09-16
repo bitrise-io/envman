@@ -139,10 +139,8 @@ workflows:
     - script:
         title: Err check
         inputs:
-        - content: |-
-            cd $ENVMAN_PATH
-            errcheck -asserts=true -blank=true $(godep go list ./...)
-            cd $BITRISE_SOURCE_DIR
+        - content: errcheck -asserts=true -blank=true $(godep go list ./...)
+        - working_dir: $ENVMAN_PATH
     - script:
         title: Go Lint
         inputs:
