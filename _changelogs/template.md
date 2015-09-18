@@ -9,7 +9,7 @@
 To install this version, run the following commands (in a bash shell):
 
 ```
-curl -L https://github.com/bitrise-io/envman/releases/download/{{version}}/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
+curl -fL https://github.com/bitrise-io/envman/releases/download/{{version}}/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
 ```
 
 Then:
