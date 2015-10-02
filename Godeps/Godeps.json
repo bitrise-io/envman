@@ -41,13 +41,13 @@
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",
-			"Comment": "v1.0-42-gb8dc1ce",
-			"Rev": "b8dc1cecf15bdaf1988d9e87aa7cd98d899a06d6"
+			"Comment": "v1.0-49-g2b15294",
+			"Rev": "2b15294402a895a4224659d181866f545991021e"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/require",
-			"Comment": "v1.0-42-gb8dc1ce",
-			"Rev": "b8dc1cecf15bdaf1988d9e87aa7cd98d899a06d6"
+			"Comment": "v1.0-49-g2b15294",
+			"Rev": "2b15294402a895a4224659d181866f545991021e"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
