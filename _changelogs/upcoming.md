@@ -1,4 +1,3 @@
 ## Changes
 
-* change 1
-* change 2
+* Removed unnecessary log :'[ENVMAN] - Failed to execute command:exit status X'
