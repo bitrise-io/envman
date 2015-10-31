@@ -109,6 +109,19 @@ workflows:
             set -v
 
             godep go test ./...
+    - script:
+        title: revert GOPATH patch
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -e
+            set -v
+
+            envman add --key GOPATH --value "$ORIG_GOPATH"
+    - script:
+        title: Go install
+        inputs:
+        - content: go install
 
   ci:
     description: |-
