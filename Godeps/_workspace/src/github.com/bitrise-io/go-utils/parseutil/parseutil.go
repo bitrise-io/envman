@@ -27,37 +27,46 @@ func ParseBool(userInputStr string) (bool, error) {
 }
 
 // CastToString ...
-func CastToString(v interface{}) string {
-	value := fmt.Sprintf("%v", v)
-	return value
+func CastToString(value interface{}) string {
+	casted, ok := value.(string)
+
+	if !ok {
+		castedStr := fmt.Sprintf("%v", value)
+		casted = castedStr
+	}
+
+	return casted
 }
 
 // CastToStringPtr ...
 func CastToStringPtr(value interface{}) *string {
-	castedValue, ok := value.(string)
+	castedValue := CastToString(value)
+	return pointers.NewStringPtr(castedValue)
+}
+
+// CastToBool ...
+func CastToBool(value interface{}) (bool, bool) {
+	casted, ok := value.(bool)
+
 	if !ok {
 		castedStr := CastToString(value)
-		return pointers.NewStringPtr(castedStr)
+
+		castedBool, err := ParseBool(castedStr)
+		if err != nil {
+			return false, false
+		}
+
+		casted = castedBool
 	}
-	return pointers.NewStringPtr(castedValue)
+
+	return casted, true
 }
 
 // CastToBoolPtr ...
 func CastToBoolPtr(value interface{}) (*bool, bool) {
-	castedValue, ok := value.(bool)
+	castedValue, ok := CastToBool(value)
 	if !ok {
-		castedStr := CastToString(value)
-		if castedStr == "" {
-			return nil, false
-		}
-
-		casted, err := ParseBool(castedStr)
-		if err != nil {
-			return nil, false
-		}
-
-		castedValue = casted
+		return nil, false
 	}
-
 	return pointers.NewBoolPtr(castedValue), true
 }
