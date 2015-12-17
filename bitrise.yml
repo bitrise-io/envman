@@ -19,7 +19,7 @@ app:
 workflows:
   create_changelog:
     envs:
-    - FILTER_MERGE: false
+    - FILTER_MERGE: true
     steps:
     - script:
         title: Read first and last commit
