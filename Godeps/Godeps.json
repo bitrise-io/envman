@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/bitrise-io/envman",
-	"GoVersion": "go1.5.2",
+	"GoVersion": "go1.5",
 	"Packages": [
 		"./..."
 	],
@@ -56,6 +56,10 @@
 			"ImportPath": "github.com/stretchr/testify/require",
 			"Comment": "v1.0-88-ge3a8ff8",
 			"Rev": "e3a8ff8ce36581f87a15341206f205b1da467059"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "833a04a10549a95dc34458c195cbad61bbb6cb4d"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
