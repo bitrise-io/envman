@@ -48,9 +48,8 @@ workflows:
   _prepare_and_setup:
     title: Install required testing tools
     description: |-
-        1, Install godep
-        2, Install errcheck
-        3, Install golint
+        1. Install errcheck
+        2. Install golint
     steps:
     - script:
         title: Install required testing tools
@@ -58,15 +57,9 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -e
-            set -v
-
-            # Install dependencies
-            go get -u github.com/tools/godep
-
+            set -ex
             # Check for unhandled errors
             go get -u github.com/kisielk/errcheck
-
             # Go lint
             go get -u github.com/golang/lint/golint
 
@@ -88,8 +81,7 @@ workflows:
         title: Go list without vendor
         inputs:
         - content: |-
-            set -e
-            set -x
+            set -ex
             no_vendor_paths="$(go list ./... | grep -v vendor)"
             envman add --key GOLIST_WITHOUT_VENDOR --value "$no_vendor_paths"
     - script:
@@ -135,8 +127,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -e
-
+            set -ex
             export CI=true
             releaseman create \
               --bump-version patch \
@@ -161,8 +152,7 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
-            set -e
-
+            set -ex
             export CI=true
             releaseman create \
               --version $RELEASE_VERSION \
@@ -210,8 +200,7 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            set -e
-            set -x
+            set -ex
 
             echo
             echo "Create final binaries"
@@ -263,11 +252,16 @@ workflows:
     - script:
         title: Dependency update
         inputs:
-        - content: |-
+        - content: |
             #!/bin/bash
-            set -e
-            set -v
-
-            go get -u ./...
+            set -ex
+            go get -u -v github.com/tools/godep
+            #
             rm -rf ./Godeps
+            rm -rf ./vendor
+            #
+            go get -t -d ./...
+            go get golang.org/x/sys/unix
+            go get github.com/davecgh/go-spew/spew
+            go get github.com/pmezard/go-difflib/difflib
             godep save ./...

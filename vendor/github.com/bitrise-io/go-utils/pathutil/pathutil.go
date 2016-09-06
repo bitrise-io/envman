@@ -39,7 +39,7 @@ func genericIsPathExists(pth string) (os.FileInfo, bool, error) {
 	if pth == "" {
 		return nil, false, errors.New("No path provided")
 	}
-	fileInf, err := os.Stat(pth)
+	fileInf, err := os.Lstat(pth)
 	if err == nil {
 		return fileInf, true, nil
 	}
@@ -53,6 +53,15 @@ func genericIsPathExists(pth string) (os.FileInfo, bool, error) {
 func IsPathExists(pth string) (bool, error) {
 	_, isExists, err := genericIsPathExists(pth)
 	return isExists, err
+}
+
+// PathCheckAndInfos ...
+// Returns:
+// 1. file info or nil
+// 2. bool, indicating whether the path exists
+// 3. error, if any error happens during the check
+func PathCheckAndInfos(pth string) (os.FileInfo, bool, error) {
+	return genericIsPathExists(pth)
 }
 
 // IsDirExists ...
@@ -100,7 +109,8 @@ func UserHomeDir() string {
 }
 
 // NormalizedOSTempDirPath ...
-// Returns a temp dir path. If tmpDirNamePrefix is provided it'll be used
+// Creates a temp dir, and returns its path.
+// If tmpDirNamePrefix is provided it'll be used
 //  as the tmp dir's name prefix.
 // Normalized: it's guaranteed that the path won't end with '/'.
 func NormalizedOSTempDirPath(tmpDirNamePrefix string) (retPth string, err error) {
