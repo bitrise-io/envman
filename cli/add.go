@@ -138,7 +138,7 @@ func logEnvs() error {
 	return nil
 }
 
-func add(c *cli.Context) {
+func add(c *cli.Context) error {
 	log.Debugln("[ENVMAN] - Work path:", envman.CurrentEnvStoreFilePath)
 
 	key := c.String(KeyKey)
@@ -168,4 +168,6 @@ func add(c *cli.Context) {
 	if err := logEnvs(); err != nil {
 		log.Fatal("[ENVMAN] - Failed to print:", err)
 	}
+
+	return nil
 }
