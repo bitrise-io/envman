@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/codegangsta/cli"
+	"gopkg.in/urfave/cli.v2"
 )
 
 const (

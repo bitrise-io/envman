@@ -8,7 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/envman/models"
-	"github.com/codegangsta/cli"
+	"gopkg.in/urfave/cli.v2"
 )
 
 func printJSONEnvs(envList models.EnvsJSONListModel) error {

@@ -8,7 +8,7 @@ import (
 	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/pointers"
-	"github.com/codegangsta/cli"
+	"gopkg.in/urfave/cli.v2"
 )
 
 func envListSizeInBytes(envs []models.EnvironmentItemModel) (int, error) {

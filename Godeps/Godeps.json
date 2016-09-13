@@ -40,7 +40,7 @@
 			"Rev": "af80680f5c8d508810be1ca5b757e236bb139466"
 		},
 		{
-			"ImportPath": "github.com/codegangsta/cli",
+			"ImportPath": "gopkg.in/urfave/cli.v2",
 			"Comment": "v1.18.0-58-gc723b19",
 			"Rev": "c723b19a84af34d905773672ffa1b8ead802e505"
 		},

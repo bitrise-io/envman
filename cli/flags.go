@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/codegangsta/cli"
+import "gopkg.in/urfave/cli.v2"
 
 const (
 	// PathEnvKey ...

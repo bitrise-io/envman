@@ -6,7 +6,7 @@ import (
 
 	"github.com/bitrise-io/envman/output"
 	"github.com/bitrise-io/envman/version"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 // VersionOutputModel ...
