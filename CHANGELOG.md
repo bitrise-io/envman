@@ -6,8 +6,12 @@
 
 ### Release Notes
 
-* __BREAKING__ : change 1
-* change 2
+* __NEW COMMAND:__ `envman version`   
+  Prints envman's version.  
+  use `--format` flag to specify output format, available options: [`json`, `yml` and `raw`]  
+  use `--full` flag to print build informations like `build_number` and `commit` of the release.
+* dependency updates
+* unit test updates
 
 ### Install or upgrade
 
@@ -46,11 +50,6 @@ That's all, you're ready to call `envman`!
 
 
 ## 1.1.0 (2015 Dec 22)
-
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
 
 ### Install or upgrade
 
@@ -94,11 +93,6 @@ That's all, you're ready to call `envman`!
 
 
 ## 1.0.0 (2015 Oct 31)
-
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
 
 ### Install or upgrade
 
@@ -146,11 +140,6 @@ That's all, you're ready to call `envman`!
 
 ## 0.9.10 (2015 Oct 02)
 
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
-
 ### Install or upgrade
 
 To install this version, run the following commands (in a bash shell):
@@ -189,11 +178,6 @@ That's all, you're ready to call `envman`!
 
 
 ## 0.9.9 (2015 Sep 21)
-
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
 
 ### Install or upgrade
 
@@ -250,11 +234,6 @@ That's all, you're ready to call `envman`!
 
 ## 0.9.8 (2015 Sep 07)
 
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
-
 ### Install or upgrade
 
 To install this version, run the following commands (in a bash shell):
@@ -286,11 +265,6 @@ That's all, you're ready to call `envman`!
 
 
 ## 0.9.7 (2015 Aug 31)
-
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
 
 ### Install or upgrade
 
@@ -334,11 +308,6 @@ That's all, you're ready to call `envman`!
 
 ## 0.9.6 (2015 Aug 24)
 
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
-
 ### Install or upgrade
 
 To install this version, run the following commands (in a bash shell):
@@ -371,11 +340,6 @@ That's all, you're ready to call `envman`!
 
 ## 0.9.5 (2015 Aug 14)
 
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
-
 ### Install or upgrade
 
 To install this version, run the following commands (in a bash shell):
@@ -403,11 +367,6 @@ That's all, you're ready to call `envman`!
 
 
 ## 0.9.4 (2015 Aug 12)
-
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
 
 ### Install or upgrade
 
@@ -450,11 +409,6 @@ That's all, you're ready to call `envman`!
 
 ## 0.9.3 (2015 Aug 05)
 
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
-
 ### Install or upgrade
 
 To install this version, run the following commands (in a bash shell):
@@ -489,11 +443,6 @@ That's all, you're ready to call `envman`!
 
 
 ## 0.9.2 (2015 Aug 03)
-
-### Release Notes
-
-* __BREAKING__ : change 1
-* change 2
 
 ### Install or upgrade
 
