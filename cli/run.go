@@ -7,7 +7,7 @@ import (
 	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/cmdex"
-	"gopkg.in/urfave/cli.v2"
+	"github.com/urfave/cli"
 )
 
 // CommandModel ...

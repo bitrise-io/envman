@@ -1,6 +1,6 @@
 package cli
 
-import "gopkg.in/urfave/cli.v2"
+import "github.com/urfave/cli"
 
 var (
 	commands = []cli.Command{

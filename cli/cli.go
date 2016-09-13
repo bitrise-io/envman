@@ -10,7 +10,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/envman/version"
-	"gopkg.in/urfave/cli.v2"
+	"github.com/urfave/cli"
 )
 
 const (

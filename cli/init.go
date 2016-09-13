@@ -4,7 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/go-utils/cmdex"
-	"gopkg.in/urfave/cli.v2"
+	"github.com/urfave/cli"
 )
 
 func initEnvStore(c *cli.Context) {
