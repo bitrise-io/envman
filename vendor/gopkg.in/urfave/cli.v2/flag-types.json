@@ -2,15 +2,6 @@
   {
     "name": "Bool",
     "type": "bool",
-    "value": false,
-    "context_default": "false",
-    "parser": "strconv.ParseBool(f.Value.String())"
-  },
-  {
-    "name": "BoolT",
-    "type": "bool",
-    "value": false,
-    "doctail": " that is true by default",
     "context_default": "false",
     "parser": "strconv.ParseBool(f.Value.String())"
   },
@@ -62,6 +53,14 @@
     "context_default": "nil",
     "context_type": "[]int64",
     "parser": "(f.Value.(*Int64Slice)).Value(), error(nil)"
+  },
+  {
+    "name": "Float64Slice",
+    "type": "*Float64Slice",
+    "dest": false,
+    "context_default": "nil",
+    "context_type": "[]float64",
+    "parser": "(f.Value.(*Float64Slice)).Value(), error(nil)"
   },
   {
     "name": "String",

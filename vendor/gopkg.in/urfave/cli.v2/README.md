@@ -32,6 +32,7 @@ applications in an expressive way.
     + [Alternate Names](#alternate-names)
     + [Values from the Environment](#values-from-the-environment)
     + [Values from alternate input sources (YAML, TOML, and others)](#values-from-alternate-input-sources-yaml-toml-and-others)
+    + [Default Values for help output](#default-values-for-help-output)
   * [Subcommands](#subcommands)
   * [Subcommands categories](#subcommands-categories)
   * [Exit code](#exit-code)
@@ -43,7 +44,7 @@ applications in an expressive way.
     + [Customization](#customization-1)
   * [Version Flag](#version-flag)
     + [Customization](#customization-2)
-    + [Full API Example](#full-api-example)
+  * [Full API Example](#full-api-example)
 - [Contribution Guidelines](#contribution-guidelines)
 
 <!-- tocstop -->
@@ -104,6 +105,9 @@ import (
 ...
 ```
 
+**NOTE**: There is a [migrator (python) script](./cli-v1-to-v2) available to aid
+with the transition from the v1 to v2 API.
+
 ### Pinning to the `v1` branch
 
 Similarly to the section above describing use of the `v2` branch, if one wants
@@ -137,11 +141,11 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  cli.NewApp().Run(os.Args)
+  (&cli.App{}).Run(os.Args)
 }
 ```
 
@@ -158,16 +162,17 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-  app.Name = "boom"
-  app.Usage = "make an explosive entrance"
-  app.Action = func(c *cli.Context) error {
-    fmt.Println("boom! I say!")
-    return nil
+  app := &cli.App{
+    Name: "boom",
+    Usage: "make an explosive entrance",
+    Action: func(c *cli.Context) error {
+      fmt.Println("boom! I say!")
+      return nil
+    },
   }
 
   app.Run(os.Args)
@@ -196,16 +201,17 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-  app.Name = "greet"
-  app.Usage = "fight the loneliness!"
-  app.Action = func(c *cli.Context) error {
-    fmt.Println("Hello friend!")
-    return nil
+  app := &cli.App{
+    Name: "greet",
+    Usage: "fight the loneliness!",
+    Action: func(c *cli.Context) error {
+      fmt.Println("Hello friend!")
+      return nil
+    },
   }
 
   app.Run(os.Args)
@@ -259,15 +265,15 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Action = func(c *cli.Context) error {
-    fmt.Printf("Hello %q", c.Args().Get(0))
-    return nil
+  app := &cli.App{
+    Action: func(c *cli.Context) error {
+      fmt.Printf("Hello %q", c.Args().Get(0))
+      return nil
+    },
   }
 
   app.Run(os.Args)
@@ -288,31 +294,30 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Flags = []cli.Flag {
-    cli.StringFlag{
-      Name: "lang",
-      Value: "english",
-      Usage: "language for the greeting",
+  app := &cli.App{
+    Flags: []cli.Flag {
+      &cli.StringFlag{
+        Name: "lang",
+        Value: "english",
+        Usage: "language for the greeting",
+      },
     },
-  }
-
-  app.Action = func(c *cli.Context) error {
-    name := "Nefertiti"
-    if c.NArg() > 0 {
-      name = c.Args().Get(0)
-    }
-    if c.String("lang") == "spanish" {
-      fmt.Println("Hola", name)
-    } else {
-      fmt.Println("Hello", name)
-    }
-    return nil
+    Action: func(c *cli.Context) error {
+      name := "Nefertiti"
+      if c.NArg() > 0 {
+        name = c.Args().Get(0)
+      }
+      if c.String("lang") == "spanish" {
+        fmt.Println("Hola", name)
+      } else {
+        fmt.Println("Hello", name)
+      }
+      return nil
+    },
   }
 
   app.Run(os.Args)
@@ -332,34 +337,33 @@ import (
   "os"
   "fmt"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
   var language string
 
-  app := cli.NewApp()
-
-  app.Flags = []cli.Flag {
-    cli.StringFlag{
-      Name:        "lang",
-      Value:       "english",
-      Usage:       "language for the greeting",
-      Destination: &language,
+  app := &cli.App{
+    Flags: []cli.Flag {
+      &cli.StringFlag{
+        Name:        "lang",
+        Value:       "english",
+        Usage:       "language for the greeting",
+        Destination: &language,
+      },
     },
-  }
-
-  app.Action = func(c *cli.Context) error {
-    name := "someone"
-    if c.NArg() > 0 {
-      name = c.Args()[0]
-    }
-    if language == "spanish" {
-      fmt.Println("Hola", name)
-    } else {
-      fmt.Println("Hello", name)
-    }
-    return nil
+    Action: func(c *cli.Context) error {
+      name := "someone"
+      if c.NArg() > 0 {
+        name = c.Args().Get(0)
+      }
+      if language == "spanish" {
+        fmt.Println("Hola", name)
+      } else {
+        fmt.Println("Hello", name)
+      }
+      return nil
+    },
   }
 
   app.Run(os.Args)
@@ -385,16 +389,17 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Flags = []cli.Flag{
-    cli.StringFlag{
-      Name:  "config, c",
-      Usage: "Load configuration from `FILE`",
+  app := &cli.App{
+    Flags: []cli.Flag{
+      &cli.StringFlag{
+        Name:    "config",
+        Aliases: []string{"c"},
+        Usage:   "Load configuration from `FILE`",
+      },
     },
   }
 
@@ -426,17 +431,18 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Flags = []cli.Flag {
-    cli.StringFlag{
-      Name: "lang, l",
-      Value: "english",
-      Usage: "language for the greeting",
+  app := &cli.App{
+    Flags: []cli.Flag {
+      &cli.StringFlag{
+        Name:    "lang",
+        Aliases: []string{"l"},
+        Value:   "english",
+        Usage:   "language for the greeting",
+      },
     },
   }
 
@@ -450,7 +456,7 @@ error.
 
 #### Values from the Environment
 
-You can also have the default value set from the environment via `EnvVar`.  e.g.
+You can also have the default value set from the environment via `EnvVars`.  e.g.
 
 <!-- {
   "args": ["&#45;&#45;help"],
@@ -462,18 +468,19 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Flags = []cli.Flag {
-    cli.StringFlag{
-      Name: "lang, l",
-      Value: "english",
-      Usage: "language for the greeting",
-      EnvVar: "APP_LANG",
+  app := &cli.App{
+    Flags: []cli.Flag {
+      &cli.StringFlag{
+        Name:    "lang",
+        Aliases: []string{"l"},
+        Value:   "english",
+        Usage:   "language for the greeting",
+        EnvVars: []string{"APP_LANG"},
+      },
     },
   }
 
@@ -481,8 +488,8 @@ func main() {
 }
 ```
 
-The `EnvVar` may also be given as a comma-delimited "cascade", where the first
-environment variable that resolves is used as the default.
+If `EnvVars` contains more than one string, the first environment variable that
+resolves is used as the default.
 
 <!-- {
   "args": ["&#45;&#45;help"],
@@ -494,18 +501,19 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Flags = []cli.Flag {
-    cli.StringFlag{
-      Name: "lang, l",
-      Value: "english",
-      Usage: "language for the greeting",
-      EnvVar: "LEGACY_COMPAT_LANG,APP_LANG,LANG",
+  app := &cli.App{
+    Flags: []cli.Flag{
+      &cli.StringFlag{
+        Name:    "lang",
+        Aliases: []string{"l"},
+        Value:   "english",
+        Usage:   "language for the greeting",
+        EnvVars: []string{"LEGACY_COMPAT_LANG", "APP_LANG", "LANG"},
+      },
     },
   }
 
@@ -526,7 +534,7 @@ In order to get values for a flag from an alternate input source the following
 code would be added to wrap an existing cli.Flag like below:
 
 ``` go
-  altsrc.NewIntFlag(cli.IntFlag{Name: "test"})
+  altsrc.NewIntFlag(&cli.IntFlag{Name: "test"})
 ```
 
 Initialization must also occur for these flags. Below is an example initializing
@@ -559,29 +567,70 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
-  "github.com/urfave/cli/altsrc"
+  "gopkg.in/urfave/cli.v2"
+  "gopkg.in/urfave/cli.v2/altsrc"
 )
 
 func main() {
-  app := cli.NewApp()
-
   flags := []cli.Flag{
-    altsrc.NewIntFlag(cli.IntFlag{Name: "test"}),
-    cli.StringFlag{Name: "load"},
+    altsrc.NewIntFlag(&cli.IntFlag{Name: "test"}),
+    &cli.StringFlag{Name: "load"},
   }
 
-  app.Action = func(c *cli.Context) error {
-    fmt.Println("yaml ist rad")
-    return nil
+  app := &cli.App{
+    Action: func(c *cli.Context) error {
+      fmt.Println("yaml ist rad")
+      return nil
+    },
+    Before: altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("load")),
+    Flags: flags,
   }
-
-  app.Before = altsrc.InitInputSourceWithContext(flags, altsrc.NewYamlSourceFromFlagFunc("load"))
-  app.Flags = flags
 
   app.Run(os.Args)
 }
 ```
+
+#### Default Values for help output
+
+Sometimes it's useful to specify a flag's default help-text value within the flag declaration. This can be useful if the default value for a flag is a computed value. The default value can be set via the `DefaultText` struct field.
+
+For example this:
+
+<!-- {
+  "args": ["&#45;&#45;help"],
+  "output": "&#45;&#45;port value"
+} -->
+```go
+package main
+
+import (
+  "os"
+
+  "gopkg.in/urfave/cli.v2"
+)
+
+func main() {
+  app := &cli.App{
+    Flags: []cli.Flag{
+      &cli.IntFlag{
+        Name:    "port",
+        Usage:   "Use a randomized port",
+        Value: 0,
+        DefaultText: "random",
+      },
+    },
+  }
+
+  app.Run(os.Args)
+}
+```
+
+Will result in help output like:
+
+```
+--port value  Use a randomized port (default: random)
+```
+
 
 ### Subcommands
 
@@ -598,50 +647,50 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Commands = []cli.Command{
-    {
-      Name:    "add",
-      Aliases: []string{"a"},
-      Usage:   "add a task to the list",
-      Action:  func(c *cli.Context) error {
-        fmt.Println("added task: ", c.Args().First())
-        return nil
-      },
-    },
-    {
-      Name:    "complete",
-      Aliases: []string{"c"},
-      Usage:   "complete a task on the list",
-      Action:  func(c *cli.Context) error {
-        fmt.Println("completed task: ", c.Args().First())
-        return nil
-      },
-    },
-    {
-      Name:        "template",
-      Aliases:     []string{"t"},
-      Usage:       "options for task templates",
-      Subcommands: []cli.Command{
-        {
-          Name:  "add",
-          Usage: "add a new template",
-          Action: func(c *cli.Context) error {
-            fmt.Println("new task template: ", c.Args().First())
-            return nil
-          },
+  app := &cli.App{
+    Commands: []*cli.Command{
+      {
+        Name:    "add",
+        Aliases: []string{"a"},
+        Usage:   "add a task to the list",
+        Action:  func(c *cli.Context) error {
+          fmt.Println("added task: ", c.Args().First())
+          return nil
         },
-        {
-          Name:  "remove",
-          Usage: "remove an existing template",
-          Action: func(c *cli.Context) error {
-            fmt.Println("removed task template: ", c.Args().First())
-            return nil
+      },
+      {
+        Name:    "complete",
+        Aliases: []string{"c"},
+        Usage:   "complete a task on the list",
+        Action:  func(c *cli.Context) error {
+          fmt.Println("completed task: ", c.Args().First())
+          return nil
+        },
+      },
+      {
+        Name:        "template",
+        Aliases:     []string{"t"},
+        Usage:       "options for task templates",
+        Subcommands: []*cli.Command{
+          {
+            Name:  "add",
+            Usage: "add a new template",
+            Action: func(c *cli.Context) error {
+              fmt.Println("new task template: ", c.Args().First())
+              return nil
+            },
+          },
+          {
+            Name:  "remove",
+            Usage: "remove an existing template",
+            Action: func(c *cli.Context) error {
+              fmt.Println("removed task template: ", c.Args().First())
+              return nil
+            },
           },
         },
       },
@@ -666,23 +715,23 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-
-  app.Commands = []cli.Command{
-    {
-      Name: "noop",
-    },
-    {
-      Name:     "add",
-      Category: "template",
-    },
-    {
-      Name:     "remove",
-      Category: "template",
+  app := &cli.App{
+    Commands: []*cli.Command{
+      {
+        Name: "noop",
+      },
+      {
+        Name:     "add",
+        Category: "template",
+      },
+      {
+        Name:     "remove",
+        Category: "template",
+      },
     },
   }
 
@@ -714,22 +763,24 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  app := cli.NewApp()
-  app.Flags = []cli.Flag{
-    cli.BoolTFlag{
-      Name:  "ginger-crouton",
-      Usage: "is it in the soup?",
+  app := &cli.App{
+    Flags: []cli.Flag{
+      &cli.BoolFlag{
+        Name:  "ginger-crouton",
+        Value: true,
+        Usage: "is it in the soup?",
+      },
     },
-  }
-  app.Action = func(ctx *cli.Context) error {
-    if !ctx.Bool("ginger-crouton") {
-      return cli.NewExitError("it is not in the soup", 86)
-    }
-    return nil
+    Action: func(ctx *cli.Context) error {
+      if !ctx.Bool("ginger-crouton") {
+        return cli.Exit("it is not in the soup", 86)
+      }
+      return nil
+    },
   }
 
   app.Run(os.Args)
@@ -754,31 +805,32 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
   tasks := []string{"cook", "clean", "laundry", "eat", "sleep", "code"}
 
-  app := cli.NewApp()
-  app.EnableBashCompletion = true
-  app.Commands = []cli.Command{
-    {
-      Name:  "complete",
-      Aliases: []string{"c"},
-      Usage: "complete a task on the list",
-      Action: func(c *cli.Context) error {
-         fmt.Println("completed task: ", c.Args().First())
-         return nil
-      },
-      BashComplete: func(c *cli.Context) {
-        // This will complete if no args are passed
-        if c.NArg() > 0 {
-          return
-        }
-        for _, t := range tasks {
-          fmt.Println(t)
-        }
+  app := &cli.App{
+    EnableBashCompletion: true,
+    Commands: []*cli.Command{
+      {
+        Name:    "complete",
+        Aliases: []string{"c"},
+        Usage:   "complete a task on the list",
+        Action: func(c *cli.Context) error {
+           fmt.Println("completed task: ", c.Args().First())
+           return nil
+        },
+        BashComplete: func(c *cli.Context) {
+          // This will complete if no args are passed
+          if c.NArg() > 0 {
+            return
+          }
+          for _, t := range tasks {
+            fmt.Println(t)
+          }
+        },
       },
     },
   }
@@ -825,20 +877,21 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  cli.BashCompletionFlag = cli.BoolFlag{
+  cli.BashCompletionFlag = &cli.BoolFlag{
     Name:   "compgen",
     Hidden: true,
   }
 
-  app := cli.NewApp()
-  app.EnableBashCompletion = true
-  app.Commands = []cli.Command{
-    {
-      Name: "wat",
+  app := &cli.App{
+    EnableBashCompletion: true,
+    Commands: []*cli.Command{
+      {
+        Name: "wat",
+      },
     },
   }
   app.Run(os.Args)
@@ -870,7 +923,7 @@ import (
   "io"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
@@ -913,7 +966,7 @@ VERSION:
     fmt.Println("Ha HA.  I pwnd the help!!1")
   }
 
-  cli.NewApp().Run(os.Args)
+  (&cli.App{}).Run(os.Args)
 }
 ```
 
@@ -930,17 +983,17 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  cli.HelpFlag = cli.BoolFlag{
-    Name: "halp, haaaaalp",
+  cli.HelpFlag = &cli.BoolFlag{
+    Name: "haaaaalp", Aliases: []string{"halp"},
     Usage: "HALP",
-    EnvVar: "SHOW_HALP,HALPPLZ",
+    EnvVars: []string{"SHOW_HALP", "HALPPLZ"},
   }
 
-  cli.NewApp().Run(os.Args)
+  (&cli.App{}).Run(os.Args)
 }
 ```
 
@@ -952,12 +1005,12 @@ is checked by the cli internals in order to print the `App.Version` via
 
 #### Customization
 
-The default flag may be customized to something other than `-v/--version` by
+The default flag may be cusomized to something other than `-v/--version` by
 setting `cli.VersionFlag`, e.g.:
 
 <!-- {
   "args": ["&#45;&#45print-version"],
-  "output": "partay version 19\\.99\\.0"
+  "output": "partay version v19\\.99\\.0"
 } -->
 ``` go
 package main
@@ -965,18 +1018,19 @@ package main
 import (
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func main() {
-  cli.VersionFlag = cli.BoolFlag{
-    Name: "print-version, V",
+  cli.VersionFlag = &cli.BoolFlag{
+    Name: "print-version", Aliases: []string{"V"},
     Usage: "print only the version",
   }
 
-  app := cli.NewApp()
-  app.Name = "partay"
-  app.Version = "19.99.0"
+  app := &cli.App{
+    Name: "partay",
+    Version: "v19.99.0",
+  }
   app.Run(os.Args)
 }
 ```
@@ -985,7 +1039,7 @@ Alternatively, the version printer at `cli.VersionPrinter` may be overridden, e.
 
 <!-- {
   "args": ["&#45;&#45version"],
-  "output": "version=19\\.99\\.0 revision=fafafaf"
+  "output": "version=v19\\.99\\.0 revision=fafafaf"
 } -->
 ``` go
 package main
@@ -994,7 +1048,7 @@ import (
   "fmt"
   "os"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 var (
@@ -1006,14 +1060,15 @@ func main() {
     fmt.Printf("version=%s revision=%s\n", c.App.Version, Revision)
   }
 
-  app := cli.NewApp()
-  app.Name = "partay"
-  app.Version = "19.99.0"
+  app := &cli.App{
+    Name: "partay",
+    Version: "v19.99.0",
+  }
   app.Run(os.Args)
 }
 ```
 
-#### Full API Example
+### Full API Example
 
 **Notice**: This is a contrived (functioning) example meant strictly for API
 demonstration purposes.  Use of one's imagination is encouraged.
@@ -1033,7 +1088,7 @@ import (
   "os"
   "time"
 
-  "github.com/urfave/cli"
+  "gopkg.in/urfave/cli.v2"
 )
 
 func init() {
@@ -1041,9 +1096,9 @@ func init() {
   cli.CommandHelpTemplate += "\nYMMV\n"
   cli.SubcommandHelpTemplate += "\nor something\n"
 
-  cli.HelpFlag = cli.BoolFlag{Name: "halp"}
-  cli.BashCompletionFlag = cli.BoolFlag{Name: "compgen", Hidden: true}
-  cli.VersionFlag = cli.BoolFlag{Name: "print-version, V"}
+  cli.HelpFlag = &cli.BoolFlag{Name: "halp"}
+  cli.BashCompletionFlag = &cli.BoolFlag{Name: "compgen", Hidden: true}
+  cli.VersionFlag = &cli.BoolFlag{Name: "print-version", Aliases: []string{"V"}}
 
   cli.HelpPrinter = func(w io.Writer, templ string, data interface{}) {
     fmt.Fprintf(w, "best of luck to you\n")
@@ -1056,7 +1111,7 @@ func init() {
   }
   cli.ErrWriter = ioutil.Discard
   cli.FlagStringer = func(fl cli.Flag) string {
-    return fmt.Sprintf("\t\t%s", fl.GetName())
+    return fmt.Sprintf("\t\t%s", fl.Names()[0])
   }
 }
 
@@ -1071,7 +1126,7 @@ func (w *hexWriter) Write(p []byte) (int, error) {
   return len(p), nil
 }
 
-type genericType struct{
+type genericType struct {
   s string
 }
 
@@ -1085,204 +1140,194 @@ func (g *genericType) String() string {
 }
 
 func main() {
-  app := cli.NewApp()
-  app.Name = "kənˈtrīv"
-  app.Version = "19.99.0"
-  app.Compiled = time.Now()
-  app.Authors = []cli.Author{
-    cli.Author{
-      Name:  "Example Human",
-      Email: "human@example.com",
-    },
-  }
-  app.Copyright = "(c) 1999 Serious Enterprise"
-  app.HelpName = "contrive"
-  app.Usage = "demonstrate available API"
-  app.UsageText = "contrive - demonstrating the available API"
-  app.ArgsUsage = "[args and such]"
-  app.Commands = []cli.Command{
-    cli.Command{
-      Name:        "doo",
-      Aliases:     []string{"do"},
-      Category:    "motion",
-      Usage:       "do the doo",
-      UsageText:   "doo - does the dooing",
-      Description: "no really, there is a lot of dooing to be done",
-      ArgsUsage:   "[arrgh]",
-      Flags: []cli.Flag{
-        cli.BoolFlag{Name: "forever, forevvarr"},
+  app := cli.App{
+    Name: "kənˈtrīv",
+    Version: "v19.99.0",
+    Compiled: time.Now(),
+    Authors: []*cli.Author{
+      &cli.Author{
+        Name:  "Example Human",
+        Email: "human@example.com",
       },
-      Subcommands: cli.Commands{
-        cli.Command{
-          Name:   "wop",
-          Action: wopAction,
+    },
+    Copyright: "(c) 1999 Serious Enterprise",
+    HelpName: "contrive",
+    Usage: "demonstrate available API",
+    UsageText: "contrive - demonstrating the available API",
+    ArgsUsage: "[args and such]",
+    Commands: []*cli.Command{
+      &cli.Command{
+        Name:        "doo",
+        Aliases:     []string{"do"},
+        Category:    "motion",
+        Usage:       "do the doo",
+        UsageText:   "doo - does the dooing",
+        Description: "no really, there is a lot of dooing to be done",
+        ArgsUsage:   "[arrgh]",
+        Flags: []cli.Flag{
+          &cli.BoolFlag{Name: "forever", Aliases: []string{"forevvarr"}},
+        },
+        Subcommands: []*cli.Command{
+          &cli.Command{
+            Name:   "wop",
+            Action: wopAction,
+          },
+        },
+        SkipFlagParsing: false,
+        HideHelp:        false,
+        Hidden:          false,
+        HelpName:        "doo!",
+        BashComplete: func(c *cli.Context) {
+          fmt.Fprintf(c.App.Writer, "--better\n")
+        },
+        Before: func(c *cli.Context) error {
+          fmt.Fprintf(c.App.Writer, "brace for impact\n")
+          return nil
+        },
+        After: func(c *cli.Context) error {
+          fmt.Fprintf(c.App.Writer, "did we lose anyone?\n")
+          return nil
+        },
+        Action: func(c *cli.Context) error {
+          c.Command.FullName()
+          c.Command.HasName("wop")
+          c.Command.Names()
+          c.Command.VisibleFlags()
+          fmt.Fprintf(c.App.Writer, "dodododododoodododddooooododododooo\n")
+          if c.Bool("forever") {
+            c.Command.Run(c)
+          }
+          return nil
+        },
+        OnUsageError: func(c *cli.Context, err error, isSubcommand bool) error {
+          fmt.Fprintf(c.App.Writer, "for shame\n")
+          return err
         },
       },
-      SkipFlagParsing: false,
-      HideHelp:        false,
-      Hidden:          false,
-      HelpName:        "doo!",
-      BashComplete: func(c *cli.Context) {
-        fmt.Fprintf(c.App.Writer, "--better\n")
-      },
-      Before: func(c *cli.Context) error {
-        fmt.Fprintf(c.App.Writer, "brace for impact\n")
-        return nil
-      },
-      After: func(c *cli.Context) error {
-        fmt.Fprintf(c.App.Writer, "did we lose anyone?\n")
-        return nil
-      },
-      Action: func(c *cli.Context) error {
-        c.Command.FullName()
-        c.Command.HasName("wop")
-        c.Command.Names()
-        c.Command.VisibleFlags()
-        fmt.Fprintf(c.App.Writer, "dodododododoodododddooooododododooo\n")
-        if c.Bool("forever") {
-          c.Command.Run(c)
-        }
-        return nil
-      },
-      OnUsageError: func(c *cli.Context, err error, isSubcommand bool) error {
-        fmt.Fprintf(c.App.Writer, "for shame\n")
-        return err
-      },
     },
-  }
-  app.Flags = []cli.Flag{
-    cli.BoolFlag{Name: "fancy"},
-    cli.BoolTFlag{Name: "fancier"},
-    cli.DurationFlag{Name: "howlong, H", Value: time.Second * 3},
-    cli.Float64Flag{Name: "howmuch"},
-    cli.GenericFlag{Name: "wat", Value: &genericType{}},
-    cli.Int64Flag{Name: "longdistance"},
-    cli.Int64SliceFlag{Name: "intervals"},
-    cli.IntFlag{Name: "distance"},
-    cli.IntSliceFlag{Name: "times"},
-    cli.StringFlag{Name: "dance-move, d"},
-    cli.StringSliceFlag{Name: "names, N"},
-    cli.UintFlag{Name: "age"},
-    cli.Uint64Flag{Name: "bigage"},
-  }
-  app.EnableBashCompletion = true
-  app.HideHelp = false
-  app.HideVersion = false
-  app.BashComplete = func(c *cli.Context) {
-    fmt.Fprintf(c.App.Writer, "lipstick\nkiss\nme\nlipstick\nringo\n")
-  }
-  app.Before = func(c *cli.Context) error {
-    fmt.Fprintf(c.App.Writer, "HEEEERE GOES\n")
-    return nil
-  }
-  app.After = func(c *cli.Context) error {
-    fmt.Fprintf(c.App.Writer, "Phew!\n")
-    return nil
-  }
-  app.CommandNotFound = func(c *cli.Context, command string) {
-    fmt.Fprintf(c.App.Writer, "Thar be no %q here.\n", command)
-  }
-  app.OnUsageError = func(c *cli.Context, err error, isSubcommand bool) error {
-    if isSubcommand {
-      return err
-    }
+    Flags: []cli.Flag{
+      &cli.BoolFlag{Name: "fancy"},
+      &cli.BoolFlag{Value: true, Name: "fancier"},
+      &cli.DurationFlag{Name: "howlong", Aliases: []string{"H"}, Value: time.Second * 3},
+      &cli.Float64Flag{Name: "howmuch"},
+      &cli.GenericFlag{Name: "wat", Value: &genericType{}},
+      &cli.Int64Flag{Name: "longdistance"},
+      &cli.Int64SliceFlag{Name: "intervals"},
+      &cli.IntFlag{Name: "distance"},
+      &cli.IntSliceFlag{Name: "times"},
+      &cli.StringFlag{Name: "dance-move", Aliases: []string{"d"}},
+      &cli.StringSliceFlag{Name: "names", Aliases: []string{"N"}},
+      &cli.UintFlag{Name: "age"},
+      &cli.Uint64Flag{Name: "bigage"},
+    },
+    EnableBashCompletion: true,
+    HideHelp: false,
+    HideVersion: false,
+    BashComplete: func(c *cli.Context) {
+      fmt.Fprintf(c.App.Writer, "lipstick\nkiss\nme\nlipstick\nringo\n")
+    },
+    Before: func(c *cli.Context) error {
+      fmt.Fprintf(c.App.Writer, "HEEEERE GOES\n")
+      return nil
+    },
+    After: func(c *cli.Context) error {
+      fmt.Fprintf(c.App.Writer, "Phew!\n")
+      return nil
+    },
+    CommandNotFound: func(c *cli.Context, command string) {
+      fmt.Fprintf(c.App.Writer, "Thar be no %q here.\n", command)
+    },
+    OnUsageError: func(c *cli.Context, err error, isSubcommand bool) error {
+      if isSubcommand {
+        return err
+      }
 
-    fmt.Fprintf(c.App.Writer, "WRONG: %#v\n", err)
-    return nil
-  }
-  app.Action = func(c *cli.Context) error {
-    cli.DefaultAppComplete(c)
-    cli.HandleExitCoder(errors.New("not an exit coder, though"))
-    cli.ShowAppHelp(c)
-    cli.ShowCommandCompletions(c, "nope")
-    cli.ShowCommandHelp(c, "also-nope")
-    cli.ShowCompletions(c)
-    cli.ShowSubcommandHelp(c)
-    cli.ShowVersion(c)
+      fmt.Fprintf(c.App.Writer, "WRONG: %#v\n", err)
+      return nil
+    },
+    Action: func(c *cli.Context) error {
+      cli.DefaultAppComplete(c)
+      cli.HandleExitCoder(errors.New("not an exit coder, though"))
+      cli.ShowAppHelp(c)
+      cli.ShowCommandCompletions(c, "nope")
+      cli.ShowCommandHelp(c, "also-nope")
+      cli.ShowCompletions(c)
+      cli.ShowSubcommandHelp(c)
+      cli.ShowVersion(c)
 
-    categories := c.App.Categories()
-    categories.AddCommand("sounds", cli.Command{
-      Name: "bloop",
-    })
+      categories := c.App.Categories
+      categories.AddCommand("sounds", &cli.Command{
+        Name: "bloop",
+      })
 
-    for _, category := range c.App.Categories() {
-      fmt.Fprintf(c.App.Writer, "%s\n", category.Name)
-      fmt.Fprintf(c.App.Writer, "%#v\n", category.Commands)
-      fmt.Fprintf(c.App.Writer, "%#v\n", category.VisibleCommands())
-    }
+      for _, category := range c.App.Categories.Categories() {
+        fmt.Fprintf(c.App.Writer, "%s\n", category.Name)
+        fmt.Fprintf(c.App.Writer, "%#v\n", category.VisibleCommands())
+        fmt.Fprintf(c.App.Writer, "%#v\n", category.VisibleCommands())
+      }
 
-    fmt.Printf("%#v\n", c.App.Command("doo"))
-    if c.Bool("infinite") {
-      c.App.Run([]string{"app", "doo", "wop"})
-    }
+      fmt.Printf("%#v\n", c.App.Command("doo"))
+      if c.Bool("infinite") {
+        c.App.Run([]string{"app", "doo", "wop"})
+      }
 
-    if c.Bool("forevar") {
-      c.App.RunAsSubcommand(c)
-    }
-    c.App.Setup()
-    fmt.Printf("%#v\n", c.App.VisibleCategories())
-    fmt.Printf("%#v\n", c.App.VisibleCommands())
-    fmt.Printf("%#v\n", c.App.VisibleFlags())
+      if c.Bool("forevar") {
+        c.App.RunAsSubcommand(c)
+      }
+      c.App.Setup()
+      fmt.Printf("%#v\n", c.App.VisibleCategories())
+      fmt.Printf("%#v\n", c.App.VisibleCommands())
+      fmt.Printf("%#v\n", c.App.VisibleFlags())
 
-    fmt.Printf("%#v\n", c.Args().First())
-    if len(c.Args()) > 0 {
-      fmt.Printf("%#v\n", c.Args()[1])
-    }
-    fmt.Printf("%#v\n", c.Args().Present())
-    fmt.Printf("%#v\n", c.Args().Tail())
+      fmt.Printf("%#v\n", c.Args().First())
+      if c.Args().Len() > 0 {
+        fmt.Printf("%#v\n", c.Args().Get(1))
+      }
+      fmt.Printf("%#v\n", c.Args().Present())
+      fmt.Printf("%#v\n", c.Args().Tail())
 
-    set := flag.NewFlagSet("contrive", 0)
-    nc := cli.NewContext(c.App, set, c)
+      set := flag.NewFlagSet("contrive", 0)
+      nc := cli.NewContext(c.App, set, c)
 
-    fmt.Printf("%#v\n", nc.Args())
-    fmt.Printf("%#v\n", nc.Bool("nope"))
-    fmt.Printf("%#v\n", nc.BoolT("nerp"))
-    fmt.Printf("%#v\n", nc.Duration("howlong"))
-    fmt.Printf("%#v\n", nc.Float64("hay"))
-    fmt.Printf("%#v\n", nc.Generic("bloop"))
-    fmt.Printf("%#v\n", nc.Int64("bonk"))
-    fmt.Printf("%#v\n", nc.Int64Slice("burnks"))
-    fmt.Printf("%#v\n", nc.Int("bips"))
-    fmt.Printf("%#v\n", nc.IntSlice("blups"))
-    fmt.Printf("%#v\n", nc.String("snurt"))
-    fmt.Printf("%#v\n", nc.StringSlice("snurkles"))
-    fmt.Printf("%#v\n", nc.Uint("flub"))
-    fmt.Printf("%#v\n", nc.Uint64("florb"))
-    fmt.Printf("%#v\n", nc.GlobalBool("global-nope"))
-    fmt.Printf("%#v\n", nc.GlobalBoolT("global-nerp"))
-    fmt.Printf("%#v\n", nc.GlobalDuration("global-howlong"))
-    fmt.Printf("%#v\n", nc.GlobalFloat64("global-hay"))
-    fmt.Printf("%#v\n", nc.GlobalGeneric("global-bloop"))
-    fmt.Printf("%#v\n", nc.GlobalInt("global-bips"))
-    fmt.Printf("%#v\n", nc.GlobalIntSlice("global-blups"))
-    fmt.Printf("%#v\n", nc.GlobalString("global-snurt"))
-    fmt.Printf("%#v\n", nc.GlobalStringSlice("global-snurkles"))
+      fmt.Printf("%#v\n", nc.Args())
+      fmt.Printf("%#v\n", nc.Bool("nope"))
+      fmt.Printf("%#v\n", !nc.Bool("nerp"))
+      fmt.Printf("%#v\n", nc.Duration("howlong"))
+      fmt.Printf("%#v\n", nc.Float64("hay"))
+      fmt.Printf("%#v\n", nc.Generic("bloop"))
+      fmt.Printf("%#v\n", nc.Int64("bonk"))
+      fmt.Printf("%#v\n", nc.Int64Slice("burnks"))
+      fmt.Printf("%#v\n", nc.Int("bips"))
+      fmt.Printf("%#v\n", nc.IntSlice("blups"))
+      fmt.Printf("%#v\n", nc.String("snurt"))
+      fmt.Printf("%#v\n", nc.StringSlice("snurkles"))
+      fmt.Printf("%#v\n", nc.Uint("flub"))
+      fmt.Printf("%#v\n", nc.Uint64("florb"))
 
-    fmt.Printf("%#v\n", nc.FlagNames())
-    fmt.Printf("%#v\n", nc.GlobalFlagNames())
-    fmt.Printf("%#v\n", nc.GlobalIsSet("wat"))
-    fmt.Printf("%#v\n", nc.GlobalSet("wat", "nope"))
-    fmt.Printf("%#v\n", nc.NArg())
-    fmt.Printf("%#v\n", nc.NumFlags())
-    fmt.Printf("%#v\n", nc.Parent())
+      fmt.Printf("%#v\n", nc.FlagNames())
+      fmt.Printf("%#v\n", nc.IsSet("wat"))
+      fmt.Printf("%#v\n", nc.Set("wat", "nope"))
+      fmt.Printf("%#v\n", nc.NArg())
+      fmt.Printf("%#v\n", nc.NumFlags())
+      fmt.Printf("%#v\n", nc.Lineage()[1])
 
-    nc.Set("wat", "also-nope")
+      nc.Set("wat", "also-nope")
 
-    ec := cli.NewExitError("ohwell", 86)
-    fmt.Fprintf(c.App.Writer, "%d", ec.ExitCode())
-    fmt.Printf("made it!\n")
-    return ec
+      ec := cli.Exit("ohwell", 86)
+      fmt.Fprintf(c.App.Writer, "%d", ec.ExitCode())
+      fmt.Printf("made it!\n")
+      return ec
+    },
+    Metadata: map[string]interface{}{
+      "layers":          "many",
+      "explicable":      false,
+      "whatever-values": 19.99,
+    },
   }
 
   if os.Getenv("HEXY") != "" {
     app.Writer = &hexWriter{}
     app.ErrWriter = &hexWriter{}
-  }
-
-  app.Metadata = map[string]interface{}{
-    "layers":     "many",
-    "explicable": false,
-    "whatever-values": 19.99,
   }
 
   app.Run(os.Args)

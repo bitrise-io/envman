@@ -37,8 +37,9 @@ The meaning of each field is as follows:
                name (string) - The type "name", which will be suffixed with
                                `Flag` when generating the type definition
                                for `cli` and the wrapper type for `altsrc`
-               type (string) - The type that the generated `Flag` type for `cli`
-                               is expected to "contain" as its `.Value` member
+               type (string) - The type that the generated `Flag` type for
+                               `cli` is expected to "contain" as its `.Value`
+                               member
                 value (bool) - Should the generated `cli` type have a `Value`
                                member?
                  dest (bool) - Should the generated `cli` type support a
@@ -120,7 +121,6 @@ def _set_typedef_defaults(typedef):
     typedef.setdefault('doctail', '')
     typedef.setdefault('context_type', typedef['type'])
     typedef.setdefault('dest', True)
-    typedef.setdefault('value', True)
     typedef.setdefault('parser', 'f.Value, error(nil)')
     typedef.setdefault('parser_cast', 'parsed')
 
@@ -140,15 +140,13 @@ def _write_cli_flag_types(outfile, types):
         // {name}Flag is a flag with type {type}{doctail}
         type {name}Flag struct {{
             Name string
+            Aliases []string
             Usage string
-            EnvVar string
+            EnvVars []string
             Hidden bool
-        """.format(**typedef))
-
-        if typedef['value']:
-            _fwrite(outfile, """\
             Value {type}
-            """.format(**typedef))
+            DefaultText string
+        """.format(**typedef))
 
         if typedef['dest']:
             _fwrite(outfile, """\
@@ -160,25 +158,19 @@ def _write_cli_flag_types(outfile, types):
         _fwrite(outfile, """\
             // String returns a readable representation of this value
             // (for usage defaults)
-            func (f {name}Flag) String() string {{
+            func (f *{name}Flag) String() string {{
                 return FlagStringer(f)
             }}
 
-            // GetName returns the name of the flag
-            func (f {name}Flag) GetName() string {{
-                return f.Name
+            // Names returns the names of the flag
+            func (f *{name}Flag) Names() []string {{
+                return flagNames(f)
             }}
 
             // {name} looks up the value of a local {name}Flag, returns
             // {context_default} if not found
             func (c *Context) {name}(name string) {context_type} {{
-                return lookup{name}(name, c.flagSet)
-            }}
-
-            // Global{name} looks up the value of a global {name}Flag, returns
-            // {context_default} if not found
-            func (c *Context) Global{name}(name string) {context_type} {{
-                if fs := lookupGlobalFlagSet(name, c); fs != nil {{
+                if fs := lookupFlagSet(name, c); fs != nil {{
                     return lookup{name}(name, fs)
                 }}
                 return {context_default}
@@ -202,9 +194,7 @@ def _write_altsrc_flag_types(outfile, types):
     _fwrite(outfile, """\
         package altsrc
 
-        import (
-            "gopkg.in/urfave/cli.v1"
-        )
+        import "gopkg.in/urfave/cli.v2"
 
         // WARNING: This file is generated!
 
@@ -217,12 +207,12 @@ def _write_altsrc_flag_types(outfile, types):
         // {name}Flag is the flag type that wraps cli.{name}Flag to allow
         // for other values to be specified
         type {name}Flag struct {{
-            cli.{name}Flag
+            *cli.{name}Flag
             set *flag.FlagSet
         }}
 
         // New{name}Flag creates a new {name}Flag
-        func New{name}Flag(fl cli.{name}Flag) *{name}Flag {{
+        func New{name}Flag(fl *cli.{name}Flag) *{name}Flag {{
             return &{name}Flag{{{name}Flag: fl, set: nil}}
         }}
 
