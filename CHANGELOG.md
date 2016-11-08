@@ -2,6 +2,37 @@
 
 -----------------
 
+## 1.1.2 (2016 Nov 08)
+
+### Release Notes
+
+* New field added to envman's environemnt item model: `category`.   
+This new property will be used on bitrise website, to group inputs, like: `required`, `code-sign`, `xcodebuild-configs`, ...  
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-io/envman/releases/download/1.1.2/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/envman
+```
+
+That's all, you're ready to call `envman`!
+
+### Release Commits - 1.1.1 -> 1.1.2
+
+* [bbac7e0] Krisztian Godrei - workflow refactor (2016 Nov 08)
+* [39da611] Krisztián Gödrei - bitrise.yml update (#115) (2016 Nov 08)
+* [cc31966] Krisztián Gödrei - godeps-update (#114) (2016 Nov 08)
+* [9dda617] Krisztián Gödrei - add catgeory to environment model (#113) (2016 Nov 04)
+
+
 ## 1.1.1 (2016 Sep 13)
 
 ### Release Notes
@@ -492,4 +523,4 @@ That's all, you're ready to call `envman`!
 
 -----------------
 
-Generated at: 2016 Sep 13
+Generated at: 2016 Nov 08
