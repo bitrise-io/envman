@@ -6,7 +6,7 @@
 
 ### Release Notes
 
-* New field added to envman's environemnt item model: `category`.   
+* New field added to envman's environment item model: `category`.   
 This new property will be used on bitrise website, to group inputs, like: `required`, `code-sign`, `xcodebuild-configs`, ...  
 
 ### Install or upgrade
@@ -62,8 +62,8 @@ That's all, you're ready to call `envman`!
 
 ### Release Commits - 1.1.0 -> 1.1.1
 
-* [85ee7fc] Krisztián Gödrei - release config (2016 Sep 13)
-* [719a45b] Krisztián Gödrei - prepare for 1.1.1 (2016 Sep 13)
+* [85ee7fc] Krisztián Gödrei - release config (2016 Sep 13)
+* [719a45b] Krisztián Gödrei - prepare for 1.1.1 (2016 Sep 13)
 * [f75917d] Krisztián Gödrei - Cli package update (#111) (2016 Sep 13)
 * [92a6239] Viktor Benei - Merge pull request #110 from bitrise-io/feature/deps-update (2016 Sep 06)
 * [a9776c6] Viktor Benei - godeps update (2016 Sep 06)
@@ -75,9 +75,9 @@ That's all, you're ready to call `envman`!
 * [70dc8cf] Krisztián Gödrei - Merge pull request #108 from godrei/godeps_update (2016 Apr 07)
 * [cd79125] godrei - godeps update & bitrise.yml updates for go 1.6 (2016 Apr 07)
 * [8046e19] Viktor Benei - Merge pull request #107 from godrei/expand_env_test (2016 Mar 16)
-* [188a69a] Krisztián Gödrei - expand envs test (2016 Mar 16)
+* [188a69a] Krisztián Gödrei - expand envs test (2016 Mar 16)
 * [a99d6da] Viktor Benei - Merge pull request #106 from godrei/model_methods_update (2016 Mar 01)
-* [e6de87c] Krisztián Gödrei - NewEnvJSONList instead of CreateFromJSON (2016 Mar 01)
+* [e6de87c] Krisztián Gödrei - NewEnvJSONList instead of CreateFromJSON (2016 Mar 01)
 
 
 ## 1.1.0 (2015 Dec 22)
@@ -109,18 +109,18 @@ That's all, you're ready to call `envman`!
 * [d5b3098] Viktor Benei - godeps-update (2015 Dec 22)
 * [6f5c49c] Viktor Benei - Merge pull request #102 from godrei/changelog (2015 Dec 17)
 * [7a1a388] Viktor Benei - Merge pull request #103 from godrei/typo (2015 Dec 17)
-* [ea54069] Krisztián Gödrei - typo (2015 Dec 17)
-* [34e03b4] Krisztián Gödrei - PR fixes (2015 Dec 17)
-* [e650aed] Krisztián Gödrei - changelog fix (2015 Dec 16)
-* [8589079] Krisztián Gödrei - version bump, changelog (2015 Dec 16)
+* [ea54069] Krisztián Gödrei - typo (2015 Dec 17)
+* [34e03b4] Krisztián Gödrei - PR fixes (2015 Dec 17)
+* [e650aed] Krisztián Gödrei - changelog fix (2015 Dec 16)
+* [8589079] Krisztián Gödrei - version bump, changelog (2015 Dec 16)
 * [099d4db] Viktor Benei - Merge pull request #100 from godrei/skip_if_empty (2015 Dec 16)
-* [2ed2734] Krisztián Gödrei - flag usage updates (2015 Dec 16)
-* [a105e06] Krisztián Gödrei - create changelog workflow (2015 Dec 16)
-* [d59437a] Krisztián Gödrei - environment skip_if_empty property and handling (2015 Dec 16)
-* [d96ed92] Krisztián Gödrei - godep update (2015 Dec 16)
+* [2ed2734] Krisztián Gödrei - flag usage updates (2015 Dec 16)
+* [a105e06] Krisztián Gödrei - create changelog workflow (2015 Dec 16)
+* [d59437a] Krisztián Gödrei - environment skip_if_empty property and handling (2015 Dec 16)
+* [d96ed92] Krisztián Gödrei - godep update (2015 Dec 16)
 * [26edf8e] Viktor Benei - Merge pull request #99 from godrei/master (2015 Dec 15)
-* [33ddda6] Krisztián Gödrei - godeps update (2015 Dec 15)
-* [9b9e8a5] Krisztián Gödrei - skip if empty field (2015 Dec 15)
+* [33ddda6] Krisztián Gödrei - godeps update (2015 Dec 15)
+* [9b9e8a5] Krisztián Gödrei - skip if empty field (2015 Dec 15)
 
 
 ## 1.0.0 (2015 Oct 31)
@@ -330,7 +330,7 @@ That's all, you're ready to call `envman`!
 * [a25959b] Viktor Benei - godeps-update (2015 Aug 26)
 * [ae9b09d] Krisztian Goedrei - init fix (2015 Aug 25)
 * [f4d2c83] Viktor Benei - Merge pull request #62 from bazscsa/master (2015 Aug 24)
-* [5b29e2c] Tamás Bazsonyi - Show envman releases in the Install guide section (2015 Aug 24)
+* [5b29e2c] Tamás Bazsonyi - Show envman releases in the Install guide section (2015 Aug 24)
 * [20f921c] Viktor Benei - Merge pull request #61 from viktorbenei/master (2015 Aug 24)
 * [8f8deec] Viktor Benei - start of v0.9.7 (2015 Aug 24)
 * [8fc5738] Viktor Benei - Merge branch 'master' of https://github.com/bitrise-io/envman (2015 Aug 24)
