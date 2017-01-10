@@ -2,13 +2,14 @@ format_version: 1.3.1
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 trigger_map:
-- pattern: "*"
-  is_pull_request_allowed: true
+- push_branch: "*"
+  workflow: ci
+- pull_request_source_branch: "*"
   workflow: ci
 
 app:
   envs:
-  - RELEASE_VERSION: 1.1.2
+  - RELEASE_VERSION: 1.1.3
   - BIN_NAME: envman
   - GITHUB_RELEASES_URL: https://github.com/bitrise-io/${BIN_NAME}/releases
 

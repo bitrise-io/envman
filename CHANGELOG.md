@@ -2,6 +2,40 @@
 
 -----------------
 
+## 1.1.3 (2017 Jan 10)
+
+### Release Notes
+
+* `EnvsYMLModel` model refactored to `EnvsSerializeModel` and got `Normalize` function to make the EnvsYMLModel instance json serializable, even if it was created with yml parser.
+* typo fixes
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-io/envman/releases/download/1.1.3/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/envman
+```
+
+That's all, you're ready to call `envman`!
+
+### Release Commits - 1.1.2 -> 1.1.3
+
+* [2c42f32] Krisztian Godrei - prepare for 1.1.3 (2017 Jan 10)
+* [39332db] Krisztián Gödrei - godeps-update (#117) (2017 Jan 10)
+* [0507a11] Viktor Benei - Merge pull request #116 from bitrise-io/feature/serialize-model-fix (2016 Dec 14)
+* [a8b2f8f] Viktor Benei - test and doc comment for EnvsSerializeModel.Normalize (2016 Dec 14)
+* [97e7667] Viktor Benei - errcheck fix (2016 Dec 14)
+* [13d2bd2] Viktor Benei - EnvsYMLModel -> EnvsSerializeModel ; EnvsSerializeModel.Normalize (2016 Dec 14)
+* [8c4944e] Krisztián Gödrei - Update CHANGELOG.md (2016 Nov 08)
+
+
 ## 1.1.2 (2016 Nov 08)
 
 ### Release Notes
@@ -523,4 +557,4 @@ That's all, you're ready to call `envman`!
 
 -----------------
 
-Generated at: 2016 Nov 08
+Generated at: 2017 Jan 10
