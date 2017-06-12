@@ -1,4 +1,4 @@
-format_version: 1.3.1
+format_version: "2"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 trigger_map:
@@ -9,7 +9,7 @@ trigger_map:
 
 app:
   envs:
-  - RELEASE_VERSION: 1.1.3
+  - RELEASE_VERSION: 1.1.4
   - BIN_NAME: envman
   - GITHUB_RELEASES_URL: https://github.com/bitrise-io/${BIN_NAME}/releases
 
@@ -129,7 +129,7 @@ workflows:
             #!/bin/bash
             set -ex
             export CI=true
-            releaseman create \
+            releaseman create-changelog \
               --version $RELEASE_VERSION \
               --set-version-script "bash _scripts/set_version.sh version/version.go"
 
