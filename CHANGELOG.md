@@ -2,6 +2,39 @@
 
 -----------------
 
+## 1.1.4 (2017 Jun 12)
+
+### Release Notes
+
+* dependency updates
+* typo fixes
+* Go example updates
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-io/envman/releases/download/1.1.4/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/envman
+```
+
+That's all, you're ready to call `envman`!
+
+### Release Commits - 1.1.3 -> 1.1.4
+
+* [5f8bb71] Krisztian Godrei - prepare for 1.1.4 (2017 Jun 12)
+* [dcf6169] Krisztián Gödrei - godeps-update (#121) (2017 Jun 12)
+* [e9f05f9] Viktor Benei - Go example updates (#118) (2017 May 19)
+* [c3699e9] Viktor Benei - one more typo fix in README (#120) (2017 May 19)
+* [1026f0c] Viktor Benei - typo fix in readme (#119) (2017 May 19)
+
+
 ## 1.1.3 (2017 Jan 10)
 
 ### Release Notes
@@ -557,4 +590,4 @@ That's all, you're ready to call `envman`!
 
 -----------------
 
-Generated at: 2017 Jan 10
+Generated at: 2017 Jun 12
