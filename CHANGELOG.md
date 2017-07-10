@@ -2,6 +2,37 @@
 
 -----------------
 
+## 1.1.5 (2017 Jul 10)
+
+### Release Notes
+
+* dependency updates
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-io/envman/releases/download/1.1.5/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/envman
+```
+
+That's all, you're ready to call `envman`!
+
+### Release Commits - 1.1.4 -> 1.1.5
+
+* [e42d060] Krisztian Godrei - prepare for 1.1.5 (2017 Jul 10)
+* [5174c25] Krisztián Gödrei - godeps update (#122) (2017 Jul 10)
+* [c3aba6c] Krisztian Godrei - readme update (2017 Jul 10)
+* [a9e6184] Krisztian Godrei - README update (2017 Jun 12)
+* [4f0bef2] Krisztian Godrei - README: release a new version (2017 Jun 12)
+
+
 ## 1.1.4 (2017 Jun 12)
 
 ### Release Notes
@@ -590,4 +621,4 @@ That's all, you're ready to call `envman`!
 
 -----------------
 
-Generated at: 2017 Jun 12
+Generated at: 2017 Jul 10
