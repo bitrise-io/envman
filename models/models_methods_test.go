@@ -117,6 +117,24 @@ func TestParseFromInterfaceMap(t *testing.T) {
 	model["skip_if_empty"] = "true"
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
 
+	t.Log("parse meta field - Fail: string is not castable to map[string]interface{}")
+	{
+		model := map[string]interface{}{}
+		model["meta"] = "value"
+		require.Error(t, envOptions.ParseFromInterfaceMap(model))
+	}
+
+	t.Log("parse meta field")
+	{
+		serializedObj := `key: "value"`
+		var obj interface{}
+		require.NoError(t, yaml.Unmarshal([]byte(serializedObj), &obj))
+
+		model := map[string]interface{}{}
+		model["meta"] = obj
+		require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	}
+
 	// other_key is not supported key
 	model = map[string]interface{}{}
 	model["other_key"] = true
@@ -391,5 +409,37 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 		jsonContBytes, err := json.Marshal(objFromYAML)
 		require.NoError(t, err)
 		require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"is_expand":true}}]}`, string(jsonContBytes))
+	}
+
+	t.Log("test meta field")
+	{
+		yamlContent := `envs:
+- KEY_ONE: first value
+- KEY_TWO: second value, with options
+  opts:
+    meta: 
+        is_expose: true
+`
+		var objFromYAML EnvsSerializeModel
+		require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &objFromYAML))
+
+		// the objFromYAML object in this state can't be serialized to JSON directly,
+		// as the YAML parser parses the `opts` into map[interface]interface,
+		// which is not supported by JSON
+		{
+			_, err := json.Marshal(objFromYAML)
+			require.EqualError(t, err, `json: unsupported type: map[interface {}]interface {}`)
+		}
+
+		// now, if we call Normalize on this object, that will convert the map[interface]interface
+		// into map[string]interface, which is JSON serializable
+		require.NoError(t, objFromYAML.Normalize())
+
+		// let's try the serialization again - this time it will work!
+		{
+			jsonContBytes, err := json.Marshal(objFromYAML)
+			require.NoError(t, err)
+			require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"meta":{"is_expose":true}}}]}`, string(jsonContBytes))
+		}
 	}
 }
