@@ -2,6 +2,51 @@
 
 -----------------
 
+## 1.1.6 (2017 Aug 07)
+
+### Release Notes
+
+__Meta field (`meta`) added to `EnvironmentItemOptionsModel`__
+
+This property of the environment options is used to define extra options without creating a new [envman](https://github.com/bitrise-io/envman) release.
+
+The __bitrise-cli__ does not use `meta` field directly, but other tools can use this property to expand the environment options.
+
+For example the `bitrise.io` website will use the `meta` field to define if secret environment variables should be used in pull request triggered builds or not.
+
+```
+.bitrise.secrets.yml
+
+envs:
+- MY_SECRET_ENV: secret value
+  opts:
+    meta:
+      is_expose: true
+```
+
+### Install or upgrade
+
+To install this version, run the following commands (in a bash shell):
+
+```
+curl -fL https://github.com/bitrise-io/envman/releases/download/1.1.6/envman-$(uname -s)-$(uname -m) > /usr/local/bin/envman
+```
+
+Then:
+
+```
+chmod +x /usr/local/bin/envman
+```
+
+That's all, you're ready to call `envman`!
+
+### Release Commits - 1.1.5 -> 1.1.6
+
+* [f291011] Krisztian Godrei - prepare for 1.1.6 (2017 Aug 07)
+* [1f04b73] Krisztián Gödrei - meta field added to env model (#124) (2017 Aug 07)
+* [318a433] Krisztián Gödrei - fixed EnvsSerializeModel (#123) (2017 Aug 04)
+
+
 ## 1.1.5 (2017 Jul 10)
 
 ### Release Notes
@@ -621,4 +666,4 @@ That's all, you're ready to call `envman`!
 
 -----------------
 
-Generated at: 2017 Jul 10
+Generated at: 2017 Aug 07
