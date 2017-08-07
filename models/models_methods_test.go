@@ -440,6 +440,35 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 			jsonContBytes, err := json.Marshal(objFromYAML)
 			require.NoError(t, err)
 			require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"meta":{"is_expose":true}}}]}`, string(jsonContBytes))
+
+			var serializeModel EnvsSerializeModel
+			require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &serializeModel))
+			require.Equal(t, 2, len(serializeModel.Envs))
+			for _, env := range serializeModel.Envs {
+				key, value, err := env.GetKeyValuePair()
+				require.NoError(t, err)
+
+				if key == "KEY_ONE" {
+					require.Equal(t, "first value", value)
+
+					options, err := env.GetOptions()
+					require.NoError(t, err)
+					require.Equal(t, EnvironmentItemOptionsModel{}, options)
+				} else if key == "KEY_TWO" {
+					require.Equal(t, "second value, with options", value)
+
+					options, err := env.GetOptions()
+					require.NoError(t, err)
+					require.NotNil(t, options.Meta)
+
+					isExposeValue := (*options.Meta)["is_expose"]
+					isExpose, ok := isExposeValue.(bool)
+					require.Equal(t, true, ok)
+					require.Equal(t, true, isExpose)
+				} else {
+					t.Fatalf("unexpected key found: %s", key)
+				}
+			}
 		}
 	}
 }
