@@ -85,43 +85,57 @@ func TestParseFromInterfaceMap(t *testing.T) {
 	model["value_options"] = []string{"test_key2", "test_value2"}
 	model["is_expand"] = true
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, "test_title", *envOptions.Title)
+	require.Equal(t, "test_key2", envOptions.ValueOptions[0])
+	require.Equal(t, "test_value2", envOptions.ValueOptions[1])
+	require.Equal(t, true, *envOptions.IsExpand)
 
 	// title is not a string
 	model = map[string]interface{}{}
 	model["title"] = true
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, "true", *envOptions.Title)
 
 	// value_options is not a string slice
 	model = map[string]interface{}{}
 	model["value_options"] = []interface{}{true, false}
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, 2, len(envOptions.ValueOptions))
+	require.Equal(t, "true", envOptions.ValueOptions[0])
+	require.Equal(t, "false", envOptions.ValueOptions[1])
 
 	// is_required is not a bool
 	model = map[string]interface{}{}
 	model["is_required"] = pointers.NewBoolPtr(true)
-	require.NotEqual(t, nil, envOptions.ParseFromInterfaceMap(model))
+	require.Error(t, envOptions.ParseFromInterfaceMap(model))
+	require.Nil(t, envOptions.IsRequired)
 
 	model = map[string]interface{}{}
 	model["is_required"] = "YeS"
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, true, *envOptions.IsRequired)
 
 	model = map[string]interface{}{}
 	model["is_required"] = "NO"
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, false, *envOptions.IsRequired)
 
 	model = map[string]interface{}{}
 	model["is_required"] = "y"
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, true, *envOptions.IsRequired)
 
 	model = map[string]interface{}{}
 	model["skip_if_empty"] = "true"
 	require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+	require.Equal(t, true, *envOptions.SkipIfEmpty)
 
 	t.Log("parse meta field - Fail: string is not castable to map[string]interface{}")
 	{
 		model := map[string]interface{}{}
 		model["meta"] = "value"
 		require.Error(t, envOptions.ParseFromInterfaceMap(model))
+		require.Nil(t, envOptions.Meta)
 	}
 
 	t.Log("parse meta field")
@@ -133,6 +147,7 @@ func TestParseFromInterfaceMap(t *testing.T) {
 		model := map[string]interface{}{}
 		model["meta"] = obj
 		require.NoError(t, envOptions.ParseFromInterfaceMap(model))
+		require.Equal(t, map[string]interface{}{"key": "value"}, envOptions.Meta)
 	}
 
 	// other_key is not supported key
