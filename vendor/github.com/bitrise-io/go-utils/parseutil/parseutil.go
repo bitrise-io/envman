@@ -76,7 +76,10 @@ func CastToMapStringInterface(value interface{}) (map[string]interface{}, bool) 
 	castedValue, ok := value.(map[interface{}]interface{})
 	desiredMap := map[string]interface{}{}
 	for key, value := range castedValue {
-		keyStr := CastToString(key)
+		keyStr, ok := key.(string)
+		if !ok {
+			return map[string]interface{}{}, false
+		}
 		desiredMap[keyStr] = value
 	}
 	return desiredMap, ok
