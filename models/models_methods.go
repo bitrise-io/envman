@@ -13,8 +13,6 @@ import (
 const (
 	// OptionsKey ...
 	OptionsKey = "opts"
-	// MetaKey ...
-	MetaKey = "meta"
 )
 
 const (
@@ -164,11 +162,11 @@ func (envSerModel *EnvironmentItemOptionsModel) ParseFromInterfaceMap(input map[
 			}
 			envSerModel.SkipIfEmpty = castedBoolPtr
 		case "meta":
-			castedMapStringInterfacePtr, ok := parseutil.CastToMapStringInterfacePtr(value)
+			castedMapStringInterface, ok := parseutil.CastToMapStringInterface(value)
 			if !ok {
 				return fmt.Errorf("failed to parse map[string]interface{} value (%#v) for key (%s)", value, keyStr)
 			}
-			envSerModel.Meta = castedMapStringInterfacePtr
+			envSerModel.Meta = castedMapStringInterface
 		default:
 			return fmt.Errorf("not supported key found in options: %s", keyStr)
 		}
@@ -283,7 +281,7 @@ func (env *EnvironmentItemModel) FillMissingDefaults() error {
 		options.SkipIfEmpty = pointers.NewBoolPtr(DefaultSkipIfEmpty)
 	}
 	if options.Meta == nil {
-		options.Meta = pointers.NewMapStringInterfacePtr(map[string]interface{}{})
+		options.Meta = map[string]interface{}{}
 	}
 	(*env)[OptionsKey] = options
 	return nil

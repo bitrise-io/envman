@@ -461,7 +461,7 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 					require.NoError(t, err)
 					require.NotNil(t, options.Meta)
 
-					isExposeValue := (*options.Meta)["is_expose"]
+					isExposeValue := options.Meta["is_expose"]
 					isExpose, ok := isExposeValue.(bool)
 					require.Equal(t, true, ok)
 					require.Equal(t, true, isExpose)
