@@ -8,7 +8,6 @@
   version = "v1.0.4"
 
 [[projects]]
-  branch = "master"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "command",
@@ -18,7 +17,7 @@
     "pathutil",
     "pointers"
   ]
-  revision = "b33f6bcef9b50045d7e62364b354584afc3ee329"
+  revision = "3cd2fc1c516caded20f67b53428cb793a82ad454"
 
 [[projects]]
   branch = "master"
@@ -66,7 +65,7 @@
     "unix",
     "windows"
   ]
-  revision = "1792d66dc88e503d3cb2400578221cdf1f7fe26f"
+  revision = "d38bf781f16e180a1b2ad82697d2f81d7b7ecfac"
 
 [[projects]]
   branch = "v2"
@@ -77,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0aaba87442e29b26dadcb363bd734f29d8b8d76b7f8f080d2b5b07738a12aa7b"
+  inputs-digest = "43edf0ff97026338b8bc19531a0ac7527f579c9b8c97bbae86826b106d8fcdab"
   solver-name = "gps-cdcl"
   solver-version = 1
