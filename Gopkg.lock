@@ -18,7 +18,7 @@
     "pathutil",
     "pointers"
   ]
-  revision = "b33f6bcef9b50045d7e62364b354584afc3ee329"
+  revision = "2d657206204605ce3b86124c33fea53c3e380d78"
 
 [[projects]]
   branch = "master"
@@ -57,7 +57,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "2b6c08872f4b66da917bb4ce98df4f0307330f78"
+  revision = "b0697eccbea9adec5b7ba8008f4c33d98d733388"
 
 [[projects]]
   branch = "master"
