@@ -3,7 +3,6 @@ package models
 // EnvironmentItemOptionsModel ...
 type EnvironmentItemOptionsModel struct {
 	// These fields are processed by envman at envman run
-	IsSensitive *bool `json:"is_sensitive,omitempty" yaml:"is_sensitive,omitempty"`
 	IsExpand    *bool `json:"is_expand,omitempty" yaml:"is_expand,omitempty"`
 	SkipIfEmpty *bool `json:"skip_if_empty,omitempty" yaml:"skip_if_empty,omitempty"`
 	// These fields used only by bitrise
@@ -15,6 +14,7 @@ type EnvironmentItemOptionsModel struct {
 	IsRequired        *bool    `json:"is_required,omitempty" yaml:"is_required,omitempty"`
 	IsDontChangeValue *bool    `json:"is_dont_change_value,omitempty" yaml:"is_dont_change_value,omitempty"`
 	IsTemplate        *bool    `json:"is_template,omitempty" yaml:"is_template,omitempty"`
+	IsSensitive       *bool    `json:"is_sensitive,omitempty" yaml:"is_sensitive,omitempty"`
 	//
 	Meta map[string]interface{} `json:"meta,omitempty" yaml:"meta,omitempty"`
 }
