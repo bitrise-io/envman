@@ -1,8 +1,12 @@
 package cli
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/envman/envman"
@@ -134,6 +138,51 @@ func logEnvs() error {
 	return nil
 }
 
+func readIfNamedPipe(f *os.File) (string, bool, error) {
+	info, err := f.Stat()
+	if err != nil {
+		return "", false, fmt.Errorf("failed to get stdin FileInfo: %s", err)
+	}
+
+	var stdinValue string
+	var isNamedPipe bool
+	switch {
+	case info.Mode()&os.ModeNamedPipe == os.ModeNamedPipe:
+		log.Debugln("reading a named pipe")
+		if info.Size() > 0 {
+			var err error
+			stdinValue, err = readAllByRunes(f)
+			if err != nil {
+				return "", false, fmt.Errorf("failed to read: %s", err)
+			}
+			isNamedPipe = true
+		}
+	case info.Mode()&os.ModeCharDevice == os.ModeCharDevice:
+		log.Debugln("reading a char device")
+	default:
+		log.Debugf("reading: %s", info.Mode())
+	}
+	log.Debugf("stdin has %d bytes", info.Size())
+	log.Debugf("stdinValue: <%s>", stdinValue)
+	return stdinValue, isNamedPipe, nil
+}
+
+func readAllByRunes(r io.Reader) (string, error) {
+	reader := bufio.NewReader(r)
+	var output []rune
+	for {
+		c, _, err := reader.ReadRune()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return "", fmt.Errorf("failed to read rune: %s", err)
+		}
+		output = append(output, c)
+	}
+	return string(output), nil
+}
+
 func add(c *cli.Context) error {
 	log.Debugln("[ENVMAN] - Work path:", envman.CurrentEnvStoreFilePath)
 
@@ -143,7 +192,9 @@ func add(c *cli.Context) error {
 	skipIfEmpty := c.Bool(SkipIfEmptyKey)
 
 	var value string
-	if stdinValue != "" {
+	if stdinValue, _, err := readIfNamedPipe(os.Stdin); err != nil {
+		log.Fatal("Failed to read stdin:", err)
+	} else if stdinValue != "" {
 		value = stdinValue
 	} else if c.IsSet(ValueKey) {
 		value = c.String(ValueKey)
