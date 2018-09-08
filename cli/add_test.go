@@ -2,12 +2,65 @@ package cli
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/bitrise-io/envman/models"
+	"github.com/bitrise-io/go-utils/fileutil"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/stretchr/testify/require"
 )
+
+func TestReadIfNamedPipe(t *testing.T) {
+	t.Log("regular file is not a pipe")
+	{
+		tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
+		require.NoError(t, err)
+
+		inputPth := filepath.Join(tmpDir, "Input")
+		input, err := os.Create(inputPth)
+		require.NoError(t, err)
+
+		_, err = input.Write([]byte("test"))
+		require.NoError(t, err)
+
+		s, isPipe, err := readIfNamedPipe(input)
+		require.NoError(t, err)
+		require.Equal(t, "", s)
+		require.False(t, isPipe)
+	}
+
+	t.Log("stdin is not a pipe")
+	{
+		s, isPipe, err := readIfNamedPipe(os.Stdin)
+		require.NoError(t, err)
+		require.Equal(t, "", s)
+		require.False(t, isPipe)
+	}
+}
+
+func TestReadAllByRunes(t *testing.T) {
+	t.Log("regular file")
+	{
+		tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
+		require.NoError(t, err)
+
+		pth := filepath.Join(tmpDir, "Input")
+		fmt.Printf("inputPth: %s\n", pth)
+		require.NoError(t, fileutil.WriteStringToFile(pth, "test"))
+
+		f, err := os.Open(pth)
+		require.NoError(t, err)
+
+		s, err := readAllByRunes(f)
+		require.NoError(t, err)
+		require.Equal(t, "test", s)
+	}
+
+}
 
 func TestEnvListSizeInBytes(t *testing.T) {
 	str100Bytes := strings.Repeat("a", 100)
