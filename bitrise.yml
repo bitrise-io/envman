@@ -25,8 +25,9 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             set -ex
-            current_envman="$(pwd)/_tmp/ci-bin"
-            go build -o $current_envman
+
+            export INTEGRATION_TEST_BINARY_PATH="$(pwd)/_tmp/ci-bin"
+            go build -o $INTEGRATION_TEST_BINARY_PATH
 
             export PR=""
             export PULL_REQUEST_ID=""
