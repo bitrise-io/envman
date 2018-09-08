@@ -1,11 +1,14 @@
 package integration
 
-import "os"
+import (
+	"os"
+	"testing"
 
-func binPath() string {
+	"github.com/stretchr/testify/require"
+)
+
+func binPath(t *testing.T) string {
 	pth := os.Getenv("INTEGRATION_TEST_BINARY_PATH")
-	if pth == "" {
-		pth = "envman"
-	}
+	require.NotEmpty(t, pth, "INTEGRATION_TEST_BINARY_PATH should not be empty")
 	return pth
 }

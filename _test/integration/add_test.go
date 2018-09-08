@@ -23,7 +23,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using flag value")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST1", "--value", "test1")
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST1", "--value", "test1")
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		require.NoError(t, err, out)
 
@@ -34,7 +34,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using piped string")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST2").SetStdin(strings.NewReader("test2"))
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST2").SetStdin(strings.NewReader("test2"))
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		require.NoError(t, err, out)
 
@@ -45,7 +45,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using flag and piped string - piped string has priority")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST2", "--value", "hello").SetStdin(strings.NewReader("test2"))
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST2", "--value", "hello").SetStdin(strings.NewReader("test2"))
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		require.NoError(t, err, out)
 
@@ -56,7 +56,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using flag and piped empty string - empty string does not overrides the flag value")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST2", "--value", "hello").SetStdin(strings.NewReader(""))
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST2", "--value", "hello").SetStdin(strings.NewReader(""))
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		require.NoError(t, err, out)
 
@@ -67,7 +67,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using piped empty string")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST3").SetStdin(strings.NewReader(""))
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST3").SetStdin(strings.NewReader(""))
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		require.NoError(t, err, out)
 
@@ -78,7 +78,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using piped nil bytes")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST4").SetStdin(bytes.NewReader([]byte(nil)))
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST4").SetStdin(bytes.NewReader([]byte(nil)))
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
 		require.NoError(t, err, out)
 
@@ -89,7 +89,7 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add using empty pipe")
 	{
-		cmd := command.New(binPath(), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST5")
+		cmd := command.New(binPath(t), "-l", "debug", "--path", envstorePth, "add", "--key", "TEST5")
 		execCmd := cmd.GetCmd()
 		_, err := execCmd.StdinPipe()
 		require.NoError(t, err)
