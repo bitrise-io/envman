@@ -2,7 +2,6 @@ package cli
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -136,14 +135,6 @@ func logEnvs() error {
 	}
 
 	return nil
-}
-
-func ensureNamedPipe(f *os.File) (bool, error) {
-	info, err := f.Stat()
-	if err != nil {
-		return false, fmt.Errorf("failed to get FileInfo: %s", err)
-	}
-	return info.Mode()&os.ModeNamedPipe == os.ModeNamedPipe, nil
 }
 
 // readMax reads maximum the given amount of bytes
