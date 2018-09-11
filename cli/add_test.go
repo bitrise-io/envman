@@ -2,12 +2,149 @@ package cli
 
 import (
 	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/bitrise-io/envman/models"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/stretchr/testify/require"
 )
+
+func TestReadMax(t *testing.T) {
+	{
+		s, err := readMax(strings.NewReader(""), 20*1024)
+		require.NoError(t, err)
+		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	{
+		s, err := readMax(strings.NewReader("test"), 20*1024)
+		require.NoError(t, err)
+		require.Equal(t, "test", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	{
+		s, err := readMax(strings.NewReader("test"), 2)
+		require.NoError(t, err)
+		require.Equal(t, "te", s, fmt.Sprintf("s was: (%s)", s))
+	}
+}
+
+func TestReadMaxWithTimeout(t *testing.T) {
+	t.Log("read empty string")
+	{
+		s, err := readMaxWithTimeout(strings.NewReader(""), 20*1024, 1*time.Second)
+		require.NoError(t, err)
+		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	t.Log("read some string")
+	{
+		s, err := readMaxWithTimeout(strings.NewReader("some text to be read"), 20*1024, 1*time.Second)
+		require.NoError(t, err)
+		require.Equal(t, "some text to be read", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	t.Log("reading from closed pipe, with data")
+	{
+		r, w := io.Pipe()
+
+		// writing without a reader will deadlock so write in a goroutine
+		go func() {
+			defer func() { require.NoError(t, w.Close()) }()
+			_, err := fmt.Fprint(w, "some text to be read")
+			require.NoError(t, err)
+		}()
+
+		s, err := readMaxWithTimeout(r, 20*1024, 1*time.Second)
+		require.NoError(t, err)
+		require.Equal(t, "some text to be read", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	t.Log("reading from closed pipe, with data - timeout")
+	{
+		r, w := io.Pipe()
+
+		// writing without a reader will deadlock so write in a goroutine
+		go func() {
+			time.Sleep(2 * time.Second)
+			defer func() { require.NoError(t, w.Close()) }()
+			_, err := fmt.Fprint(w, "some text to be read")
+			require.NoError(t, err)
+		}()
+
+		s, err := readMaxWithTimeout(r, 20*1024, 1*time.Second)
+		require.Error(t, err)
+		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	t.Log("reading from unclosed pipe, with data")
+	{
+		r, w := io.Pipe()
+
+		go func() {
+			_, err := fmt.Fprint(w, "some text to be read")
+			require.NoError(t, err)
+		}()
+
+		s, err := readMaxWithTimeout(r, 20*1024, 1*time.Second)
+		require.NoError(t, err)
+		require.Equal(t, "some text to be read", s, fmt.Sprintf("s was: (%s)", s))
+	}
+
+	t.Log("reading from unclosed pipe, without data - timeout")
+	{
+		r, _ := io.Pipe()
+
+		s, err := readMaxWithTimeout(r, 20*1024, 1*time.Second)
+		require.EqualError(t, err, "timeout")
+		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
+	}
+}
+
+func TestEnsureNamedPipe(t *testing.T) {
+	t.Log("regular file is not a pipe")
+	{
+		tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
+		require.NoError(t, err)
+
+		inputPth := filepath.Join(tmpDir, "Input")
+		input, err := os.Create(inputPth)
+		require.NoError(t, err)
+
+		_, err = input.Write([]byte("test"))
+		require.NoError(t, err)
+
+		ok, err := ensureNamedPipe(input)
+		require.NoError(t, err)
+		require.False(t, ok)
+	}
+}
+
+// func TestReadAllByRunes(t *testing.T) {
+// 	t.Log("regular file")
+// 	{
+// 		tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
+// 		require.NoError(t, err)
+
+// 		pth := filepath.Join(tmpDir, "Input")
+// 		fmt.Printf("inputPth: %s\n", pth)
+// 		require.NoError(t, fileutil.WriteStringToFile(pth, "test"))
+
+// 		f, err := os.Open(pth)
+// 		require.NoError(t, err)
+
+// 		s, err := readAllByRunes(f)
+// 		require.NoError(t, err)
+// 		require.Equal(t, "test", s)
+// 	}
+
+// }
 
 func TestEnvListSizeInBytes(t *testing.T) {
 	str100Bytes := strings.Repeat("a", 100)
