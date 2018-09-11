@@ -76,7 +76,7 @@ func TestReadMaxWithTimeout(t *testing.T) {
 		}()
 
 		s, err := readMaxWithTimeout(r, 20*1024, 1*time.Second)
-		require.Error(t, err)
+		require.EqualError(t, err, errTimeout.Error())
 		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
 	}
 
@@ -99,7 +99,7 @@ func TestReadMaxWithTimeout(t *testing.T) {
 		r, _ := io.Pipe()
 
 		s, err := readMaxWithTimeout(r, 20*1024, 1*time.Second)
-		require.EqualError(t, err, "timeout")
+		require.EqualError(t, err, errTimeout.Error())
 		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
 	}
 }

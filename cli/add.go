@@ -14,6 +14,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+var errTimeout = errors.New("timeout")
+
 func envListSizeInBytes(envs []models.EnvironmentItemModel) (int, error) {
 	valueSizeInBytes := 0
 	for _, env := range envs {
@@ -152,10 +154,8 @@ func readMax(reader io.Reader, maxSize uint) (string, error) {
 	return string(r), nil
 }
 
-var errTimeout = errors.New("timeout")
-
 // readMaxWithTimeout reads maximum a given amount of time using readMax
-func readMaxWithTimeout(reader io.Reader, maxSize uint, timeout time.Duration) (string, error) {
+func readMaxWithTimeout(reader io.Reader, maxSize uint, timeout time.Duration) (value string, err error) {
 	valueChan := make(chan string)
 	errChan := make(chan error)
 
@@ -168,15 +168,13 @@ func readMaxWithTimeout(reader io.Reader, maxSize uint, timeout time.Duration) (
 		valueChan <- v
 	}()
 
-	var value string
-	var err error
 	select {
 	case value = <-valueChan:
 	case err = <-errChan:
 	case <-time.After(timeout):
 		err = errTimeout
 	}
-	return value, err
+	return
 }
 
 func add(c *cli.Context) error {
@@ -189,26 +187,8 @@ func add(c *cli.Context) error {
 
 	var value string
 
-	// read piped stdin value
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		log.Fatalf("[ENVMAN] Failed to get standard input FileInfo: %s", err)
-	}
-	if info.Mode()&os.ModeNamedPipe == os.ModeNamedPipe {
-		// max BASH env size: 20kB
-		var err error
-		value, err = readMaxWithTimeout(os.Stdin, 20*1024, 1*time.Second)
-		if err != nil {
-			if err == errTimeout {
-				log.Warning("[ENVMAN] Standard input read timed out")
-			} else {
-				log.Fatalf("[ENVMAN] Failed to read standard input: %s", err)
-			}
-		}
-	}
-
 	// read flag value
-	if value == "" && c.IsSet(ValueKey) {
+	if c.IsSet(ValueKey) {
 		value = c.String(ValueKey)
 	}
 
@@ -217,6 +197,29 @@ func add(c *cli.Context) error {
 		var err error
 		if value, err = loadValueFromFile(c.String(ValueFileKey)); err != nil {
 			log.Fatal("[ENVMAN] Failed to read file value: ", err)
+		}
+	}
+
+	// read piped stdin value
+	if value == "" {
+		info, err := os.Stdin.Stat()
+		if err != nil {
+			log.Fatalf("[ENVMAN] Failed to get standard input FileInfo: %s", err)
+		}
+		if info.Mode()&os.ModeNamedPipe == os.ModeNamedPipe {
+			configs, err := envman.GetConfigs()
+			if err != nil {
+				log.Fatalf("[ENVMAN] Failed to load envman config: %s", err)
+			}
+
+			value, err = readMaxWithTimeout(os.Stdin, uint(configs.EnvBytesLimitInKB*1024), 1*time.Second)
+			if err != nil {
+				if err == errTimeout {
+					log.Warning("[ENVMAN] Standard input read timed out")
+				} else {
+					log.Fatalf("[ENVMAN] Failed to read standard input: %s", err)
+				}
+			}
 		}
 	}
 
