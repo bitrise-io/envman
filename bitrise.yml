@@ -19,6 +19,19 @@ workflows:
         inputs:
         - other_options: -f ${GO_CODE_COVERAGE_REPORT_PATH}
         - CODECOV_TOKEN: "$CODECOV_UPLOAD_TOKEN"
+    - script:
+        title: Run integration tests
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            current_envman="$(pwd)/_tmp/test_envman"
+            go build -o "$current_envman"
+
+            export PR="" PULL_REQUEST_ID=""
+            export INTEGRATION_TEST_BINARY_PATH="$current_envman"
+            go test -v ./_tests/integration/...
 
   create-binaries:
     title: Create binaries
