@@ -4,14 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/bitrise-io/envman/models"
-	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -106,45 +103,6 @@ func TestReadMaxWithTimeout(t *testing.T) {
 		require.Equal(t, "", s, fmt.Sprintf("s was: (%s)", s))
 	}
 }
-
-func TestEnsureNamedPipe(t *testing.T) {
-	t.Log("regular file is not a pipe")
-	{
-		tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
-		require.NoError(t, err)
-
-		inputPth := filepath.Join(tmpDir, "Input")
-		input, err := os.Create(inputPth)
-		require.NoError(t, err)
-
-		_, err = input.Write([]byte("test"))
-		require.NoError(t, err)
-
-		ok, err := ensureNamedPipe(input)
-		require.NoError(t, err)
-		require.False(t, ok)
-	}
-}
-
-// func TestReadAllByRunes(t *testing.T) {
-// 	t.Log("regular file")
-// 	{
-// 		tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
-// 		require.NoError(t, err)
-
-// 		pth := filepath.Join(tmpDir, "Input")
-// 		fmt.Printf("inputPth: %s\n", pth)
-// 		require.NoError(t, fileutil.WriteStringToFile(pth, "test"))
-
-// 		f, err := os.Open(pth)
-// 		require.NoError(t, err)
-
-// 		s, err := readAllByRunes(f)
-// 		require.NoError(t, err)
-// 		require.Equal(t, "test", s)
-// 	}
-
-// }
 
 func TestEnvListSizeInBytes(t *testing.T) {
 	str100Bytes := strings.Repeat("a", 100)
