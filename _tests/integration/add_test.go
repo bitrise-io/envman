@@ -1,11 +1,14 @@
 package integration
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/bitrise-io/envman/envman"
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/fileutil"
@@ -23,6 +26,42 @@ func addFileCommand(key, pth, envstore string) *command.Model {
 
 func addPipeCommand(key string, reader io.Reader, envstore string) *command.Model {
 	return command.New(binPath(), "-l", "debug", "-p", envstore, "add", "--key", key).SetStdin(reader)
+}
+
+func runWithCustomEnvmanConfig(cfg envman.ConfigsModel, fn func()) error {
+	configPath := filepath.Join(pathutil.UserHomeDir(), ".envman", "configs.json")
+	if err := pathutil.EnsureDirExist(filepath.Dir(configPath)); err != nil {
+		return err
+	}
+
+	exists, err := pathutil.IsPathExists(configPath)
+	if err != nil {
+		return err
+	}
+
+	var origData []byte
+	if exists {
+		origData, err = fileutil.ReadBytesFromFile(configPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	cfgData, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	if err := fileutil.WriteBytesToFile(configPath, cfgData); err != nil {
+		return err
+	}
+
+	fn()
+
+	if exists {
+		return fileutil.WriteBytesToFile(configPath, origData)
+	}
+	return os.RemoveAll(configPath)
 }
 
 func TestAdd(t *testing.T) {
@@ -65,6 +104,14 @@ func TestAdd(t *testing.T) {
 		cont, err := fileutil.ReadStringFromFile(envstore)
 		require.NoError(t, err, out)
 		require.Equal(t, "envs:\n- KEY: some piped value\n", cont)
+	}
+
+	t.Log("add piped value over limit")
+	{
+		require.NoError(t, runWithCustomEnvmanConfig(envman.ConfigsModel{EnvBytesLimitInKB: 1, EnvListBytesLimitInKB: 2}, func() {
+			out, err := addPipeCommand("KEY", strings.NewReader(strings.Repeat("0", 2*1024)), envstore).RunAndReturnTrimmedCombinedOutput()
+			require.Error(t, err, out)
+		}))
 	}
 
 	t.Log("add empty piped value")

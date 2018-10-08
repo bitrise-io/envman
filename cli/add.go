@@ -183,7 +183,7 @@ func add(c *cli.Context) error {
 
 			if configs.EnvBytesLimitInKB > 0 && len(data) > configs.EnvBytesLimitInKB*1024 {
 				valueSizeInKB := ((float64)(len(data))) / 1024.0
-				log.Warnf("environment value (%s...) too large", value[0:100])
+				log.Warnf("environment value too large")
 				log.Warnf("environment value size (%#v KB) - max allowed size: %#v KB", valueSizeInKB, (float64)(configs.EnvBytesLimitInKB))
 				log.Fatalf("[ENVMAN] environment value too large - rejected")
 			}
