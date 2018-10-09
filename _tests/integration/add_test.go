@@ -84,13 +84,13 @@ func TestAdd(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		cfgData, err := json.Marshal(envman.ConfigsModel{EnvBytesLimitInKB: 0, EnvListBytesLimitInKB: 2})
+		cfgData, err := json.Marshal(envman.ConfigsModel{EnvBytesLimitInKB: 0, EnvListBytesLimitInKB: 3})
 		require.NoError(t, err)
 
 		require.NoError(t, fileutil.WriteBytesToFile(configPath, cfgData))
 
-		_, err = addPipeCommand("KEY", strings.NewReader(strings.Repeat("0", 2*1024)), envstore).RunAndReturnTrimmedCombinedOutput()
-		require.NoError(t, err)
+		out, err := addPipeCommand("KEY", strings.NewReader(strings.Repeat("0", 2*1024)), envstore).RunAndReturnTrimmedCombinedOutput()
+		require.NoError(t, err, out)
 
 		if exists {
 			require.NoError(t, fileutil.WriteBytesToFile(configPath, origData))
