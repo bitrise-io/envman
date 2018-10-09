@@ -28,42 +28,6 @@ func addPipeCommand(key string, reader io.Reader, envstore string) *command.Mode
 	return command.New(binPath(), "-l", "debug", "-p", envstore, "add", "--key", key).SetStdin(reader)
 }
 
-func runWithCustomEnvmanConfig(cfg envman.ConfigsModel, fn func()) error {
-	configPath := filepath.Join(pathutil.UserHomeDir(), ".envman", "configs.json")
-	if err := pathutil.EnsureDirExist(filepath.Dir(configPath)); err != nil {
-		return err
-	}
-
-	exists, err := pathutil.IsPathExists(configPath)
-	if err != nil {
-		return err
-	}
-
-	var origData []byte
-	if exists {
-		origData, err = fileutil.ReadBytesFromFile(configPath)
-		if err != nil {
-			return err
-		}
-	}
-
-	cfgData, err := json.Marshal(cfg)
-	if err != nil {
-		return err
-	}
-
-	if err := fileutil.WriteBytesToFile(configPath, cfgData); err != nil {
-		return err
-	}
-
-	fn()
-
-	if exists {
-		return fileutil.WriteBytesToFile(configPath, origData)
-	}
-	return os.RemoveAll(configPath)
-}
-
 func TestAdd(t *testing.T) {
 	tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
 	require.NoError(t, err)
@@ -108,10 +72,32 @@ func TestAdd(t *testing.T) {
 
 	t.Log("add piped value over limit")
 	{
-		require.NoError(t, runWithCustomEnvmanConfig(envman.ConfigsModel{EnvBytesLimitInKB: 1, EnvListBytesLimitInKB: 2}, func() {
-			out, err := addPipeCommand("KEY", strings.NewReader(strings.Repeat("0", 2*1024)), envstore).RunAndReturnTrimmedCombinedOutput()
-			require.Error(t, err, out)
-		}))
+		configPath := filepath.Join(pathutil.UserHomeDir(), ".envman", "configs.json")
+		require.NoError(t, pathutil.EnsureDirExist(filepath.Dir(configPath)))
+
+		exists, err := pathutil.IsPathExists(configPath)
+		require.NoError(t, err)
+
+		var origData []byte
+		if exists {
+			origData, err = fileutil.ReadBytesFromFile(configPath)
+			require.NoError(t, err)
+		}
+
+		cfgData, err := json.Marshal(envman.ConfigsModel{EnvBytesLimitInKB: 1, EnvListBytesLimitInKB: 2})
+		require.NoError(t, err)
+
+		require.NoError(t, fileutil.WriteBytesToFile(configPath, cfgData))
+
+		out, err := addPipeCommand("KEY", strings.NewReader(strings.Repeat("0", 2*1024)), envstore).RunAndReturnTrimmedCombinedOutput()
+		require.Error(t, err)
+		require.True(t, strings.Contains(out, "environment value size (2 KB) - max allowed size: 1 KB"))
+
+		if exists {
+			require.NoError(t, fileutil.WriteBytesToFile(configPath, origData))
+		} else {
+			require.NoError(t, os.RemoveAll(configPath))
+		}
 	}
 
 	t.Log("add empty piped value")
