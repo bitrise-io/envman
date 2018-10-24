@@ -213,6 +213,9 @@ func add(c *cli.Context) error {
 
 	if err := addEnv(key, value, expand, replace, skipIfEmpty); err != nil {
 		log.Fatal("[ENVMAN] Failed to add env:", err)
+	} else {
+		log.Info("[ENVMAN] added key:", key)
+		log.Info("[ENVMAN] added value:", value)
 	}
 
 	log.Debugln("[ENVMAN] Env added")
