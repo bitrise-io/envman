@@ -44,6 +44,7 @@ func validateEnv(key, value string, envList []models.EnvironmentItemModel) (stri
 			log.Warnf("environment var (%s) value (%s...) too large", key, value[0:100])
 			log.Warnf("environment value size (%#v KB) - max allowed size: %#v KB", valueSizeInKB, (float64)(configs.EnvBytesLimitInKB))
 			return fmt.Sprintf("environment var (%s) value too large - rejected", key), nil
+
 		}
 	}
 
