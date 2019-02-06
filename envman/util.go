@@ -124,7 +124,7 @@ func removeDefaults(env *models.EnvironmentItemModel) error {
 	return nil
 }
 
-func generateFormattedYMLForEnvModels(envs []models.EnvironmentItemModel) (models.EnvsSerializeModel, error) {
+func generateFormattedYMLForEnvModels(envs []models.EnvironmentItemModel, unsets []string) (models.EnvsSerializeModel, error) {
 	envMapSlice := []models.EnvironmentItemModel{}
 	for _, env := range envs {
 		err := removeDefaults(&env)
@@ -177,7 +177,8 @@ func generateFormattedYMLForEnvModels(envs []models.EnvironmentItemModel) (model
 	}
 
 	return models.EnvsSerializeModel{
-		Envs: envMapSlice,
+		Envs:   envMapSlice,
+		Unsets: unsets,
 	}, nil
 }
 
@@ -185,12 +186,12 @@ func generateFormattedYMLForEnvModels(envs []models.EnvironmentItemModel) (model
 // --- File methods
 
 // WriteEnvMapToFile ...
-func WriteEnvMapToFile(pth string, envs []models.EnvironmentItemModel) error {
+func WriteEnvMapToFile(pth string, envs []models.EnvironmentItemModel, unsets []string) error {
 	if pth == "" {
 		return errors.New("No path provided")
 	}
 
-	envYML, err := generateFormattedYMLForEnvModels(envs)
+	envYML, err := generateFormattedYMLForEnvModels(envs, unsets)
 	if err != nil {
 		return err
 	}
@@ -206,7 +207,7 @@ func InitAtPath(pth string) error {
 	if exist, err := pathutil.IsPathExists(pth); err != nil {
 		return err
 	} else if !exist {
-		if err := WriteEnvMapToFile(pth, []models.EnvironmentItemModel{}); err != nil {
+		if err := WriteEnvMapToFile(pth, []models.EnvironmentItemModel{}, []string{}); err != nil {
 			return err
 		}
 	} else {
@@ -217,38 +218,38 @@ func InitAtPath(pth string) error {
 }
 
 // ParseEnvsYML ...
-func ParseEnvsYML(bytes []byte) ([]models.EnvironmentItemModel, error) {
+func ParseEnvsYML(bytes []byte) (models.EnvsSerializeModel, error) {
 	var envsYML models.EnvsSerializeModel
 	if err := yaml.Unmarshal(bytes, &envsYML); err != nil {
-		return []models.EnvironmentItemModel{}, err
+		return models.EnvsSerializeModel{}, err
 	}
 	for _, env := range envsYML.Envs {
 		if err := env.NormalizeValidateFillDefaults(); err != nil {
-			return []models.EnvironmentItemModel{}, err
+			return models.EnvsSerializeModel{}, err
 		}
 	}
-	return envsYML.Envs, nil
+	return envsYML, nil
 }
 
 // ReadEnvs ...
-func ReadEnvs(pth string) ([]models.EnvironmentItemModel, error) {
+func ReadEnvs(pth string) (models.EnvsSerializeModel, error) {
 	bytes, err := fileutil.ReadBytesFromFile(pth)
 	if err != nil {
-		return []models.EnvironmentItemModel{}, err
+		return models.EnvsSerializeModel{}, err
 	}
 
 	return ParseEnvsYML(bytes)
 }
 
 // ReadEnvsOrCreateEmptyList ...
-func ReadEnvsOrCreateEmptyList() ([]models.EnvironmentItemModel, error) {
+func ReadEnvsOrCreateEmptyList() (models.EnvsSerializeModel, error) {
 	envModels, err := ReadEnvs(CurrentEnvStoreFilePath)
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
 			err = InitAtPath(CurrentEnvStoreFilePath)
-			return []models.EnvironmentItemModel{}, err
+			return models.EnvsSerializeModel{}, err
 		}
-		return []models.EnvironmentItemModel{}, err
+		return models.EnvsSerializeModel{}, err
 	}
 	return envModels, nil
 }

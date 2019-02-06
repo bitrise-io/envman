@@ -406,6 +406,9 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 - KEY_TWO: second value, with options
   opts:
     is_expand: true
+unsets:
+- ENV1
+- ENV2
 `
 	var objFromYAML EnvsSerializeModel
 	require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &objFromYAML))
@@ -426,7 +429,7 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 	{
 		jsonContBytes, err := json.Marshal(objFromYAML)
 		require.NoError(t, err)
-		require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"is_expand":true}}]}`, string(jsonContBytes))
+		require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"is_expand":true}}],"unsets":["ENV1","ENV2"]}`, string(jsonContBytes))
 	}
 
 	t.Log("test meta field")
@@ -437,6 +440,8 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
   opts:
     meta: 
       is_expose: true
+unsets:
+- ENV1
 `
 		var objFromYAML EnvsSerializeModel
 		require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &objFromYAML))
@@ -457,7 +462,7 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 		{
 			jsonContBytes, err := json.Marshal(objFromYAML)
 			require.NoError(t, err)
-			require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"meta":{"is_expose":true}}}]}`, string(jsonContBytes))
+			require.Equal(t, `{"envs":[{"KEY_ONE":"first value","opts":{}},{"KEY_TWO":"second value, with options","opts":{"meta":{"is_expose":true}}}],"unsets":["ENV1"]}`, string(jsonContBytes))
 
 			var serializeModel EnvsSerializeModel
 			require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &serializeModel))

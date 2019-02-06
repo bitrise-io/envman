@@ -71,7 +71,7 @@ func addEnv(key string, value string, expand, replace, skipIfEmpty bool) error {
 	}
 
 	// Validate input
-	validatedValue, err := validateEnv(key, value, environments)
+	validatedValue, err := validateEnv(key, value, environments.Envs)
 	if err != nil {
 		return err
 	}
@@ -89,12 +89,12 @@ func addEnv(key string, value string, expand, replace, skipIfEmpty bool) error {
 		return err
 	}
 
-	newEnvSlice, err := envman.UpdateOrAddToEnvlist(environments, newEnv, replace)
+	newEnvSlice, err := envman.UpdateOrAddToEnvlist(environments.Envs, newEnv, replace)
 	if err != nil {
 		return err
 	}
 
-	return envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, newEnvSlice)
+	return envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, newEnvSlice, environments.Unsets)
 }
 
 func loadValueFromFile(pth string) (string, error) {
@@ -113,10 +113,10 @@ func logEnvs() error {
 		return err
 	}
 
-	if len(environments) == 0 {
+	if len(environments.Envs) == 0 {
 		log.Info("[ENVMAN] Empty envstore")
 	} else {
-		for _, env := range environments {
+		for _, env := range environments.Envs {
 			key, value, err := env.GetKeyValuePair()
 			if err != nil {
 				return err
@@ -195,7 +195,7 @@ func add(c *cli.Context) error {
 				if err != nil {
 					log.Fatalf("[ENVMAN] failed to get env list, error: %s", err)
 				}
-				envListSizeInBytes, err := envListSizeInBytes(envList)
+				envListSizeInBytes, err := envListSizeInBytes(envList.Envs)
 				if err != nil {
 					log.Fatalf("[ENVMAN] failed to get env list size, error: %s", err)
 				}

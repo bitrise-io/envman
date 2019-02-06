@@ -18,7 +18,7 @@ func clearEnvs() error {
 		return errors.New(errMsg)
 	}
 
-	return envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, []models.EnvironmentItemModel{})
+	return envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, []models.EnvironmentItemModel{}, []string{})
 }
 
 func clear(c *cli.Context) error {

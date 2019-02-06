@@ -72,7 +72,7 @@ func print(c *cli.Context) error {
 		log.Fatalf("Failed to read envs, error: %s", err)
 	}
 
-	envsJSONList, err := convertToEnsJSONModel(environments, expand)
+	envsJSONList, err := convertToEnsJSONModel(environments.Envs, expand)
 	if err != nil {
 		log.Fatalf("Failed to convert envs, error: %s", err)
 	}

@@ -78,7 +78,7 @@ func run(c *cli.Context) error {
 
 		cmdToExecute := CommandModel{
 			Command:      doCommand,
-			Environments: doCmdEnvs,
+			Environments: doCmdEnvs.Envs,
 			Argumentums:  doArgs,
 		}
 
