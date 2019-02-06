@@ -38,8 +38,9 @@ func TestCommandEnvs(t *testing.T) {
 		require.Equal(t, nil, env2.FillMissingDefaults())
 
 		envs := []models.EnvironmentItemModel{env1, env2}
+		store := models.EnvsSerializeModel{Envs: envs}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(store)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -80,8 +81,9 @@ func TestCommandEnvs(t *testing.T) {
 		require.Equal(t, nil, env2.FillMissingDefaults())
 
 		envs := []models.EnvironmentItemModel{env1, env2}
+		store := models.EnvsSerializeModel{Envs: envs}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(store)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -124,8 +126,9 @@ func TestCommandEnvs(t *testing.T) {
 		require.Equal(t, nil, env2.FillMissingDefaults())
 
 		envs := []models.EnvironmentItemModel{env1, env2}
+		store := models.EnvsSerializeModel{Envs: envs}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(store)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -168,8 +171,9 @@ func TestCommandEnvs(t *testing.T) {
 		require.Equal(t, nil, env2.FillMissingDefaults())
 
 		envs := []models.EnvironmentItemModel{env1, env2}
+		store := models.EnvsSerializeModel{Envs: envs}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(store)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -214,8 +218,9 @@ func TestCommandEnvs(t *testing.T) {
 		require.Equal(t, nil, env3.FillMissingDefaults())
 
 		envs := []models.EnvironmentItemModel{env1, env2, env3}
+		store := models.EnvsSerializeModel{Envs: envs}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(store)
 		require.Equal(t, nil, err)
 
 		env3Found := false

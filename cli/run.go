@@ -14,15 +14,15 @@ import (
 type CommandModel struct {
 	Command      string
 	Argumentums  []string
-	Environments []models.EnvironmentItemModel
+	Environments models.EnvsSerializeModel
 }
 
 func expandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
-func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
-	for _, env := range envs {
+func commandEnvs(envs models.EnvsSerializeModel) ([]string, error) {
+	for _, env := range envs.Envs {
 		key, value, err := env.GetKeyValuePair()
 		if err != nil {
 			return []string{}, err
@@ -48,6 +48,11 @@ func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
 			return []string{}, err
 		}
 	}
+
+	for _, key := range envs.Unsets {
+		os.Unsetenv(key)
+	}
+
 	return os.Environ(), nil
 }
 
@@ -78,7 +83,7 @@ func run(c *cli.Context) error {
 
 		cmdToExecute := CommandModel{
 			Command:      doCommand,
-			Environments: doCmdEnvs.Envs,
+			Environments: doCmdEnvs,
 			Argumentums:  doArgs,
 		}
 
