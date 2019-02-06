@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -238,5 +239,21 @@ func TestCommandEnvs(t *testing.T) {
 			}
 		}
 		require.Equal(t, true, env3Found)
+	}
+
+	t.Log("unset OS envs test")
+	{
+		key := "TEST_ENV"
+		val := "test"
+		os.Setenv(key, val)
+		store := models.EnvsSerializeModel{Unsets: []string{key}}
+
+		envs, err := commandEnvs(store)
+		envFmt := "%s=%s" // note: if this format mismatches elements of `envs`, test can be a false positive!
+		unset := fmt.Sprintf(envFmt, key, val)
+
+		require.Equal(t, nil, err)
+		require.NotContains(t, envs, unset)
+
 	}
 }
