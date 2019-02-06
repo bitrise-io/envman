@@ -24,7 +24,8 @@ type EnvironmentItemModel map[string]interface{}
 
 // EnvsSerializeModel ...
 type EnvsSerializeModel struct {
-	Envs []EnvironmentItemModel `json:"envs" yaml:"envs"`
+	Envs   []EnvironmentItemModel `json:"envs" yaml:"envs"`
+	Unsets []string               `json:"unsets" yaml:"unsets"`
 }
 
 // EnvsJSONListModel ...
