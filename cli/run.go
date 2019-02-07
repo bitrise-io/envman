@@ -12,9 +12,9 @@ import (
 
 // CommandModel ...
 type CommandModel struct {
-	Command      string
-	Argumentums  []string
-	Environments models.EnvsSerializeModel
+	Command     string
+	Argumentums []string
+	EnvStore    models.EnvsSerializeModel
 }
 
 func expandEnvsInString(inp string) string {
@@ -57,7 +57,7 @@ func commandEnvs(envs models.EnvsSerializeModel) ([]string, error) {
 }
 
 func runCommandModel(cmdModel CommandModel) (int, error) {
-	cmdEnvs, err := commandEnvs(cmdModel.Environments)
+	cmdEnvs, err := commandEnvs(cmdModel.EnvStore)
 	if err != nil {
 		return 1, err
 	}
@@ -69,7 +69,7 @@ func run(c *cli.Context) error {
 	log.Debug("[ENVMAN] - Work path:", envman.CurrentEnvStoreFilePath)
 
 	if len(c.Args()) > 0 {
-		doCmdEnvs, err := envman.ReadEnvs(envman.CurrentEnvStoreFilePath)
+		doEnvstore, err := envman.ReadEnvs(envman.CurrentEnvStoreFilePath)
 		if err != nil {
 			log.Fatal("[ENVMAN] - Failed to load EnvStore:", err)
 		}
@@ -82,9 +82,9 @@ func run(c *cli.Context) error {
 		}
 
 		cmdToExecute := CommandModel{
-			Command:      doCommand,
-			Environments: doCmdEnvs,
-			Argumentums:  doArgs,
+			Command:     doCommand,
+			EnvStore:    doEnvstore,
+			Argumentums: doArgs,
 		}
 
 		log.Debug("[ENVMAN] - Executing command:", cmdToExecute)
