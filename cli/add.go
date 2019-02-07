@@ -65,7 +65,7 @@ func validateEnv(key, value string, envList []models.EnvironmentItemModel) (stri
 
 func addEnv(key string, value string, expand, replace, skipIfEmpty bool) error {
 	// Load envs, or create if not exist
-	envstore, err := envman.ReadEnvsOrCreateEmptyList()
+	envstore, err := envman.ReadOrInitEnvStore()
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func add(c *cli.Context) error {
 			}
 
 			if configs.EnvListBytesLimitInKB > 0 {
-				envList, err := envman.ReadEnvsOrCreateEmptyList()
+				envList, err := envman.ReadOrInitEnvStore()
 				if err != nil {
 					log.Fatalf("[ENVMAN] failed to get env list, error: %s", err)
 				}

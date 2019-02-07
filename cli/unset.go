@@ -8,7 +8,7 @@ import (
 func unset(c *cli.Context) error {
 	key := c.String(KeyKey)
 
-	envstore, err := envman.ReadEnvsOrCreateEmptyList()
+	envstore, err := envman.ReadOrInitEnvStore()
 	if err != nil {
 		return err
 	}

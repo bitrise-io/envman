@@ -241,8 +241,10 @@ func ReadEnvs(pth string) (models.EnvsSerializeModel, error) {
 	return ParseEnvsYML(bytes)
 }
 
-// ReadEnvsOrCreateEmptyList ...
-func ReadEnvsOrCreateEmptyList() (models.EnvsSerializeModel, error) {
+// ReadOrInitEnvStore reads from the system configured env store
+// file and returns the contents. If the file does not exist,
+// it creates an empty env store and returns that.
+func ReadOrInitEnvStore() (models.EnvsSerializeModel, error) {
 	envstore, err := ReadEnvs(CurrentEnvStoreFilePath)
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
