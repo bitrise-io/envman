@@ -65,13 +65,13 @@ func validateEnv(key, value string, envList []models.EnvironmentItemModel) (stri
 
 func addEnv(key string, value string, expand, replace, skipIfEmpty bool) error {
 	// Load envs, or create if not exist
-	environments, err := envman.ReadEnvsOrCreateEmptyList()
+	envstore, err := envman.ReadEnvsOrCreateEmptyList()
 	if err != nil {
 		return err
 	}
 
 	// Validate input
-	validatedValue, err := validateEnv(key, value, environments.Envs)
+	validatedValue, err := validateEnv(key, value, envstore.Envs)
 	if err != nil {
 		return err
 	}
@@ -89,12 +89,12 @@ func addEnv(key string, value string, expand, replace, skipIfEmpty bool) error {
 		return err
 	}
 
-	newEnvSlice, err := envman.UpdateOrAddToEnvlist(environments.Envs, newEnv, replace)
+	newEnvSlice, err := envman.UpdateOrAddToEnvlist(envstore.Envs, newEnv, replace)
 	if err != nil {
 		return err
 	}
 
-	return envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, newEnvSlice, environments.Unsets)
+	return envman.WriteEnvMapToFile(envman.CurrentEnvStoreFilePath, newEnvSlice, envstore.Unsets)
 }
 
 func loadValueFromFile(pth string) (string, error) {

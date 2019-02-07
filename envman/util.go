@@ -219,16 +219,16 @@ func InitAtPath(pth string) error {
 
 // ParseEnvsYML ...
 func ParseEnvsYML(bytes []byte) (models.EnvsSerializeModel, error) {
-	var envsYML models.EnvsSerializeModel
-	if err := yaml.Unmarshal(bytes, &envsYML); err != nil {
+	var envstore models.EnvsSerializeModel
+	if err := yaml.Unmarshal(bytes, &envstore); err != nil {
 		return models.EnvsSerializeModel{}, err
 	}
-	for _, env := range envsYML.Envs {
+	for _, env := range envstore.Envs {
 		if err := env.NormalizeValidateFillDefaults(); err != nil {
 			return models.EnvsSerializeModel{}, err
 		}
 	}
-	return envsYML, nil
+	return envstore, nil
 }
 
 // ReadEnvs ...
@@ -243,7 +243,7 @@ func ReadEnvs(pth string) (models.EnvsSerializeModel, error) {
 
 // ReadEnvsOrCreateEmptyList ...
 func ReadEnvsOrCreateEmptyList() (models.EnvsSerializeModel, error) {
-	envModels, err := ReadEnvs(CurrentEnvStoreFilePath)
+	envstore, err := ReadEnvs(CurrentEnvStoreFilePath)
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
 			err = InitAtPath(CurrentEnvStoreFilePath)
@@ -251,5 +251,5 @@ func ReadEnvsOrCreateEmptyList() (models.EnvsSerializeModel, error) {
 		}
 		return models.EnvsSerializeModel{}, err
 	}
-	return envModels, nil
+	return envstore, nil
 }
