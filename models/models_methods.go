@@ -29,6 +29,8 @@ const (
 	DefaultIsDontChangeValue = false
 	// DefaultIsTemplate ...
 	DefaultIsTemplate = false
+	// DefaultUnset ...
+	DefaultUnset = false
 )
 
 // NewEnvJSONList ...
@@ -294,6 +296,10 @@ func (env *EnvironmentItemModel) FillMissingDefaults() error {
 	if options.Meta == nil {
 		options.Meta = map[string]interface{}{}
 	}
+	if options.Unset == nil {
+		options.Unset = pointers.NewBoolPtr(false)
+	}
+
 	(*env)[OptionsKey] = options
 	return nil
 }
