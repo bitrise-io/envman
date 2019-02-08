@@ -171,6 +171,12 @@ func (envSerModel *EnvironmentItemOptionsModel) ParseFromInterfaceMap(input map[
 				return fmt.Errorf("failed to parse bool value (%#v) for key (%s)", value, keyStr)
 			}
 			envSerModel.SkipIfEmpty = castedBoolPtr
+		case "unset":
+			castedBoolPtr, ok := parseutil.CastToBoolPtr(value)
+			if !ok {
+				return fmt.Errorf("failed to parse bool value (%#v) for key (%s)", value, keyStr)
+			}
+			envSerModel.Unset = castedBoolPtr
 		case "meta":
 			castedMapStringInterface, ok := parseutil.CastToMapStringInterface(value)
 			if !ok {
