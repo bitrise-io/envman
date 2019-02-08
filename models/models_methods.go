@@ -303,7 +303,7 @@ func (env *EnvironmentItemModel) FillMissingDefaults() error {
 		options.Meta = map[string]interface{}{}
 	}
 	if options.Unset == nil {
-		options.Unset = pointers.NewBoolPtr(false)
+		options.Unset = pointers.NewBoolPtr(DefaultUnset)
 	}
 
 	(*env)[OptionsKey] = options
