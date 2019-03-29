@@ -3,14 +3,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e4c72127d910a96daf869a44f3dd563b86dbe6931a172863a0e99c5ff04b59e4"
-  name = "github.com/Sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
-
-[[projects]]
-  branch = "master"
   digest = "1:e060948c7e3c507fda0740da7b39d1ce0af0c3a82745e8bcccf5b1bfada0553f"
   name = "github.com/bitrise-io/go-utils"
   packages = [
@@ -58,6 +50,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:7501afe55f3c936fbd9a4458523dc63c2a89a8f2821b7ff76313b39ef40dfcd8"
+  name = "github.com/sirupsen/logrus"
+  packages = [
+    ".",
+    "terminal",
+  ]
+  pruneopts = "UT"
+  revision = "aefd7ecb9095a92e92a5c904c347156869b303ec"
+
+[[projects]]
+  branch = "master"
   digest = "1:45511ffd176fe0c5ab6cb08cdd141f3217df8e115124b176e894ab103925d53c"
   name = "github.com/stretchr/testify"
   packages = [
@@ -77,42 +80,31 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:058e9504b9a79bfe86092974d05bb3298d2aa0c312d266d43148de289a5065d9"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  pruneopts = "UT"
-  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
-
-[[projects]]
-  branch = "master"
-  digest = "1:944736317d4f2fb1c1015ef9ca05fd9313b4e19f1128901cc678f636435fa9b0"
+  digest = "1:c9a4e761695039425d21448d3289ff280c3a98f0c8145fa7417d9889556006b7"
   name = "golang.org/x/sys"
-  packages = [
-    "unix",
-    "windows",
-  ]
+  packages = ["unix"]
   pruneopts = "UT"
-  revision = "fead79001313d15903fb4605b4a1b781532cd93e"
+  revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
 
 [[projects]]
   branch = "v2"
-  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  digest = "1:2d56cd111a870bdf3ee37601877effe1fc79b8983645c147846f4769b6eb7051"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  revision = "7b8349ac747c6a24702b762d2c4fd9266cf4f1d6"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Sirupsen/logrus",
     "github.com/bitrise-io/go-utils/command",
     "github.com/bitrise-io/go-utils/fileutil",
     "github.com/bitrise-io/go-utils/parseutil",
     "github.com/bitrise-io/go-utils/pathutil",
     "github.com/bitrise-io/go-utils/pointers",
     "github.com/bitrise-io/goinp/goinp",
+    "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/require",
     "github.com/urfave/cli",
     "gopkg.in/yaml.v2",
