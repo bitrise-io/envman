@@ -1,5 +1,5 @@
 [[constraint]]
-  name = "github.com/Sirupsen/logrus"
+  name = "github.com/sirupsen/logrus"
   branch = "master"
 
 [[constraint]]
