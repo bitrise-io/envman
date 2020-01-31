@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 ENV PROJ_NAME envman
-ENV BITRISE_CLI_VERSION 1.21.0
+ENV BITRISE_CLI_VERSION 1.38.0
 ENV GO_VERSION go1.10.3.linux-amd64.tar.gz
 
 RUN apt-get update
