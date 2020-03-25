@@ -43,7 +43,7 @@ func convertToEnsJSONModel(envs []models.EnvironmentItemModel, expand bool) (mod
 		}
 
 		if expand && (opts.IsExpand != nil && *opts.IsExpand) {
-			value = expandEnvsInString(value)
+			value = ExpandEnvsInString(value)
 		}
 
 		JSONModels[key] = value

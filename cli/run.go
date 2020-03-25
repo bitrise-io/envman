@@ -18,7 +18,8 @@ type CommandModel struct {
 	Environments []models.EnvironmentItemModel
 }
 
-func expandEnvsInString(inp string) string {
+// ExpandEnvsInString ...
+func ExpandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
@@ -47,7 +48,7 @@ func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
 
 		var valueStr string
 		if *opts.IsExpand {
-			valueStr = expandEnvsInString(value)
+			valueStr = ExpandEnvsInString(value)
 		} else {
 			valueStr = value
 		}

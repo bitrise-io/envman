@@ -17,7 +17,7 @@ func TestExpandEnvsInString(t *testing.T) {
 		require.Equal(t, nil, os.Setenv("MY_ENV_KEY", "key"))
 
 		inp := "${MY_ENV_KEY} of my home"
-		expanded := expandEnvsInString(inp)
+		expanded := ExpandEnvsInString(inp)
 
 		key := os.Getenv("MY_ENV_KEY")
 		require.NotEqual(t, "", expanded)
