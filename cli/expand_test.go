@@ -389,7 +389,7 @@ func TestExpandStepInputs(t *testing.T) {
 
 			// Assert
 			require.NotNil(t, got)
-			require.NotNil(t, envmanEnvs)
+			//require.NotNil(t, envmanEnvs)
 			if !reflect.DeepEqual(test.want, got) {
 				t.Fatalf("expandStepInputs() actual: %v expected: %v", got, test.want)
 			}
