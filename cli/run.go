@@ -11,6 +11,13 @@ import (
 	"github.com/urfave/cli"
 )
 
+type envController interface {
+	Set(string, string) error
+	Unset(string) error
+	List() []string
+	Expand(string) string
+}
+
 // CommandModel ...
 type CommandModel struct {
 	Command      string
@@ -18,11 +25,11 @@ type CommandModel struct {
 	Environments []models.EnvironmentItemModel
 }
 
-func expandEnvsInString(inp string) string {
-	return os.ExpandEnv(inp)
+func expandEnvsInString(inp string, ec envController) string {
+	return ec.Expand(inp)
 }
 
-func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
+func commandEnvs(envs []models.EnvironmentItemModel, ec envController) ([]string, error) {
 	for _, env := range envs {
 		key, value, err := env.GetKeyValuePair()
 		if err != nil {
@@ -35,7 +42,7 @@ func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
 		}
 
 		if opts.Unset != nil && *opts.Unset {
-			if err := os.Unsetenv(key); err != nil {
+			if err := ec.Unset(key); err != nil {
 				return []string{}, fmt.Errorf("unset env (%s): %s", key, err)
 			}
 			continue
@@ -47,20 +54,20 @@ func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
 
 		var valueStr string
 		if *opts.IsExpand {
-			valueStr = expandEnvsInString(value)
+			valueStr = expandEnvsInString(value, ec)
 		} else {
 			valueStr = value
 		}
 
-		if err := os.Setenv(key, valueStr); err != nil {
+		if err := ec.Set(key, valueStr); err != nil {
 			return []string{}, err
 		}
 	}
-	return os.Environ(), nil
+	return ec.List(), nil
 }
 
 func runCommandModel(cmdModel CommandModel) (int, error) {
-	cmdEnvs, err := commandEnvs(cmdModel.Environments)
+	cmdEnvs, err := commandEnvs(cmdModel.Environments, EnvController{})
 	if err != nil {
 		return 1, err
 	}

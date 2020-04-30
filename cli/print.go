@@ -3,7 +3,6 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bitrise-io/envman/envman"
@@ -29,7 +28,7 @@ func printRawEnvs(envList models.EnvsJSONListModel) {
 	fmt.Println()
 }
 
-func convertToEnsJSONModel(envs []models.EnvironmentItemModel, expand bool) (models.EnvsJSONListModel, error) {
+func convertToEnsJSONModel(envs []models.EnvironmentItemModel, expand bool, ec EnvController) (models.EnvsJSONListModel, error) {
 	JSONModels := models.EnvsJSONListModel{}
 	for _, env := range envs {
 		key, value, err := env.GetKeyValuePair()
@@ -43,12 +42,12 @@ func convertToEnsJSONModel(envs []models.EnvironmentItemModel, expand bool) (mod
 		}
 
 		if expand && (opts.IsExpand != nil && *opts.IsExpand) {
-			value = expandEnvsInString(value)
+			value = expandEnvsInString(value, ec)
 		}
 
 		JSONModels[key] = value
 
-		if err := os.Setenv(key, value); err != nil {
+		if err := ec.Set(key, value); err != nil {
 			return models.EnvsJSONListModel{}, err
 		}
 	}
@@ -72,7 +71,7 @@ func print(c *cli.Context) error {
 		log.Fatalf("Failed to read envs, error: %s", err)
 	}
 
-	envsJSONList, err := convertToEnsJSONModel(environments, expand)
+	envsJSONList, err := convertToEnsJSONModel(environments, expand, EnvController{})
 	if err != nil {
 		log.Fatalf("Failed to convert envs, error: %s", err)
 	}

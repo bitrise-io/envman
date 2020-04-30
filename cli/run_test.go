@@ -14,12 +14,13 @@ import (
 func TestExpandEnvsInString(t *testing.T) {
 	t.Log("Expand env")
 	{
-		require.Equal(t, nil, os.Setenv("MY_ENV_KEY", "key"))
+		ec := EnvController{}
+		require.Equal(t, nil, ec.Set("MY_ENV_KEY", "key"))
 
 		inp := "${MY_ENV_KEY} of my home"
-		expanded := expandEnvsInString(inp)
+		expanded := expandEnvsInString(inp, ec)
 
-		key := os.Getenv("MY_ENV_KEY")
+		key := ec.Get("MY_ENV_KEY")
 		require.NotEqual(t, "", expanded)
 		require.Equal(t, key+" of my home", expanded)
 	}
@@ -40,7 +41,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(envs, EnvController{})
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -82,7 +83,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(envs, EnvController{})
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -126,7 +127,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(envs, EnvController{})
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -170,7 +171,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(envs, EnvController{})
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -216,7 +217,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2, env3}
 
-		sessionEnvs, err := commandEnvs(envs)
+		sessionEnvs, err := commandEnvs(envs, EnvController{})
 		require.Equal(t, nil, err)
 
 		env3Found := false
@@ -256,7 +257,7 @@ func TestCommandEnvs(t *testing.T) {
 		}
 
 		// when
-		envs, err := commandEnvs(testEnvs)
+		envs, err := commandEnvs(testEnvs, EnvController{})
 		envFmt := "%s=%s" // note: if this format mismatches elements of `envs`, test can be a false positive!
 		unset := fmt.Sprintf(envFmt, key, val)
 

@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"os"
 	"path"
 	"testing"
 
@@ -10,6 +9,8 @@ import (
 )
 
 func TestPrint(t *testing.T) {
+	ec := EnvController{"HOME": "/sample/home/path"}
+
 	envsStr := `
 envs:
 - TEST_HOME1: $HOME
@@ -18,14 +19,14 @@ envs:
 	environments, err := envman.ParseEnvsYML([]byte(envsStr))
 	require.Equal(t, nil, err)
 
-	envsJSONList, err := convertToEnsJSONModel(environments, false)
+	envsJSONList, err := convertToEnsJSONModel(environments, false, ec)
 	require.Equal(t, nil, err)
 	require.Equal(t, "$HOME", envsJSONList["TEST_HOME1"])
 	require.Equal(t, "$TEST_HOME1/test", envsJSONList["TEST_HOME2"])
 
-	testHome1 := os.Getenv("HOME")
+	testHome1 := ec.Get("HOME")
 	testHome2 := path.Join(testHome1, "test")
-	envsJSONList, err = convertToEnsJSONModel(environments, true)
+	envsJSONList, err = convertToEnsJSONModel(environments, true, ec)
 	require.Equal(t, nil, err)
 	require.Equal(t, testHome1, envsJSONList["TEST_HOME1"])
 	require.Equal(t, testHome2, envsJSONList["TEST_HOME2"])
