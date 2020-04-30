@@ -152,7 +152,7 @@ func TestExpandStepInputs(t *testing.T) {
 		name   string
 		envs   []envmanModels.EnvironmentItemModel
 		inputs []envmanModels.EnvironmentItemModel
-		want   map[string]string
+		want   map[string]envVarValue
 	}{
 		{
 			name: "Env does not depend on input",
@@ -163,9 +163,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_major": "12", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_major":      "12",
-				"simulator_os_version": "",
+			want: map[string]envVarValue{
+				"simulator_major":      {value: "12"},
+				"simulator_os_version": {value: ""},
 			},
 		},
 		{
@@ -177,9 +177,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"simulator_major": "12", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_major":      "12",
-				"simulator_os_version": "",
+			want: map[string]envVarValue{
+				"simulator_major":      {value: "12"},
+				"simulator_os_version": {value: ""},
 			},
 		},
 		{
@@ -189,9 +189,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"secret_input": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
-				// "secret_input":         "",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
+				"secret_input":         {value: "top secret", isSensitive: true},
 			},
 		},
 		{
@@ -202,8 +202,8 @@ func TestExpandStepInputs(t *testing.T) {
 			inputs: []envmanModels.EnvironmentItemModel{
 				{"simulator_device": "iPhone $secret_env", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_device": "iPhone [REDACTED]",
+			want: map[string]envVarValue{
+				"simulator_device": {value: "iPhone top secret", isSensitive: true},
 			},
 		},
 		{
@@ -213,9 +213,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
 				{"simulator_device": "iPhone 8 Plus", "opts": map[string]interface{}{}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
-				"simulator_device":     "iPhone 8 Plus",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
+				"simulator_device":     {value: "iPhone 8 Plus"},
 			},
 		},
 		{
@@ -225,9 +225,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"simulator_device": "iPhone 8 Plus", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
-				"simulator_device":     "iPhone 8 Plus",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
+				"simulator_device":     {value: "iPhone 8 Plus"},
 			},
 		},
 		{
@@ -238,8 +238,8 @@ func TestExpandStepInputs(t *testing.T) {
 			inputs: []envmanModels.EnvironmentItemModel{
 				{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": false}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "$SIMULATOR_OS_VERSION",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "$SIMULATOR_OS_VERSION"},
 			},
 		},
 		{
@@ -248,7 +248,7 @@ func TestExpandStepInputs(t *testing.T) {
 				{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"unset": true}},
 			},
 			inputs: []envmanModels.EnvironmentItemModel{},
-			want:   map[string]string{},
+			want:   map[string]envVarValue{},
 		},
 		{
 			name: "Skip if empty",
@@ -256,7 +256,7 @@ func TestExpandStepInputs(t *testing.T) {
 				{"SIMULATOR_OS_VERSION": "", "opts": map[string]interface{}{"skip_if_empty": true}},
 			},
 			inputs: []envmanModels.EnvironmentItemModel{},
-			want:   map[string]string{},
+			want:   map[string]envVarValue{},
 		},
 		{
 			name: "Env expansion, input contains env var.",
@@ -266,8 +266,8 @@ func TestExpandStepInputs(t *testing.T) {
 			inputs: []envmanModels.EnvironmentItemModel{
 				{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
 			},
 		},
 		{
@@ -280,8 +280,8 @@ func TestExpandStepInputs(t *testing.T) {
 			inputs: []envmanModels.EnvironmentItemModel{
 				{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
 			},
 		},
 		{
@@ -293,9 +293,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
-				"simulator_device":     "iPhone 8 (13.3)",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
+				"simulator_device":     {value: "iPhone 8 (13.3)"},
 			},
 		},
 		{
@@ -307,9 +307,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"simulator_os_version": "13.3",
-				"simulator_device":     "iPhone 8 (12.1)",
+			want: map[string]envVarValue{
+				"simulator_os_version": {value: "13.3"},
+				"simulator_device":     {value: "iPhone 8 (12.1)"},
 			},
 		},
 		{
@@ -321,9 +321,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"loop": "$loop", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"env_loop": "$ENV_LOOP", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"loop":     "",
-				"env_loop": "",
+			want: map[string]envVarValue{
+				"loop":     {value: ""},
+				"env_loop": {value: ""},
 			},
 		},
 		{
@@ -335,9 +335,9 @@ func TestExpandStepInputs(t *testing.T) {
 				{"loop": "Something: $loop", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"env_loop": "$ENV_LOOP", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"loop":     "Something: ",
-				"env_loop": "Env Something: ",
+			want: map[string]envVarValue{
+				"loop":     {value: "Something: "},
+				"env_loop": {value: "Env Something: "},
 			},
 		},
 		{
@@ -348,10 +348,10 @@ func TestExpandStepInputs(t *testing.T) {
 				{"similar": "$similar2", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"env": "Something: $similar", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"similar2": "anything",
-				"similar":  "anything",
-				"env":      "Something: anything",
+			want: map[string]envVarValue{
+				"similar2": {value: "anything"},
+				"similar":  {value: "anything"},
+				"env":      {value: "Something: anything"},
 			},
 		},
 		{
@@ -366,11 +366,11 @@ func TestExpandStepInputs(t *testing.T) {
 				{"c": "$a", "opts": map[string]interface{}{"is_sensitive": false}},
 				{"env": "$A", "opts": map[string]interface{}{"is_sensitive": false}},
 			},
-			want: map[string]string{
-				"a":   "",
-				"b":   "",
-				"c":   "",
-				"env": "",
+			want: map[string]envVarValue{
+				"a":   {value: ""},
+				"b":   {value: ""},
+				"c":   {value: ""},
+				"env": {value: ""},
 			},
 		},
 	}
@@ -406,7 +406,7 @@ func TestExpandStepInputs(t *testing.T) {
 }
 
 // compare tests if each env var in environ is included in envs with the same value.
-func compare(t *testing.T, environ []string, envs map[string]string) error {
+func compare(t *testing.T, environ []string, envs map[string]envVarValue) error {
 	/*
 		if len(environ) != len(envs) {
 			return fmt.Errorf("compare() failed: elem num not equal (%d != %d)", len(environ), len(envs))
@@ -418,8 +418,8 @@ func compare(t *testing.T, environ []string, envs map[string]string) error {
 		v, ok := envs[key]
 		if ok != true {
 			// return fmt.Errorf("compare() failed: %s not found", key)
-		} else if v != value {
-			return fmt.Errorf("compare() failed: %s value (%s) not equals to: %s", key, value, v)
+		} else if v.value != value {
+			return fmt.Errorf("compare() failed: %s value (%s) not equals to: %s", key, value, v.value)
 		}
 	}
 	return nil
