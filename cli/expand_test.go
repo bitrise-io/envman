@@ -243,6 +243,22 @@ func TestExpandStepInputs(t *testing.T) {
 			},
 		},
 		{
+			name: "Unset",
+			envs: []envmanModels.EnvironmentItemModel{
+				{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"unset": true}},
+			},
+			inputs: []envmanModels.EnvironmentItemModel{},
+			want:   map[string]string{},
+		},
+		{
+			name: "Skip if empty",
+			envs: []envmanModels.EnvironmentItemModel{
+				{"SIMULATOR_OS_VERSION": "", "opts": map[string]interface{}{"skip_if_empty": true}},
+			},
+			inputs: []envmanModels.EnvironmentItemModel{},
+			want:   map[string]string{},
+		},
+		{
 			name: "Env expansion, input contains env var.",
 			envs: []envmanModels.EnvironmentItemModel{
 				{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
