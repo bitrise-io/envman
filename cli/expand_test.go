@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 
-	"github.com/bitrise-io/envman/models"
 	envmanModels "github.com/bitrise-io/envman/models"
 	"github.com/stretchr/testify/require"
 )
@@ -15,135 +13,20 @@ import (
 func restoreEnviron(environ []string) error {
 	currEnviron := os.Environ()
 	for _, currEnv := range currEnviron {
-		currEnvKey, _ := keyValue(currEnv)
+		currEnvKey, _ := parseOSEnv(currEnv)
 		if err := os.Unsetenv(currEnvKey); err != nil {
 			return err
 		}
 	}
 
 	for _, env := range environ {
-		key, value := keyValue(env)
+		key, value := parseOSEnv(env)
 		if err := os.Setenv(key, value); err != nil {
 			return fmt.Errorf("failed to set %s=%s: %s", key, value, err)
 		}
 	}
 
 	return nil
-}
-
-func filterSecrets(environ []models.EnvironmentItemModel) ([]models.EnvironmentItemModel, error) {
-	var filtered []models.EnvironmentItemModel
-	for _, env := range environ {
-		opts, err := env.GetOptions()
-		if err != nil {
-			return nil, err
-		}
-		if opts.IsSensitive != nil && *opts.IsSensitive == true {
-			continue
-		}
-		filtered = append(filtered, env)
-	}
-	return filtered, nil
-}
-
-func keyValue(env string) (key string, value string) {
-	const sep = "="
-	split := strings.SplitAfterN(env, sep, 2)
-	key = strings.TrimSuffix(split[0], sep)
-	if len(split) > 1 {
-		value = split[1]
-	}
-	return
-}
-
-func expandEnvironment(environments []models.EnvironmentItemModel) ([]string, error) {
-	// envman.CommandEnvs() achives the expansion in the way it modifies the current process' environment,
-	// at the end of the function we restore the original environment (restoreEnviron).
-	osEnviron := os.Environ()
-
-	expandedEnviron, err := commandEnvs(environments)
-	if err != nil {
-		return nil, err
-	}
-
-	// envman.CommandEnvs(environments) always adds os.Environ() to the input environment.
-	// For testing we need to make it's behavior close to the expandStepInputsForAnalytics() function,
-	// which works only with the input environment.
-	//
-	// With this workaround there is still a differenc in the 2 function's behaviour:
-	// envman.CommandEnvs(environments) always uses os.Environ() for expansion,
-	// while expandStepInputsForAnalytics() works only with the input environment.
-	// If we do not refer to os.Environ() the 2 functions should do expansion in the same way.
-	var filteredEnviron []string
-	for _, expandedEnv := range expandedEnviron {
-		set := true
-
-		expandedEnvKey, _ := keyValue(expandedEnv)
-		for _, osEnv := range osEnviron {
-			osEnvKey, _ := keyValue(osEnv)
-			if expandedEnvKey == osEnvKey {
-				set = false
-				break
-			}
-		}
-
-		if set {
-			filteredEnviron = append(filteredEnviron, expandedEnv)
-		}
-	}
-
-	return filteredEnviron, restoreEnviron(osEnviron)
-}
-
-func TestSecretExpand(t *testing.T) {
-	// Arrange
-	appEnvs := []envmanModels.EnvironmentItemModel{
-		{"date": "2020 $month"},
-		{"month": "jun"},
-		{"simulator_short_device": "($date) Ipad"},
-	}
-	workflowEnvs := []envmanModels.EnvironmentItemModel{
-		{
-			"secret_simulator_device": "$simulator_short_device Pro",
-			"opts":                    map[string]interface{}{"is_sensitive": true},
-		},
-	}
-	inputEnvs := []envmanModels.EnvironmentItemModel{
-		{"simulator_device": "$secret_simulator_device"},
-		{"fallback_simulator_device": "$simulator_device"},
-	}
-
-	// Act
-	got := expandStepInputsForAnalytics(inputEnvs, append(appEnvs, workflowEnvs...))
-
-	// envman expand
-	// environ, err := filterSecrets(append(append(appEnvs, workflowEnvs...), inputEnvs...))
-	//require.NoError(t, err)
-	environ := append(append(appEnvs, workflowEnvs...), inputEnvs...)
-	envmanEnvs, err := expandEnvironment(environ)
-	require.NoError(t, err)
-
-	// Assert
-	require.NotNil(t, got)
-	require.NotNil(t, envmanEnvs)
-	want := map[string]string{
-		"simulator_device":          "[REDACTED]",
-		"fallback_simulator_device": "(2020 ) Ipad Pro",
-	}
-	if !reflect.DeepEqual(want, got) {
-		t.Fatalf("expandStepInputs() actual: %v expected: %v", got, want)
-	}
-
-	// Test if the test expectation is align with envman.CommandEnvs function's behaviour
-	/*
-			if err := compare(t, envmanEnvs, want); err != nil {
-				t.Errorf("invalid expectation: %s", err)
-			}
-		// Test if expandStepInputsForAnalytics is align with envman.CommandEnvs function's behaviour
-		if err := compare(t, want, got); err != nil {
-			t.Error(err)
-		}
-	*/
 }
 
 func TestExpandStepInputs(t *testing.T) {
@@ -183,7 +66,7 @@ func TestExpandStepInputs(t *testing.T) {
 			},
 		},
 		{
-			name: "Secrets inputs are removed",
+			name: "Secrets inputs are marked as sensitive",
 			envs: []envmanModels.EnvironmentItemModel{},
 			inputs: []envmanModels.EnvironmentItemModel{
 				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
@@ -195,7 +78,7 @@ func TestExpandStepInputs(t *testing.T) {
 			},
 		},
 		{
-			name: "Secrets environments are redacted",
+			name: "Secrets environments are marked as sensitive",
 			envs: []envmanModels.EnvironmentItemModel{
 				{"secret_env": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
 			},
@@ -204,6 +87,23 @@ func TestExpandStepInputs(t *testing.T) {
 			},
 			want: map[string]envVarValue{
 				"simulator_device": {value: "iPhone top secret", isSensitive: true},
+			},
+		},
+		{
+			name: "Inputs referencing sensitive env are marked as sensitive",
+			envs: []envmanModels.EnvironmentItemModel{
+				{"date": "2020 $month"},
+				{"month": "jun"},
+				{"simulator_short_device": "($date) Ipad"},
+				{"secret_simulator_device": "$simulator_short_device Pro", "opts": map[string]interface{}{"is_sensitive": true}},
+			},
+			inputs: []envmanModels.EnvironmentItemModel{
+				{"simulator_device": "$secret_simulator_device"},
+				{"fallback_simulator_device": "$simulator_device"},
+			},
+			want: map[string]envVarValue{
+				"simulator_device":          {value: "(2020 ) Ipad Pro", isSensitive: true},
+				"fallback_simulator_device": {value: "(2020 ) Ipad Pro", isSensitive: true},
 			},
 		},
 		{
@@ -377,15 +277,22 @@ func TestExpandStepInputs(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			cleanEnvs := os.Environ()
 			// Act
 			got := expandStepInputsForAnalytics(test.inputs, test.envs)
+			if err := restoreEnviron(cleanEnvs); err != nil {
+				t.Fatal(err)
+			}
 
 			// envman expand
 			// environ, err := filterSecrets(append(test.envs, test.inputs...))
 			// require.NoError(t, err)
 			environ := append(test.envs, test.inputs...)
-			envmanEnvs, err := expandEnvironment(environ)
+			envmanEnvs, err := commandEnvs(environ)
 			require.NoError(t, err)
+			if err := restoreEnviron(cleanEnvs); err != nil {
+				t.Fatal(err)
+			}
 
 			// Assert
 			require.NotNil(t, got)
@@ -402,6 +309,39 @@ func TestExpandStepInputs(t *testing.T) {
 				t.Fatal(err)
 			}
 		})
+
+		t.Run("Compare commandEnvs and commandEnvs2"+test.name, func(t *testing.T) {
+			cleanEnvs := os.Environ()
+			environ := append(test.envs, test.inputs...)
+
+			for _, newEnv := range environ {
+				if err := newEnv.FillMissingDefaults(); err != nil {
+					t.Fatalf("failed to fill missing defaults: %s", err)
+				}
+			}
+
+			got1, err := commandEnvs(environ)
+			require.NoError(t, err)
+			require.NotNil(t, got1)
+			if err := restoreEnviron(cleanEnvs); err != nil {
+				t.Fatal(err)
+			}
+
+			got2, err := commandEnvs2(environ)
+			require.NoError(t, err)
+			require.NotNil(t, got2)
+			if err := restoreEnviron(cleanEnvs); err != nil {
+				t.Fatal(err)
+			}
+
+			if !reflect.DeepEqual(got1, got2) {
+				t.Fatalf("commandEnvs2() actual: %#v, expecteed: %#v", got2, got1)
+			}
+
+			if compare(t, got2, test.want); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 
@@ -414,7 +354,7 @@ func compare(t *testing.T, environ []string, envs map[string]envVarValue) error 
 	*/
 
 	for _, envVar := range environ {
-		key, value := keyValue(envVar)
+		key, value := parseOSEnv(envVar)
 		v, ok := envs[key]
 		if ok != true {
 			// return fmt.Errorf("compare() failed: %s not found", key)
