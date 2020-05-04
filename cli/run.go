@@ -5,6 +5,7 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/envman"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/command"
@@ -56,6 +57,27 @@ func commandEnvs(envs []models.EnvironmentItemModel) ([]string, error) {
 			return []string{}, err
 		}
 	}
+	return os.Environ(), nil
+}
+
+func commandEnvs2(newEnvs []models.EnvironmentItemModel) ([]string, error) {
+	result, err := env.GetDeclarationsSideEffects(newEnvs, &env.DefaultEnvironmentSource{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, command := range result.CommandHistory {
+		switch command.Action {
+		case env.SetAction:
+			os.Setenv(command.Variable.Key, command.Variable.Value)
+		case env.UnsetAction:
+			os.Unsetenv(command.Variable.Key)
+		case env.SkipAction:
+		default:
+			return nil, fmt.Errorf("invalid case for environement declaration action: %#v", command)
+		}
+	}
+
 	return os.Environ(), nil
 }
 
