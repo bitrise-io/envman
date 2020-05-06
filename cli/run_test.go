@@ -558,6 +558,11 @@ func TestExpandStepInputs(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cleanEnvs := os.Environ()
 			environ := append(test.envs, test.inputs...)
+
+			for _, envVar := range environ {
+				err := envVar.FillMissingDefaults()
+				require.NoError(t, err, "FillMissingDefaults()")
+			}
 			// Act
 			got, err := env.GetDeclarationsSideEffects(environ, &env.DefaultEnvironmentSource{})
 			if err := restoreEnviron(cleanEnvs); err != nil {

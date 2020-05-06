@@ -97,7 +97,7 @@ func SplitEnv(env string) (key string, value string) {
 // Variable expansion is done also, every new variable can reference the previous and initial environments (via EnvironmentSource)
 // The new variables (models.EnvironmentItemModel) can be defined in the envman definition file, or filled in directly.
 // If the source of the variables (models.EnvironmentItemModel) is the bitrise.yml workflow,
-// they should be in this order: App level envs; Workflow level envs; Input envs.
+// they will be in this order: App secrets; App level envs; Workflow level envs; Additional Step info envs; Input envs.
 func GetDeclarationsSideEffects(newEnvs []models.EnvironmentItemModel, envSource EnvironmentSource) (DeclarationSideEffects, error) {
 	envs := envSource.GetEnvironment()
 	commandHistory := make([]Command, len(newEnvs))
@@ -130,10 +130,6 @@ func GetDeclarationsSideEffects(newEnvs []models.EnvironmentItemModel, envSource
 // getDeclarationCommand maps a variable to be daclered (env) to an expanded env key and value.
 // The current process environment is not changed.
 func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Variable) (Command, error) {
-	if err := env.FillMissingDefaults(); err != nil {
-		return Command{}, fmt.Errorf("failed to fill missing defaults: %s", err)
-	}
-
 	envKey, envValue, err := env.GetKeyValuePair()
 	if err != nil {
 		return Command{}, fmt.Errorf("failed to get new environment variable name and value: %s", err)
