@@ -76,7 +76,7 @@ func commandEnvs2(newEnvs []models.EnvironmentItemModel) ([]string, error) {
 }
 
 func runCommandModel(cmdModel CommandModel) (int, error) {
-	cmdEnvs, err := commandEnvs2(cmdModel.Environments)
+	cmdEnvs, err := commandEnvs(cmdModel.Environments)
 	if err != nil {
 		return 1, err
 	}

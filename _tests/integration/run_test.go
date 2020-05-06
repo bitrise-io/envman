@@ -1,9 +1,11 @@
 package integration
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -13,269 +15,240 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRun(t *testing.T) {
-	tests := []struct {
-		name         string
-		envs, inputs []models.EnvironmentItemModel
-		want         map[string]env.Variable
-	}{
-		{
-			name: "Env does not depend on input",
-			envs: []models.EnvironmentItemModel{
-				{"simulator_device": "$simulator_major", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_major": "12", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_major":      {Value: "12"},
-				"simulator_os_version": {Value: ""},
-			},
+var SharedTestCases = []struct {
+	name string
+	envs []models.EnvironmentItemModel
+	want []env.Command
+}{
+	{
+		name: "empty env list",
+		envs: []models.EnvironmentItemModel{},
+		want: []env.Command{},
+	},
+	{
+		name: "unset env",
+		envs: []models.EnvironmentItemModel{
+			{"A": "B", "opts": map[string]interface{}{"unset": true}},
 		},
-		{
-			name: "Env does not depend on input (input order switched)",
-			envs: []models.EnvironmentItemModel{
-				{"simulator_device": "$simulator_major", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"simulator_major": "12", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_major":      {Value: "12"},
-				"simulator_os_version": {Value: ""},
-			},
+		want: []env.Command{
+			{Action: env.UnsetAction, Variable: env.Variable{Key: "A"}},
 		},
-		{
-			name: "Secrets inputs are marked as sensitive",
-			envs: []models.EnvironmentItemModel{},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"secret_input": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-				"secret_input":         {Value: "top secret", IsSensitive: true},
-			},
+	},
+	{
+		name: "set env",
+		envs: []models.EnvironmentItemModel{
+			{"A": "B", "opts": map[string]interface{}{}},
 		},
-		{
-			name: "Secrets environments are marked as sensitive",
-			envs: []models.EnvironmentItemModel{
-				{"secret_env": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_device": "iPhone $secret_env", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_device": {Value: "iPhone top secret", IsSensitive: true},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
 		},
-		{
-			name: "Inputs referencing sensitive env are marked as sensitive",
-			envs: []models.EnvironmentItemModel{
-				{"date": "2020 $month"},
-				{"month": "jun"},
-				{"simulator_short_device": "($date) Ipad"},
-				{"secret_simulator_device": "$simulator_short_device Pro", "opts": map[string]interface{}{"is_sensitive": true}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_device": "$secret_simulator_device"},
-				{"fallback_simulator_device": "$simulator_device"},
-			},
-			want: map[string]env.Variable{
-				"simulator_device":          {Value: "(2020 ) Ipad Pro", IsSensitive: true},
-				"fallback_simulator_device": {Value: "(2020 ) Ipad Pro", IsSensitive: true},
-			},
+	},
+	{
+		name: "set multiple envs",
+		envs: []models.EnvironmentItemModel{
+			{"A": "B", "opts": map[string]interface{}{}},
+			{"B": "C", "opts": map[string]interface{}{}},
 		},
-		{
-			name: "Not referencing other envs, missing options (sensive input).",
-			envs: []models.EnvironmentItemModel{},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
-				{"simulator_device": "iPhone 8 Plus", "opts": map[string]interface{}{}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-				"simulator_device":     {Value: "iPhone 8 Plus"},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: "C"}},
 		},
-		{
-			name: "Not referencing other envs, options specified.",
-			envs: []models.EnvironmentItemModel{},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"simulator_device": "iPhone 8 Plus", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-				"simulator_device":     {Value: "iPhone 8 Plus"},
-			},
+	},
+	{
+		name: "set int env",
+		envs: []models.EnvironmentItemModel{
+			{"A": 12, "opts": map[string]interface{}{}},
 		},
-		{
-			name: "Input references env var, is_expand is false.",
-			envs: []models.EnvironmentItemModel{
-				{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "$SIMULATOR_OS_VERSION"},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "12"}},
 		},
-		{
-			name: "Unset",
-			envs: []models.EnvironmentItemModel{
-				{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"unset": true}},
-			},
-			inputs: []models.EnvironmentItemModel{},
-			want:   map[string]env.Variable{},
+	},
+	{
+		name: "skip env",
+		envs: []models.EnvironmentItemModel{
+			{"A": "B", "opts": map[string]interface{}{}},
+			{"S": "", "opts": map[string]interface{}{"skip_if_empty": true}},
 		},
-		{
-			name: "Skip if empty",
-			envs: []models.EnvironmentItemModel{
-				{"SIMULATOR_OS_VERSION": "", "opts": map[string]interface{}{"skip_if_empty": true}},
-			},
-			inputs: []models.EnvironmentItemModel{},
-			want:   map[string]env.Variable{},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
+			{Action: env.SkipAction, Variable: env.Variable{Key: "S"}},
 		},
-		{
-			name: "Env expansion, input contains env var.",
-			envs: []models.EnvironmentItemModel{
-				{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-			},
+	},
+	{
+		name: "skip env, do not skip if not empty",
+		envs: []models.EnvironmentItemModel{
+			{"A": "B", "opts": map[string]interface{}{}},
+			{"S": "T", "opts": map[string]interface{}{"skip_if_empty": true}},
 		},
-		{
-			name: "Env var expansion, input expansion",
-			envs: []models.EnvironmentItemModel{
-				{"SIMULATOR_OS_MAJOR_VERSION": "13", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"SIMULATOR_OS_MINOR_VERSION": "3", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_MAJOR_VERSION.$SIMULATOR_OS_MINOR_VERSION", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "S", Value: "T"}},
 		},
-		{
-			name: "Input expansion, input refers other input",
-			envs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "12.1", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-				"simulator_device":     {Value: "iPhone 8 (13.3)"},
-			},
+	},
+	{
+		name: "Env does only depend on envs declared before them",
+		envs: []models.EnvironmentItemModel{
+			{"simulator_device": "$simulator_major", "opts": map[string]interface{}{"is_expand": true}},
+			{"simulator_major": "12", "opts": map[string]interface{}{"is_expand": false}},
+			{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		{
-			name: "Input expansion, input can not refer other input declared after it",
-			envs: []models.EnvironmentItemModel{
-				{"simulator_os_version": "12.1", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"simulator_os_version": {Value: "13.3"},
-				"simulator_device":     {Value: "iPhone 8 (12.1)"},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: ""}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_major", Value: "12"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: ""}},
 		},
-		{
-			name: "Input refers itself, env refers itself",
-			envs: []models.EnvironmentItemModel{
-				{"ENV_LOOP": "$ENV_LOOP", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"loop": "$loop", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"env_loop": "$ENV_LOOP", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"loop":     {Value: ""},
-				"env_loop": {Value: ""},
-			},
+	},
+	{
+		name: "Env does only depend on envs declared before them (input order switched)",
+		envs: []models.EnvironmentItemModel{
+			{"simulator_device": "$simulator_major", "opts": map[string]interface{}{"is_expand": true}},
+			{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
+			{"simulator_major": "12", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		{
-			name: "Input refers itself, env refers itself; both have prefix included",
-			envs: []models.EnvironmentItemModel{
-				{"ENV_LOOP": "Env Something: $ENV_LOOP", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"loop": "Something: $loop", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"env_loop": "$ENV_LOOP", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"loop":     {Value: "Something: "},
-				"env_loop": {Value: "Env Something: "},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: ""}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: ""}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_major", Value: "12"}},
 		},
-		{
-			name: "Inputs refer inputs in a chain, with prefix included",
-			envs: []models.EnvironmentItemModel{},
-			inputs: []models.EnvironmentItemModel{
-				{"similar2": "anything", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"similar": "$similar2", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"env": "Something: $similar", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"similar2": {Value: "anything"},
-				"similar":  {Value: "anything"},
-				"env":      {Value: "Something: anything"},
-			},
+	},
+	{
+		name: "Env does only depend on envs declared before them, envs in a loop",
+		envs: []models.EnvironmentItemModel{
+			{"A": "$C", "opts": map[string]interface{}{"is_expand": true}},
+			{"B": "$A", "opts": map[string]interface{}{"is_expand": true}},
+			{"C": "$B", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		{
-			name: "References in a loop are not expanded",
-			envs: []models.EnvironmentItemModel{
-				{"B": "$A", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"A": "$B", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			inputs: []models.EnvironmentItemModel{
-				{"a": "$b", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"b": "$c", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"c": "$a", "opts": map[string]interface{}{"is_sensitive": false}},
-				{"env": "$A", "opts": map[string]interface{}{"is_sensitive": false}},
-			},
-			want: map[string]env.Variable{
-				"a":   {Value: ""},
-				"b":   {Value: ""},
-				"c":   {Value: ""},
-				"env": {Value: ""},
-			},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: ""}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: ""}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "C", Value: ""}},
 		},
-	}
+	},
+	{
+		name: "Do not expand env if is_expand is false",
+		envs: []models.EnvironmentItemModel{
+			{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_expand": true}},
+			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": false}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "$SIMULATOR_OS_VERSION"}},
+		},
+	},
+	{
+		name: "Expand env, self reference",
+		envs: []models.EnvironmentItemModel{
+			{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: ""}},
+		},
+	},
+	{
+		name: "Expand env, input contains env var",
+		envs: []models.EnvironmentItemModel{
+			{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_expand": false}},
+			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+		},
+	},
+	{
+		name: "Multi level env var expansion",
+		envs: []models.EnvironmentItemModel{
+			{"A": "1", "opts": map[string]interface{}{"is_expand": true}},
+			{"B": "$A", "opts": map[string]interface{}{"is_expand": true}},
+			{"C": "prefix $B", "opts": map[string]interface{}{"is_expand": true}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "1"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: "1"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "C", Value: "prefix 1"}},
+		},
+	},
+	{
+		name: "Multi level env var expansion 2",
+		envs: []models.EnvironmentItemModel{
+			{"SIMULATOR_OS_MAJOR_VERSION": "13", "opts": map[string]interface{}{"is_expand": true}},
+			{"SIMULATOR_OS_MINOR_VERSION": "3", "opts": map[string]interface{}{"is_expand": true}},
+			{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_MAJOR_VERSION.$SIMULATOR_OS_MINOR_VERSION", "opts": map[string]interface{}{"is_expand": true}},
+			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_MAJOR_VERSION", Value: "13"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_MINOR_VERSION", Value: "3"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+		},
+	},
+	{
+		name: "Env expansion (partial), step input can refers other input",
+		envs: []models.EnvironmentItemModel{
+			{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
+			{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone 8 (13.3)"}},
+		},
+	},
+	{
+		name: "Env expand, duplicate env declarations",
+		envs: []models.EnvironmentItemModel{
+			{"simulator_os_version": "12.1", "opts": map[string]interface{}{}},
+			{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_expand": "true"}},
+			{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "12.1"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone 8 (12.1)"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+		},
+	},
+	{
+		name: "Secrets inputs are marked as sensitive",
+		envs: []models.EnvironmentItemModel{
+			{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
+			{"secret_input": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "secret_input", Value: "top secret", IsSensitive: true}},
+		},
+	},
+	{
+		name: "Input referencing secret env is marked as sensitive",
+		envs: []models.EnvironmentItemModel{
+			{"SECRET_ENV": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
+			{"simulator_device": "iPhone $SECRET_ENV", "opts": map[string]interface{}{"is_expand": true, "is_sensitive": false}},
+		},
+		want: []env.Command{
+			{Action: env.SetAction, Variable: env.Variable{Key: "SECRET_ENV", Value: "top secret", IsSensitive: true}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone top secret", IsSensitive: true}},
+		},
+	},
+}
 
+func TestRun(t *testing.T) {
 	tmpDir, err := pathutil.NormalizedOSTempDirPath("__envman__")
 	require.NoError(t, err)
 
 	envstore := filepath.Join(tmpDir, ".envstore")
 
-	for _, tt := range tests {
+	for _, tt := range SharedTestCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := EnvmanInitAtPath(envstore)
 			require.NoError(t, err, "EnvmanInitAtPath()")
 
-			inEnvs := append(tt.envs, tt.inputs...)
-
-			for _, envVar := range inEnvs {
+			for _, envVar := range tt.envs {
 				if err := envVar.FillMissingDefaults(); err != nil {
 					require.NoError(t, err, "FillMissingDefaults()")
 				}
 			}
 
-			ExportEnvironmentsList(envstore, inEnvs)
+			ExportEnvironmentsList(envstore, tt.envs)
 			require.NoError(t, err, "ExportEnvironmentsList()")
 
 			output, err := EnvmanRun(envstore, tmpDir, []string{"env"}, time.Minute, nil)
@@ -283,31 +256,62 @@ func TestRun(t *testing.T) {
 
 			gotOut := parseEnvRawOut(output)
 
-			t.Logf("Actual environment: %s", gotOut)
-
-			// Add inital envrionments to the want map
-			wantEnvs := make(map[string]string)
-			for changedKey, changedValue := range tt.want {
-				wantEnvs[changedKey] = changedValue.Value
+			// Want envs
+			envsWant := make(map[string]string)
+			for _, envVar := range os.Environ() {
+				key, value := env.SplitEnv(envVar)
+				envsWant[key] = value
 			}
 
-			for wantKey, wantValue := range wantEnvs {
-				require.Equal(t, wantValue, gotOut[wantKey], "Set environments do not match.")
+			for _, envCommand := range tt.want {
+				switch envCommand.Action {
+				case env.SetAction:
+					envsWant[envCommand.Variable.Key] = envCommand.Variable.Value
+				case env.UnsetAction:
+					delete(envsWant, envCommand.Variable.Key)
+				case env.SkipAction:
+				default:
+					t.Fatalf("compare() failed, invalid action: %d", envCommand.Action)
+				}
 			}
+
+			require.Equal(t, envsWant, gotOut)
 		})
 	}
 
 }
 
 func parseEnvRawOut(output string) map[string]string {
-	r := regexp.MustCompile("(?m)^([a-zA-Z_][a-zA-Z0-9_]*)=(.*)$")
-	matches := r.FindAllStringSubmatch(output, -1)
+	r := regexp.MustCompile("^([a-zA-Z_][a-zA-Z0-9_]*)=(.*)$")
+
+	lines := strings.Split(output, "\n")
 
 	envs := make(map[string]string)
-	for _, match := range matches {
+	lastKey := ""
+	for _, line := range lines {
+		match := r.FindStringSubmatch(line)
+
+		fmt.Printf("%s %s \n", line, match)
+
+		if match == nil {
+			if lastKey != "" {
+				envs[lastKey] += "\n" + line
+			}
+			continue
+		}
+
 		if len(match) != 3 {
 			continue
 		}
+
+		if match[1] == "current_envman" {
+			if lastKey != "" {
+				envs[lastKey] += "\n" + line
+			}
+			continue
+		}
+
+		lastKey = match[1]
 		envs[match[1]] = match[2]
 	}
 
@@ -323,19 +327,22 @@ func Test_parseEnvRawOut(t *testing.T) {
 		{
 			output: `RBENV_SHELL=zsh
 _=/usr/local/bin/go
+#!/bin/env bash
+echo "ff"
 A=`,
 			want: map[string]string{
 				"RBENV_SHELL": "zsh",
-				"_":           "/usr/local/bin/go",
-				"A":           "",
+				"_": `/usr/local/bin/go
+#!/bin/env bash
+echo "ff"`,
+				"A": "",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseEnvRawOut(tt.output); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseEnvRawOut() = %v, want %v", got, tt.want)
-			}
+			got := parseEnvRawOut(tt.output)
+			require.Equal(t, got, tt.want)
 		})
 	}
 }
