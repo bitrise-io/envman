@@ -22,16 +22,19 @@ const (
 	SkipAction
 )
 
-// DeclarationCommand describes an action performed on an envrionment variable
-type DeclarationCommand struct {
+// Command describes an action performed on an envrionment variable
+type Command struct {
 	Action   Action
 	Variable Variable
 }
 
 // Variable is an environment variable
 type Variable struct {
-	Key         string
-	Value       string
+	Key   string
+	Value string
+	// IsSensitive is true if variable is marked (optionally) sensitive initally (for example a sensitive input or a secret),
+	// or recursively references any variable marked as sensitive.
+	// The goal is to keep track of any references secrets, so these can be redacted easily.
 	IsSensitive bool
 }
 
@@ -39,7 +42,7 @@ type Variable struct {
 type DeclarationSideEffects struct {
 	// CommandHistory is an ordered list of commands: when performed in sequence,
 	// will result in a environment that contains the declared env vars
-	CommandHistory []DeclarationCommand
+	CommandHistory []Command
 	// ResultEnvironment is returned for reference,
 	// it will equal the environment after performing the commands
 	ResultEnvironment map[string]Variable
@@ -97,24 +100,24 @@ func SplitEnv(env string) (key string, value string) {
 // they should be in this order: App level envs; Workflow level envs; Input envs.
 func GetDeclarationsSideEffects(newEnvs []models.EnvironmentItemModel, envSource EnvironmentSource) (DeclarationSideEffects, error) {
 	envs := envSource.GetEnvironment()
-	commandHistory := make([]DeclarationCommand, len(newEnvs))
+	commandHistory := make([]Command, len(newEnvs))
 
 	for i, env := range newEnvs {
-		newEnv, err := getDeclarationCommand(env, envs)
+		command, err := getDeclarationCommand(env, envs)
 		if err != nil {
 			return DeclarationSideEffects{}, fmt.Errorf("failed to parse new environment variable (%s): %s", env, err)
 		}
 
-		commandHistory[i] = newEnv
+		commandHistory[i] = command
 
-		switch newEnv.Action {
+		switch command.Action {
 		case SetAction:
-			envs[newEnv.Variable.Key] = newEnv.Variable
+			envs[command.Variable.Key] = command.Variable
 		case UnsetAction:
-			delete(envs, newEnv.Variable.Key)
+			delete(envs, command.Variable.Key)
 		case SkipAction:
 		default:
-			return DeclarationSideEffects{}, fmt.Errorf("invalid case for environement declaration action: %#v", newEnv)
+			return DeclarationSideEffects{}, fmt.Errorf("invalid case for environement declaration action: %#v", command)
 		}
 	}
 
@@ -126,30 +129,30 @@ func GetDeclarationsSideEffects(newEnvs []models.EnvironmentItemModel, envSource
 
 // getDeclarationCommand maps a variable to be daclered (env) to an expanded env key and value.
 // The current process environment is not changed.
-func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Variable) (DeclarationCommand, error) {
+func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Variable) (Command, error) {
 	if err := env.FillMissingDefaults(); err != nil {
-		return DeclarationCommand{}, fmt.Errorf("failed to fill missing defaults: %s", err)
+		return Command{}, fmt.Errorf("failed to fill missing defaults: %s", err)
 	}
 
 	envKey, envValue, err := env.GetKeyValuePair()
 	if err != nil {
-		return DeclarationCommand{}, fmt.Errorf("failed to get new environment variable name and value: %s", err)
+		return Command{}, fmt.Errorf("failed to get new environment variable name and value: %s", err)
 	}
 
 	options, err := env.GetOptions()
 	if err != nil {
-		return DeclarationCommand{}, fmt.Errorf("failed to get new environment options: %s", err)
+		return Command{}, fmt.Errorf("failed to get new environment options: %s", err)
 	}
 
 	if options.Unset != nil && *options.Unset {
-		return DeclarationCommand{
+		return Command{
 			Action:   UnsetAction,
 			Variable: Variable{Key: envKey},
 		}, nil
 	}
 
 	if options.SkipIfEmpty != nil && *options.SkipIfEmpty && envValue == "" {
-		return DeclarationCommand{
+		return Command{
 			Action:   SkipAction,
 			Variable: Variable{Key: envKey},
 		}, nil
@@ -171,7 +174,7 @@ func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Vari
 		envValue = os.Expand(envValue, mappingFuncFactory(envs, &containsSensitiveInfo))
 	}
 
-	return DeclarationCommand{
+	return Command{
 		Action: SetAction,
 		Variable: Variable{
 			Key:         envKey,
@@ -179,4 +182,18 @@ func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Vari
 			IsSensitive: containsSensitiveInfo,
 		},
 	}, nil
+}
+
+// ExecuteCommand sets the current process's envrionment
+func ExecuteCommand(command Command) error {
+	switch command.Action {
+	case SetAction:
+		return os.Setenv(command.Variable.Key, command.Variable.Value)
+	case UnsetAction:
+		return os.Unsetenv(command.Variable.Key)
+	case SkipAction:
+		return nil
+	default:
+		return fmt.Errorf("invalid case for environement declaration action: %#v", command)
+	}
 }

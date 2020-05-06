@@ -67,14 +67,8 @@ func commandEnvs2(newEnvs []models.EnvironmentItemModel) ([]string, error) {
 	}
 
 	for _, command := range result.CommandHistory {
-		switch command.Action {
-		case env.SetAction:
-			os.Setenv(command.Variable.Key, command.Variable.Value)
-		case env.UnsetAction:
-			os.Unsetenv(command.Variable.Key)
-		case env.SkipAction:
-		default:
-			return nil, fmt.Errorf("invalid case for environement declaration action: %#v", command)
+		if err := env.ExecuteCommand(command); err != nil {
+			return nil, err
 		}
 	}
 
@@ -82,7 +76,7 @@ func commandEnvs2(newEnvs []models.EnvironmentItemModel) ([]string, error) {
 }
 
 func runCommandModel(cmdModel CommandModel) (int, error) {
-	cmdEnvs, err := commandEnvs(cmdModel.Environments)
+	cmdEnvs, err := commandEnvs2(cmdModel.Environments)
 	if err != nil {
 		return 1, err
 	}
