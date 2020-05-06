@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -347,51 +346,8 @@ func TestExpandStepInputs(t *testing.T) {
 
 			// Assert
 			require.NotNil(t, got)
-			//require.NotNil(t, envmanEnvs)
-
-			// Test if the test expectation is align with envman.CommandEnvs function's behaviour
-			if err := compare(t, envmanEnvs, cleanEnvs, test.Want); err != nil {
-				t.Logf("evmanEnvs: %+v, test.want: %+v", envmanEnvs, test.Want)
-				t.Fatal(err)
-			}
-			// Test if align with envman.CommandEnvs function's behaviour
-			if err := compare(t, envmanEnvs, cleanEnvs, got.CommandHistory); err != nil {
-				t.Fatal(err)
-			}
-
+			require.NotNil(t, envmanEnvs)
 			require.Equal(t, test.Want, got.CommandHistory)
-		})
-
-		t.Run("Compare commandEnvs and commandEnvs2"+test.Name, func(t *testing.T) {
-			cleanEnvs := os.Environ()
-
-			for _, newEnv := range test.Envs {
-				if err := newEnv.FillMissingDefaults(); err != nil {
-					t.Fatalf("failed to fill missing defaults: %s", err)
-				}
-			}
-
-			got1, err := commandEnvs(test.Envs)
-			require.NoError(t, err)
-			require.NotNil(t, got1)
-			if err := restoreEnviron(cleanEnvs); err != nil {
-				t.Fatal(err)
-			}
-
-			got2, err := commandEnvs2(test.Envs)
-			require.NoError(t, err)
-			require.NotNil(t, got2)
-			if err := restoreEnviron(cleanEnvs); err != nil {
-				t.Fatal(err)
-			}
-
-			if !reflect.DeepEqual(got1, got2) {
-				t.Fatalf("commandEnvs2() actual: %#v, expecteed: %#v", got2, got1)
-			}
-
-			if err := compare(t, got2, cleanEnvs, test.Want); err != nil {
-				t.Fatal(err)
-			}
 		})
 	}
 }

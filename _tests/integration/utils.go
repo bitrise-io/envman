@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/command"
@@ -107,18 +106,12 @@ func EnvmanClear(envstorePth string) error {
 }
 
 // EnvmanRun runs a command through envman.
-func EnvmanRun(envstorePth,
-	workDirPth string,
-	cmdArgs []string,
-	timeout time.Duration,
-	stdInPayload []byte,
-) (string, error) {
+func EnvmanRun(envstorePth, workDir string, cmdArgs []string) (string, error) {
 	const logLevel = "panic"
 	args := []string{"--loglevel", logLevel, "--path", envstorePth, "run"}
 	args = append(args, cmdArgs...)
 
-	cmd := command.New(binPath(), args...)
-	//cmd.AppendEnv("PWD=" + workDirPth)
+	cmd := command.New(binPath(), args...).SetDir(workDir)
 
 	return cmd.RunAndReturnTrimmedCombinedOutput()
 }

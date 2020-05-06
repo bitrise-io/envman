@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/go-utils/pathutil"
@@ -34,7 +33,7 @@ func TestRun(t *testing.T) {
 			ExportEnvironmentsList(envstore, tt.Envs)
 			require.NoError(t, err, "ExportEnvironmentsList()")
 
-			output, err := EnvmanRun(envstore, tmpDir, []string{"env"}, time.Minute, nil)
+			output, err := EnvmanRun(envstore, tmpDir, []string{"env"})
 			require.NoError(t, err, "EnvmanRun()")
 
 			gotOut := parseEnvRawOut(output)
