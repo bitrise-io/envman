@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bitrise-io/envman/_tests/integration"
 	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/pointers"
@@ -319,234 +320,18 @@ func compare(t *testing.T, environGot []string, initialEnvs []string, commandsWa
 	return nil
 }
 
-var SharedTestCases = []struct {
-	name string
-	envs []models.EnvironmentItemModel
-	want []env.Command
-}{
-	{
-		name: "empty env list",
-		envs: []models.EnvironmentItemModel{},
-		want: []env.Command{},
-	},
-	{
-		name: "unset env",
-		envs: []models.EnvironmentItemModel{
-			{"A": "B", "opts": map[string]interface{}{"unset": true}},
-		},
-		want: []env.Command{
-			{Action: env.UnsetAction, Variable: env.Variable{Key: "A"}},
-		},
-	},
-	{
-		name: "set env",
-		envs: []models.EnvironmentItemModel{
-			{"A": "B", "opts": map[string]interface{}{}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-		},
-	},
-	{
-		name: "set multiple envs",
-		envs: []models.EnvironmentItemModel{
-			{"A": "B", "opts": map[string]interface{}{}},
-			{"B": "C", "opts": map[string]interface{}{}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: "C"}},
-		},
-	},
-	{
-		name: "set int env",
-		envs: []models.EnvironmentItemModel{
-			{"A": 12, "opts": map[string]interface{}{}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "12"}},
-		},
-	},
-	{
-		name: "skip env",
-		envs: []models.EnvironmentItemModel{
-			{"A": "B", "opts": map[string]interface{}{}},
-			{"S": "", "opts": map[string]interface{}{"skip_if_empty": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-			{Action: env.SkipAction, Variable: env.Variable{Key: "S"}},
-		},
-	},
-	{
-		name: "skip env, do not skip if not empty",
-		envs: []models.EnvironmentItemModel{
-			{"A": "B", "opts": map[string]interface{}{}},
-			{"S": "T", "opts": map[string]interface{}{"skip_if_empty": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "S", Value: "T"}},
-		},
-	},
-	{
-		name: "Env does only depend on envs declared before them",
-		envs: []models.EnvironmentItemModel{
-			{"simulator_device": "$simulator_major", "opts": map[string]interface{}{"is_expand": true}},
-			{"simulator_major": "12", "opts": map[string]interface{}{"is_expand": false}},
-			{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_major", Value: "12"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: ""}},
-		},
-	},
-	{
-		name: "Env does only depend on envs declared before them (input order switched)",
-		envs: []models.EnvironmentItemModel{
-			{"simulator_device": "$simulator_major", "opts": map[string]interface{}{"is_expand": true}},
-			{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
-			{"simulator_major": "12", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_major", Value: "12"}},
-		},
-	},
-	{
-		name: "Env does only depend on envs declared before them, envs in a loop",
-		envs: []models.EnvironmentItemModel{
-			{"A": "$C", "opts": map[string]interface{}{"is_expand": true}},
-			{"B": "$A", "opts": map[string]interface{}{"is_expand": true}},
-			{"C": "$B", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "C", Value: ""}},
-		},
-	},
-	{
-		name: "Do not expand env if is_expand is false",
-		envs: []models.EnvironmentItemModel{
-			{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_expand": true}},
-			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": false}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "$SIMULATOR_OS_VERSION"}},
-		},
-	},
-	{
-		name: "Expand env, self reference",
-		envs: []models.EnvironmentItemModel{
-			{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: ""}},
-		},
-	},
-	{
-		name: "Expand env, input contains env var",
-		envs: []models.EnvironmentItemModel{
-			{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_expand": false}},
-			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-		},
-	},
-	{
-		name: "Multi level env var expansion",
-		envs: []models.EnvironmentItemModel{
-			{"A": "1", "opts": map[string]interface{}{"is_expand": true}},
-			{"B": "$A", "opts": map[string]interface{}{"is_expand": true}},
-			{"C": "prefix $B", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "1"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: "1"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "C", Value: "prefix 1"}},
-		},
-	},
-	{
-		name: "Multi level env var expansion 2",
-		envs: []models.EnvironmentItemModel{
-			{"SIMULATOR_OS_MAJOR_VERSION": "13", "opts": map[string]interface{}{"is_expand": true}},
-			{"SIMULATOR_OS_MINOR_VERSION": "3", "opts": map[string]interface{}{"is_expand": true}},
-			{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_MAJOR_VERSION.$SIMULATOR_OS_MINOR_VERSION", "opts": map[string]interface{}{"is_expand": true}},
-			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_MAJOR_VERSION", Value: "13"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_MINOR_VERSION", Value: "3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-		},
-	},
-	{
-		name: "Env expansion (partial), step input can refers other input",
-		envs: []models.EnvironmentItemModel{
-			{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
-			{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone 8 (13.3)"}},
-		},
-	},
-	{
-		name: "Env expand, duplicate env declarations",
-		envs: []models.EnvironmentItemModel{
-			{"simulator_os_version": "12.1", "opts": map[string]interface{}{}},
-			{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_expand": "true"}},
-			{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "12.1"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone 8 (12.1)"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-		},
-	},
-	{
-		name: "Secrets inputs are marked as sensitive",
-		envs: []models.EnvironmentItemModel{
-			{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-			{"secret_input": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "secret_input", Value: "top secret", IsSensitive: true}},
-		},
-	},
-	{
-		name: "Input referencing secret env is marked as sensitive",
-		envs: []models.EnvironmentItemModel{
-			{"SECRET_ENV": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
-			{"simulator_device": "iPhone $SECRET_ENV", "opts": map[string]interface{}{"is_expand": true, "is_sensitive": false}},
-		},
-		want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SECRET_ENV", Value: "top secret", IsSensitive: true}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone top secret", IsSensitive: true}},
-		},
-	},
-}
-
 func TestExpandStepInputs(t *testing.T) {
-	for _, test := range SharedTestCases {
-		t.Run(test.name, func(t *testing.T) {
+	for _, test := range integration.SharedTestCases {
+		t.Run(test.Name, func(t *testing.T) {
 			// Arrange
 			cleanEnvs := os.Environ()
 
-			for _, envVar := range test.envs {
+			for _, envVar := range test.Envs {
 				err := envVar.FillMissingDefaults()
 				require.NoError(t, err, "FillMissingDefaults()")
 			}
 			// Act
-			got, err := env.GetDeclarationsSideEffects(test.envs, &env.DefaultEnvironmentSource{})
+			got, err := env.GetDeclarationsSideEffects(test.Envs, &env.DefaultEnvironmentSource{})
 			require.NoError(t, err, "GetDeclarationsSideEffects()")
 
 			if err := restoreEnviron(cleanEnvs); err != nil {
@@ -554,7 +339,7 @@ func TestExpandStepInputs(t *testing.T) {
 			}
 
 			// envman expand
-			envmanEnvs, err := commandEnvs(test.envs)
+			envmanEnvs, err := commandEnvs(test.Envs)
 			require.NoError(t, err)
 			if err := restoreEnviron(cleanEnvs); err != nil {
 				t.Fatal(err)
@@ -565,8 +350,8 @@ func TestExpandStepInputs(t *testing.T) {
 			//require.NotNil(t, envmanEnvs)
 
 			// Test if the test expectation is align with envman.CommandEnvs function's behaviour
-			if err := compare(t, envmanEnvs, cleanEnvs, test.want); err != nil {
-				t.Logf("evmanEnvs: %+v, test.want: %+v", envmanEnvs, test.want)
+			if err := compare(t, envmanEnvs, cleanEnvs, test.Want); err != nil {
+				t.Logf("evmanEnvs: %+v, test.want: %+v", envmanEnvs, test.Want)
 				t.Fatal(err)
 			}
 			// Test if align with envman.CommandEnvs function's behaviour
@@ -574,26 +359,26 @@ func TestExpandStepInputs(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			require.Equal(t, test.want, got.CommandHistory)
+			require.Equal(t, test.Want, got.CommandHistory)
 		})
 
-		t.Run("Compare commandEnvs and commandEnvs2"+test.name, func(t *testing.T) {
+		t.Run("Compare commandEnvs and commandEnvs2"+test.Name, func(t *testing.T) {
 			cleanEnvs := os.Environ()
 
-			for _, newEnv := range test.envs {
+			for _, newEnv := range test.Envs {
 				if err := newEnv.FillMissingDefaults(); err != nil {
 					t.Fatalf("failed to fill missing defaults: %s", err)
 				}
 			}
 
-			got1, err := commandEnvs(test.envs)
+			got1, err := commandEnvs(test.Envs)
 			require.NoError(t, err)
 			require.NotNil(t, got1)
 			if err := restoreEnviron(cleanEnvs); err != nil {
 				t.Fatal(err)
 			}
 
-			got2, err := commandEnvs2(test.envs)
+			got2, err := commandEnvs2(test.Envs)
 			require.NoError(t, err)
 			require.NotNil(t, got2)
 			if err := restoreEnviron(cleanEnvs); err != nil {
@@ -604,7 +389,7 @@ func TestExpandStepInputs(t *testing.T) {
 				t.Fatalf("commandEnvs2() actual: %#v, expecteed: %#v", got2, got1)
 			}
 
-			if err := compare(t, got2, cleanEnvs, test.want); err != nil {
+			if err := compare(t, got2, cleanEnvs, test.Want); err != nil {
 				t.Fatal(err)
 			}
 		})
