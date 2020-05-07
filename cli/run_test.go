@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitrise-io/envman/_tests/integration"
-	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/pointers"
 	"github.com/stretchr/testify/require"
@@ -266,48 +264,5 @@ func TestCommandEnvs(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.NotContains(t, envs, unset, "failed to unset env (%s)", key)
 
-	}
-}
-
-func restoreEnviron(environ []string) error {
-	currEnviron := os.Environ()
-	for _, currEnv := range currEnviron {
-		currEnvKey, _ := env.SplitEnv(currEnv)
-		if err := os.Unsetenv(currEnvKey); err != nil {
-			return err
-		}
-	}
-
-	for _, envVar := range environ {
-		key, value := env.SplitEnv(envVar)
-		if err := os.Setenv(key, value); err != nil {
-			return fmt.Errorf("failed to set %s=%s: %s", key, value, err)
-		}
-	}
-
-	return nil
-}
-
-func TestGetDeclarationsSideEffects(t *testing.T) {
-	for _, test := range integration.SharedTestCases {
-		t.Run(test.Name, func(t *testing.T) {
-			// Arrange
-			cleanEnvs := os.Environ()
-
-			for _, envVar := range test.Envs {
-				err := envVar.FillMissingDefaults()
-				require.NoError(t, err, "FillMissingDefaults()")
-			}
-			// Act
-			got, err := env.GetDeclarationsSideEffects(test.Envs, &env.DefaultEnvironmentSource{})
-			require.NoError(t, err, "GetDeclarationsSideEffects()")
-
-			err = restoreEnviron(cleanEnvs)
-			require.NoError(t, err, "restoreEnviron()")
-
-			// Assert
-			require.NotNil(t, got)
-			require.Equal(t, test.Want, got.CommandHistory)
-		})
 	}
 }

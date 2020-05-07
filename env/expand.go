@@ -41,21 +41,21 @@ type DeclarationSideEffects struct {
 	CommandHistory []Command
 	// ResultEnvironment is returned for reference,
 	// it will equal the environment after performing the commands
-	ResultEnvironment map[string]Variable
+	ResultEnvironment map[string]string
 }
 
 // EnvironmentSource implementations can return an initial environment
 type EnvironmentSource interface {
-	GetEnvironment() map[string]Variable
+	GetEnvironment() map[string]string
 }
 
 // DefaultEnvironmentSource is a default implementation of EnvironmentSource, returns the current environment
 type DefaultEnvironmentSource struct{}
 
 // GetEnvironment returns the current process' environment
-func (*DefaultEnvironmentSource) GetEnvironment() map[string]Variable {
+func (*DefaultEnvironmentSource) GetEnvironment() map[string]string {
 	processEnvs := os.Environ()
-	envs := make(map[string]Variable)
+	envs := make(map[string]string)
 
 	for _, env := range processEnvs {
 		key, value := SplitEnv(env)
@@ -63,10 +63,7 @@ func (*DefaultEnvironmentSource) GetEnvironment() map[string]Variable {
 			continue
 		}
 
-		envs[key] = Variable{
-			Key:   key,
-			Value: value,
-		}
+		envs[key] = value
 	}
 
 	return envs
@@ -113,7 +110,7 @@ func GetDeclarationsSideEffects(newEnvs []models.EnvironmentItemModel, envSource
 
 		switch command.Action {
 		case SetAction:
-			envs[command.Variable.Key] = command.Variable
+			envs[command.Variable.Key] = command.Variable.Value
 		case UnsetAction:
 			delete(envs, command.Variable.Key)
 		case SkipAction:
@@ -130,7 +127,7 @@ func GetDeclarationsSideEffects(newEnvs []models.EnvironmentItemModel, envSource
 
 // getDeclarationCommand maps a variable to be daclered (env) to an expanded env key and value.
 // The current process environment is not changed.
-func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Variable) (Command, error) {
+func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]string) (Command, error) {
 	envKey, envValue, err := env.GetKeyValuePair()
 	if err != nil {
 		return Command{}, fmt.Errorf("failed to get new environment variable name and value: %s", err)
@@ -155,13 +152,13 @@ func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Vari
 		}, nil
 	}
 
-	mappingFuncFactory := func(envs map[string]Variable) func(string) string {
+	mappingFuncFactory := func(envs map[string]string) func(string) string {
 		return func(key string) string {
 			if _, ok := envs[key]; !ok {
 				return ""
 			}
 
-			return envs[key].Value
+			return envs[key]
 		}
 	}
 

@@ -1,27 +1,27 @@
-package integration
+package env
 
 import (
-	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
 )
 
-var SharedTestCases = []struct {
+// EnvmanSharedTestCases are test cases used as unit and integration tests.
+var EnvmanSharedTestCases = []struct {
 	Name string
 	Envs []models.EnvironmentItemModel
-	Want []env.Command
+	Want []Command
 }{
 	{
 		Name: "empty env list",
 		Envs: []models.EnvironmentItemModel{},
-		Want: []env.Command{},
+		Want: []Command{},
 	},
 	{
 		Name: "unset env",
 		Envs: []models.EnvironmentItemModel{
 			{"A": "B", "opts": map[string]interface{}{"unset": true}},
 		},
-		Want: []env.Command{
-			{Action: env.UnsetAction, Variable: env.Variable{Key: "A"}},
+		Want: []Command{
+			{Action: UnsetAction, Variable: Variable{Key: "A"}},
 		},
 	},
 	{
@@ -29,8 +29,8 @@ var SharedTestCases = []struct {
 		Envs: []models.EnvironmentItemModel{
 			{"A": "B", "opts": map[string]interface{}{}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: "B"}},
 		},
 	},
 	{
@@ -39,9 +39,9 @@ var SharedTestCases = []struct {
 			{"A": "B", "opts": map[string]interface{}{}},
 			{"B": "C", "opts": map[string]interface{}{}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: "C"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: "B"}},
+			{Action: SetAction, Variable: Variable{Key: "B", Value: "C"}},
 		},
 	},
 	{
@@ -49,8 +49,8 @@ var SharedTestCases = []struct {
 		Envs: []models.EnvironmentItemModel{
 			{"A": 12, "opts": map[string]interface{}{}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "12"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: "12"}},
 		},
 	},
 	{
@@ -59,9 +59,9 @@ var SharedTestCases = []struct {
 			{"A": "B", "opts": map[string]interface{}{}},
 			{"S": "", "opts": map[string]interface{}{"skip_if_empty": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-			{Action: env.SkipAction, Variable: env.Variable{Key: "S"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: "B"}},
+			{Action: SkipAction, Variable: Variable{Key: "S"}},
 		},
 	},
 	{
@@ -70,9 +70,9 @@ var SharedTestCases = []struct {
 			{"A": "B", "opts": map[string]interface{}{}},
 			{"S": "T", "opts": map[string]interface{}{"skip_if_empty": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "B"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "S", Value: "T"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: "B"}},
+			{Action: SetAction, Variable: Variable{Key: "S", Value: "T"}},
 		},
 	},
 	{
@@ -82,10 +82,10 @@ var SharedTestCases = []struct {
 			{"simulator_major": "12", "opts": map[string]interface{}{"is_expand": false}},
 			{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_major", Value: "12"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: ""}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "simulator_device", Value: ""}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_major", Value: "12"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: ""}},
 		},
 	},
 	{
@@ -95,10 +95,10 @@ var SharedTestCases = []struct {
 			{"simulator_os_version": "$simulator_device", "opts": map[string]interface{}{"is_sensitive": false}},
 			{"simulator_major": "12", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_major", Value: "12"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "simulator_device", Value: ""}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: ""}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_major", Value: "12"}},
 		},
 	},
 	{
@@ -108,10 +108,10 @@ var SharedTestCases = []struct {
 			{"B": "$A", "opts": map[string]interface{}{"is_expand": true}},
 			{"C": "$B", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: ""}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "C", Value: ""}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: ""}},
+			{Action: SetAction, Variable: Variable{Key: "B", Value: ""}},
+			{Action: SetAction, Variable: Variable{Key: "C", Value: ""}},
 		},
 	},
 	{
@@ -120,9 +120,9 @@ var SharedTestCases = []struct {
 			{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_expand": true}},
 			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": false}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "$SIMULATOR_OS_VERSION"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: "$SIMULATOR_OS_VERSION"}},
 		},
 	},
 	{
@@ -130,8 +130,8 @@ var SharedTestCases = []struct {
 		Envs: []models.EnvironmentItemModel{
 			{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: ""}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "SIMULATOR_OS_VERSION", Value: ""}},
 		},
 	},
 	{
@@ -140,9 +140,9 @@ var SharedTestCases = []struct {
 			{"SIMULATOR_OS_VERSION": "13.3", "opts": map[string]interface{}{"is_expand": false}},
 			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: "13.3"}},
 		},
 	},
 	{
@@ -152,10 +152,10 @@ var SharedTestCases = []struct {
 			{"B": "$A", "opts": map[string]interface{}{"is_expand": true}},
 			{"C": "prefix $B", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "A", Value: "1"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "B", Value: "1"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "C", Value: "prefix 1"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "A", Value: "1"}},
+			{Action: SetAction, Variable: Variable{Key: "B", Value: "1"}},
+			{Action: SetAction, Variable: Variable{Key: "C", Value: "prefix 1"}},
 		},
 	},
 	{
@@ -166,11 +166,11 @@ var SharedTestCases = []struct {
 			{"SIMULATOR_OS_VERSION": "$SIMULATOR_OS_MAJOR_VERSION.$SIMULATOR_OS_MINOR_VERSION", "opts": map[string]interface{}{"is_expand": true}},
 			{"simulator_os_version": "$SIMULATOR_OS_VERSION", "opts": map[string]interface{}{"is_expand": true}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_MAJOR_VERSION", Value: "13"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_MINOR_VERSION", Value: "3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "SIMULATOR_OS_MAJOR_VERSION", Value: "13"}},
+			{Action: SetAction, Variable: Variable{Key: "SIMULATOR_OS_MINOR_VERSION", Value: "3"}},
+			{Action: SetAction, Variable: Variable{Key: "SIMULATOR_OS_VERSION", Value: "13.3"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: "13.3"}},
 		},
 	},
 	{
@@ -180,10 +180,10 @@ var SharedTestCases = []struct {
 			{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{"is_expand": "true"}},
 			{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "12.1"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone 8 (12.1)"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: "12.1"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_device", Value: "iPhone 8 (12.1)"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_os_version", Value: "13.3"}},
 		},
 	},
 	{
@@ -192,9 +192,9 @@ var SharedTestCases = []struct {
 			{"SECRET_ENV": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
 			{"simulator_device": "iPhone $SECRET_ENV", "opts": map[string]interface{}{"is_expand": true, "is_sensitive": false}},
 		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SECRET_ENV", Value: "top secret"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone top secret"}},
+		Want: []Command{
+			{Action: SetAction, Variable: Variable{Key: "SECRET_ENV", Value: "top secret"}},
+			{Action: SetAction, Variable: Variable{Key: "simulator_device", Value: "iPhone top secret"}},
 		},
 	},
 }

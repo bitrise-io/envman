@@ -19,7 +19,7 @@ func TestRun(t *testing.T) {
 
 	envstore := filepath.Join(tmpDir, ".envstore")
 
-	for _, tt := range SharedTestCases {
+	for _, tt := range env.EnvmanSharedTestCases {
 		t.Run(tt.Name, func(t *testing.T) {
 			err := EnvmanInitAtPath(envstore)
 			require.NoError(t, err, "EnvmanInitAtPath()")
