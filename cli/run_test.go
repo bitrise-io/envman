@@ -288,38 +288,7 @@ func restoreEnviron(environ []string) error {
 	return nil
 }
 
-// compare tests if each env var in environ is included in envs with the same value.
-func compare(t *testing.T, environGot []string, initialEnvs []string, commandsWant []env.Command) error {
-	envsGot := make(map[string]string)
-	for _, envVar := range environGot {
-		key, value := env.SplitEnv(envVar)
-		envsGot[key] = value
-	}
-
-	envsWant := make(map[string]string)
-	for _, envVar := range initialEnvs {
-		key, value := env.SplitEnv(envVar)
-		envsWant[key] = value
-	}
-
-	for _, envCommand := range commandsWant {
-		switch envCommand.Action {
-		case env.SetAction:
-			envsWant[envCommand.Variable.Key] = envCommand.Variable.Value
-		case env.UnsetAction:
-			delete(envsWant, envCommand.Variable.Key)
-		case env.SkipAction:
-		default:
-			return fmt.Errorf("compare() failed, invalid action: %d", envCommand.Action)
-		}
-	}
-
-	require.Equal(t, envsGot, envsWant)
-
-	return nil
-}
-
-func TestExpandStepInputs(t *testing.T) {
+func TestGetDeclarationsSideEffects(t *testing.T) {
 	for _, test := range integration.SharedTestCases {
 		t.Run(test.Name, func(t *testing.T) {
 			// Arrange
@@ -333,20 +302,11 @@ func TestExpandStepInputs(t *testing.T) {
 			got, err := env.GetDeclarationsSideEffects(test.Envs, &env.DefaultEnvironmentSource{})
 			require.NoError(t, err, "GetDeclarationsSideEffects()")
 
-			if err := restoreEnviron(cleanEnvs); err != nil {
-				t.Fatal(err)
-			}
-
-			// envman expand
-			envmanEnvs, err := commandEnvs(test.Envs)
-			require.NoError(t, err)
-			if err := restoreEnviron(cleanEnvs); err != nil {
-				t.Fatal(err)
-			}
+			err = restoreEnviron(cleanEnvs)
+			require.NoError(t, err, "restoreEnviron()")
 
 			// Assert
 			require.NotNil(t, got)
-			require.NotNil(t, envmanEnvs)
 			require.Equal(t, test.Want, got.CommandHistory)
 		})
 	}

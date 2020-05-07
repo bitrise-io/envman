@@ -30,13 +30,17 @@ func TestRun(t *testing.T) {
 				}
 			}
 
-			ExportEnvironmentsList(envstore, tt.Envs)
+			err = ExportEnvironmentsList(envstore, tt.Envs)
 			require.NoError(t, err, "ExportEnvironmentsList()")
 
 			output, err := EnvmanRun(envstore, tmpDir, []string{"env"})
 			require.NoError(t, err, "EnvmanRun()")
 
-			gotOut := parseEnvRawOut(output)
+			err = EnvmanClear(envstore)
+			require.NoError(t, err, "EnvmanClear()")
+
+			gotOut, err := parseEnvRawOut(output)
+			require.NoError(t, err, "parseEnvRawOut()")
 
 			// Want envs
 			envsWant := make(map[string]string)
@@ -63,7 +67,9 @@ func TestRun(t *testing.T) {
 
 }
 
-func parseEnvRawOut(output string) map[string]string {
+// Used for tests only, to parse env command output
+func parseEnvRawOut(output string) (map[string]string, error) {
+	// matcehs a single line like MYENVKEY_1=myvalue, the first character can not be a number
 	r := regexp.MustCompile("^([a-zA-Z_][a-zA-Z0-9_]*)=(.*)$")
 
 	lines := strings.Split(output, "\n")
@@ -73,8 +79,18 @@ func parseEnvRawOut(output string) map[string]string {
 	for _, line := range lines {
 		match := r.FindStringSubmatch(line)
 
-		fmt.Printf("%s %s \n", line, match)
-
+		// If no env is mathced, treat the line as the continuation of the env in the previous line.
+		// `env` command output does not distinguish between a new env in a new line and
+		// and environment value containing newline character.
+		// Newline can be added (in bash/zsh only) for example: myenv=l1$'\n'l2 env
+		// If called from a script step, the content of the script contains newlines:
+		/*
+			content=#!/usr/bin/env bash
+			set -ex
+			current_envman="..."
+			# ...
+			go test -v ./_tests/integration/..."
+		*/
 		if match == nil {
 			if lastKey != "" {
 				envs[lastKey] += "\n" + line
@@ -82,22 +98,16 @@ func parseEnvRawOut(output string) map[string]string {
 			continue
 		}
 
+		// If match not nil, must have 3 mathces at this point (the matched string and its subexpressions)
 		if len(match) != 3 {
-			continue
-		}
-
-		if match[1] == "current_envman" {
-			if lastKey != "" {
-				envs[lastKey] += "\n" + line
-			}
-			continue
+			return nil, fmt.Errorf("3 matches are expected")
 		}
 
 		lastKey = match[1]
 		envs[match[1]] = match[2]
 	}
 
-	return envs
+	return envs, nil
 }
 
 func Test_parseEnvRawOut(t *testing.T) {
@@ -123,7 +133,8 @@ echo "ff"`,
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := parseEnvRawOut(tt.output)
+			got, err := parseEnvRawOut(tt.output)
+			require.NoError(t, err, "parseEnvRawOut()")
 			require.Equal(t, got, tt.want)
 		})
 	}

@@ -39,7 +39,7 @@ func EnvmanAdd(envstorePth, key, value string, expand, skipIfEmpty bool) error {
 // EnvmanAdd ...
 func EnvmanUnset(envstorePth, key, value string, expand, skipIfEmpty bool) error {
 	const logLevel = "debug"
-	args := []string{"--loglevel", logLevel, "--path", envstorePth, "unset", "--key", key, "--append"}
+	args := []string{"--loglevel", logLevel, "--path", envstorePth, "unset", "--key", key /*"--append"*/}
 	if !expand {
 		args = append(args, "--no-expand")
 	}
@@ -81,6 +81,7 @@ func ExportEnvironmentsList(envstorePth string, envsList []models.EnvironmentIte
 			if err := EnvmanUnset(envstorePth, key, value, isExpand, skipIfEmpty); err != nil {
 				return err
 			}
+			return nil
 		}
 
 		if err := EnvmanAdd(envstorePth, key, value, isExpand, skipIfEmpty); err != nil {

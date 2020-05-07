@@ -174,17 +174,6 @@ var SharedTestCases = []struct {
 		},
 	},
 	{
-		Name: "Env expansion (partial), step input can refers other input",
-		Envs: []models.EnvironmentItemModel{
-			{"simulator_os_version": "13.3", "opts": map[string]interface{}{}},
-			{"simulator_device": "iPhone 8 ($simulator_os_version)", "opts": map[string]interface{}{}},
-		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone 8 (13.3)"}},
-		},
-	},
-	{
 		Name: "Env expand, duplicate env declarations",
 		Envs: []models.EnvironmentItemModel{
 			{"simulator_os_version": "12.1", "opts": map[string]interface{}{}},
