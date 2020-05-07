@@ -1,14 +1,12 @@
 package integration
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/errorutil"
 )
 
 // EnvmanInitAtPath ...
@@ -39,7 +37,7 @@ func EnvmanAdd(envstorePth, key, value string, expand, skipIfEmpty bool) error {
 // EnvmanAdd ...
 func EnvmanUnset(envstorePth, key, value string, expand, skipIfEmpty bool) error {
 	const logLevel = "debug"
-	args := []string{"--loglevel", logLevel, "--path", envstorePth, "unset", "--key", key /*"--append"*/}
+	args := []string{"--loglevel", logLevel, "--path", envstorePth, "unset", "--key", key}
 	if !expand {
 		args = append(args, "--no-expand")
 	}
@@ -81,27 +79,12 @@ func ExportEnvironmentsList(envstorePth string, envsList []models.EnvironmentIte
 			if err := EnvmanUnset(envstorePth, key, value, isExpand, skipIfEmpty); err != nil {
 				return err
 			}
-			return nil
+			continue
 		}
 
 		if err := EnvmanAdd(envstorePth, key, value, isExpand, skipIfEmpty); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-// EnvmanClear ...
-func EnvmanClear(envstorePth string) error {
-	const logLevel = "debug"
-	args := []string{"--loglevel", logLevel, "--path", envstorePth, "clear"}
-	out, err := command.New(binPath(), args...).RunAndReturnTrimmedCombinedOutput()
-	if err != nil {
-		errorMsg := err.Error()
-		if errorutil.IsExitStatusError(err) && out != "" {
-			errorMsg = out
-		}
-		return fmt.Errorf("failed to clear envstore (%s), error: %s", envstorePth, errorMsg)
 	}
 	return nil
 }

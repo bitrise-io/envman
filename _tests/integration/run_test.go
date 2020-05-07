@@ -21,6 +21,7 @@ func TestRun(t *testing.T) {
 
 	for _, tt := range env.EnvmanSharedTestCases {
 		t.Run(tt.Name, func(t *testing.T) {
+			// Clear and init
 			err := EnvmanInitAtPath(envstore)
 			require.NoError(t, err, "EnvmanInitAtPath()")
 
@@ -35,9 +36,6 @@ func TestRun(t *testing.T) {
 
 			output, err := EnvmanRun(envstore, tmpDir, []string{"env"})
 			require.NoError(t, err, "EnvmanRun()")
-
-			err = EnvmanClear(envstore)
-			require.NoError(t, err, "EnvmanClear()")
 
 			gotOut, err := parseEnvRawOut(output)
 			require.NoError(t, err, "parseEnvRawOut()")
@@ -82,7 +80,7 @@ func parseEnvRawOut(output string) (map[string]string, error) {
 		// If no env is mathced, treat the line as the continuation of the env in the previous line.
 		// `env` command output does not distinguish between a new env in a new line and
 		// and environment value containing newline character.
-		// Newline can be added (in bash/zsh only) for example: myenv=l1$'\n'l2 env
+		// Newline can be added for example: **  myenv=A$'\n'B env  ** (bash/zsh only)
 		// If called from a script step, the content of the script contains newlines:
 		/*
 			content=#!/usr/bin/env bash
@@ -100,7 +98,7 @@ func parseEnvRawOut(output string) (map[string]string, error) {
 
 		// If match not nil, must have 3 mathces at this point (the matched string and its subexpressions)
 		if len(match) != 3 {
-			return nil, fmt.Errorf("3 matches are expected")
+			return nil, fmt.Errorf("parseEnvRawOut() failed, match (%s) length is not 3 for line (%s).", match, line)
 		}
 
 		lastKey = match[1]
