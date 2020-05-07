@@ -187,25 +187,14 @@ var SharedTestCases = []struct {
 		},
 	},
 	{
-		Name: "Secrets inputs are marked as sensitive",
-		Envs: []models.EnvironmentItemModel{
-			{"simulator_os_version": "13.3", "opts": map[string]interface{}{"is_sensitive": false}},
-			{"secret_input": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
-		},
-		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_os_version", Value: "13.3"}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "secret_input", Value: "top secret", IsSensitive: true}},
-		},
-	},
-	{
-		Name: "Input referencing secret env is marked as sensitive",
+		Name: "is_sensitive property is not affecting input expansion",
 		Envs: []models.EnvironmentItemModel{
 			{"SECRET_ENV": "top secret", "opts": map[string]interface{}{"is_sensitive": true}},
 			{"simulator_device": "iPhone $SECRET_ENV", "opts": map[string]interface{}{"is_expand": true, "is_sensitive": false}},
 		},
 		Want: []env.Command{
-			{Action: env.SetAction, Variable: env.Variable{Key: "SECRET_ENV", Value: "top secret", IsSensitive: true}},
-			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone top secret", IsSensitive: true}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "SECRET_ENV", Value: "top secret"}},
+			{Action: env.SetAction, Variable: env.Variable{Key: "simulator_device", Value: "iPhone top secret"}},
 		},
 	},
 }

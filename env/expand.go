@@ -32,10 +32,6 @@ type Command struct {
 type Variable struct {
 	Key   string
 	Value string
-	// IsSensitive is true if variable is marked (optionally) sensitive initally (for example a sensitive input or a secret),
-	// or recursively references any variable marked as sensitive.
-	// The goal is to keep track of any references secrets, so these can be redacted easily.
-	IsSensitive bool
 }
 
 // DeclarationSideEffects is returned by GetDeclarationsSideEffects()
@@ -68,9 +64,8 @@ func (*DefaultEnvironmentSource) GetEnvironment() map[string]Variable {
 		}
 
 		envs[key] = Variable{
-			Key:         key,
-			Value:       value,
-			IsSensitive: false,
+			Key:   key,
+			Value: value,
 		}
 	}
 
@@ -160,28 +155,25 @@ func getDeclarationCommand(env models.EnvironmentItemModel, envs map[string]Vari
 		}, nil
 	}
 
-	mappingFuncFactory := func(envs map[string]Variable, containsSensitiveInfo *bool) func(string) string {
+	mappingFuncFactory := func(envs map[string]Variable) func(string) string {
 		return func(key string) string {
 			if _, ok := envs[key]; !ok {
 				return ""
 			}
 
-			*containsSensitiveInfo = *containsSensitiveInfo || envs[key].IsSensitive
 			return envs[key].Value
 		}
 	}
 
-	containsSensitiveInfo := options.IsSensitive != nil && *options.IsSensitive
 	if options.IsExpand != nil && *options.IsExpand {
-		envValue = os.Expand(envValue, mappingFuncFactory(envs, &containsSensitiveInfo))
+		envValue = os.Expand(envValue, mappingFuncFactory(envs))
 	}
 
 	return Command{
 		Action: SetAction,
 		Variable: Variable{
-			Key:         envKey,
-			Value:       envValue,
-			IsSensitive: containsSensitiveInfo,
+			Key:   envKey,
+			Value: envValue,
 		},
 	}, nil
 }
