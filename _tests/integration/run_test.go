@@ -67,7 +67,13 @@ func TestRun(t *testing.T) {
 
 // Used for tests only, to parse env command output
 func parseEnvRawOut(output string) (map[string]string, error) {
-	// matcehs a single line like MYENVKEY_1=myvalue, the first character can not be a number
+	// matcehs a single line like MYENVKEY_1=myvalue
+	// Shell uses upperscore letters (plus numbers and underscore); Step inputs are lowerscore.
+	// https://pubs.opengroup.org/onlinepubs/9699919799/:
+	// > Environment variable names used by the utilities in the Shell and Utilities volume of POSIX.1-2017
+	// > consist solely of uppercase letters, digits, and the <underscore> ( '_' ) from the characters defined
+	// > in Portable Character Set and do not begin with a digit.
+	// > Other characters may be permitted by an implementation; applications shall tolerate the presence of such names.
 	r := regexp.MustCompile("^([a-zA-Z_][a-zA-Z0-9_]*)=(.*)$")
 
 	lines := strings.Split(output, "\n")
