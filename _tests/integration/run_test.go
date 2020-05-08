@@ -67,7 +67,7 @@ func TestRun(t *testing.T) {
 
 // Used for tests only, to parse env command output
 func parseEnvRawOut(output string) (map[string]string, error) {
-	// matcehs a single line like MYENVKEY_1=myvalue
+	// matches a single line like MYENVKEY_1=myvalue
 	// Shell uses upperscore letters (plus numbers and underscore); Step inputs are lowerscore.
 	// https://pubs.opengroup.org/onlinepubs/9699919799/:
 	// > Environment variable names used by the utilities in the Shell and Utilities volume of POSIX.1-2017
