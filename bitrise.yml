@@ -75,6 +75,7 @@ workflows:
             envman add --key OSX_DEPLOY_PATH --value $DEPLOY_PATH
             cp $DEPLOY_PATH $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH
             echo "  Copy final Darwin binary to: $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH"
+    - deploy-to-bitrise-io@1: {}
 
   dep-update:
     title: Dep update
