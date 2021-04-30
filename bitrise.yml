@@ -81,6 +81,8 @@ workflows:
             #!/bin/bash
             set -ex
             go get -u -v github.com/golang/dep/cmd/dep
+            echo "hi"
+            pwd
             ls
             dep ensure -v
             dep ensure -v -update
