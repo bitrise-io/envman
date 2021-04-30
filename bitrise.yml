@@ -40,6 +40,9 @@ workflows:
   create-binaries:
     title: Create binaries
     steps:
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@4: {}
     - script:
         title: Create binaries
         inputs:
@@ -81,8 +84,5 @@ workflows:
             #!/bin/bash
             set -ex
             go get -u -v github.com/golang/dep/cmd/dep
-            echo "hi"
-            pwd
-            ls
             dep ensure -v
             dep ensure -v -update
