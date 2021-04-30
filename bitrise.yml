@@ -61,6 +61,8 @@ workflows:
             export OS=Darwin
             export GOOS=darwin
 
+            go get github.com/bitrise-io/envman/cli
+
             DEPLOY_PATH="_bin/$BIN_NAME-$OS-$ARCH"
             echo "  Create final Darwin binary at: $DEPLOY_PATH"
 
