@@ -37,29 +37,21 @@ workflows:
             unset content
             go test -v ./_tests/integration/...
 
-  create-binaries:
-    title: Create binaries
+  _create-binary:
+    title: creates binary for specified platform
     steps:
     - script:
-        title: Create binaries
+        title: Create binary
         inputs:
         - content: |
             #!/bin/bash
             set -ex
 
-            echo
-            echo "Create final binaries"
+            echo "  Create binary for $DESCRIPTION"
             echo "  Build number: $BITRISE_BUILD_NUMBER"
 
-            export ARCH=x86_64
-            export GOARCH=amd64
-
-            # Create Darwin bin
-            export OS=Darwin
-            export GOOS=darwin
-
             DEPLOY_PATH="_bin/$BIN_NAME-$OS-$ARCH"
-            echo "  Create final Darwin binary at: $DEPLOY_PATH"
+            echo "  Create at: $DEPLOY_PATH"
 
             version_package="github.com/bitrise-io/envman/version"
 
@@ -67,26 +59,46 @@ workflows:
               -ldflags "-X $version_package.BuildNumber=$BITRISE_BUILD_NUMBER -X $version_package.Commit=$GIT_CLONE_COMMIT_HASH" \
               -o "$DEPLOY_PATH"
 
-            envman add --key OSX_DEPLOY_PATH --value $DEPLOY_PATH
             cp $DEPLOY_PATH $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH
-            echo "  Copy final Darwin binary to: $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH"
+            echo "  Copy binary to: $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH"
 
+  create-x86-darwin-binary:
+    after_run:
+    - _create-binary
+    envs:
+    - DESCRIPTION: "x86 Darwin"
+    - ARCH: "x86_64"
+    - GOARCH: "amd64"
+    - OS: "Darwin"
+    - GOOS: "darwin"
 
-            # Create Linux binary
-            export OS=Linux
-            export GOOS=linux
+  create-arm-darwin-binary:
+    after_run:
+    - _create-binary
+    envs:
+    - DESCRIPTION: "ARM Darwin"
+    - ARCH: "arm64"
+    - GOARCH: "amd64"
+    - OS: "Darwin"
+    - GOOS: "darwin"
 
-            DEPLOY_PATH="_bin/$BIN_NAME-$OS-$ARCH"
-            echo "  Create final Linux binary at: $DEPLOY_PATH"
+  create-x86-linux-binary:
+    after_run:
+    - _create-binary
+    envs:
+    - DESCRIPTION: "x86 Linux"
+    - ARCH: "x86_64"
+    - GOARCH: "amd64"
+    - OS: "Linux"
+    - GOOS: "linux"
 
-            go build \
-              -ldflags "-X $version_package.BuildNumber=$BITRISE_BUILD_NUMBER -X $version_package.Commit=$GIT_CLONE_COMMIT_HASH" \
-              -o "$DEPLOY_PATH"
-
-            envman add --key LINUX_DEPLOY_PATH --value $DEPLOY_PATH
-            cp $DEPLOY_PATH $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH
-            echo "  Copy final Linux binary to: $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH"
-
+  create-binaries:
+    title: Create binaries
+    before_run:
+    - create-arm-darwin-binary
+    - create-x86-darwin-binary
+    - create-x86-linux-binary
+  
   dep-update:
     title: Dep update
     steps:
