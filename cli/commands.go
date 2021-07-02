@@ -77,5 +77,11 @@ var (
 				flKey,
 			},
 		},
+		{
+			Name:    "export",
+			Aliases: []string{"ex"},
+			Usage:   "Exports enviromental variables to host shell",
+			Action:  export,
+		},
 	}
 )
