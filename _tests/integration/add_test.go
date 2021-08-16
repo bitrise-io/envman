@@ -54,7 +54,7 @@ func TestAdd(t *testing.T) {
 
 		cont, err := fileutil.ReadStringFromFile(envstore)
 		require.NoError(t, err, out)
-		require.Equal(t, "envs:\n- KEY: value\n  opts:\n\tis_sensitive: true", cont)
+		require.Equal(t, "envs:\n- KEY: value\n  opts:\n    is_sensitive: true\n", cont)
 	}
 
 	t.Log("add file flag value")
