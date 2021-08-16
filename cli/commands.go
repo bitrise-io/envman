@@ -44,8 +44,8 @@ var (
 					Usage: "If enabled the added environment variable will be skipped during envman run, if the value is empty. If not set then the empty value will be used.",
 				},
 				cli.BoolFlag{
-					Name:  IsSensitiveKey,
-					Usage: "If enabled the added environment variable will be added as sensitive and only will be retrieved when TBD",
+					Name:  SensitiveKey,
+					Usage: "The environment variable will be marked as sensitive.",
 				},
 			},
 		},
@@ -64,8 +64,8 @@ var (
 				flFormat,
 				flExpand,
 				cli.BoolFlag{
-					Name:  OnlySensitivesKey,
-					Usage: "If enabled only the sensitive inputs will be printed",
+					Name:  SensitiveOnlyKey,
+					Usage: "Print the only environment variables that are marked as sensitive.",
 				},
 			},
 		},

@@ -62,7 +62,7 @@ func validateEnv(key, value string, envList []models.EnvironmentItemModel) (stri
 	return value, nil
 }
 
-func addEnv(key string, value string, expand, replace, skipIfEmpty, isSensitive bool) error {
+func addEnv(key string, value string, expand, replace, skipIfEmpty, sensitive bool) error {
 	// Load envs, or create if not exist
 	environments, err := envman.ReadEnvsOrCreateEmptyList()
 	if err != nil {
@@ -82,7 +82,7 @@ func addEnv(key string, value string, expand, replace, skipIfEmpty, isSensitive 
 		models.OptionsKey: models.EnvironmentItemOptionsModel{
 			IsExpand:    pointers.NewBoolPtr(expand),
 			SkipIfEmpty: pointers.NewBoolPtr(skipIfEmpty),
-			IsSensitive: pointers.NewBoolPtr(isSensitive),
+			IsSensitive: pointers.NewBoolPtr(sensitive),
 		},
 	}
 	if err := newEnv.NormalizeValidateFillDefaults(); err != nil {
@@ -146,7 +146,7 @@ func add(c *cli.Context) error {
 	expand := !c.Bool(NoExpandKey)
 	replace := !c.Bool(AppendKey)
 	skipIfEmpty := c.Bool(SkipIfEmptyKey)
-	isSensitive := c.Bool(IsSensitiveKey)
+	sensitive := c.Bool(SensitiveKey)
 
 	var value string
 
@@ -214,7 +214,7 @@ func add(c *cli.Context) error {
 		}
 	}
 
-	if err := addEnv(key, value, expand, replace, skipIfEmpty, isSensitive); err != nil {
+	if err := addEnv(key, value, expand, replace, skipIfEmpty, sensitive); err != nil {
 		log.Fatal("[ENVMAN] Failed to add env:", err)
 	}
 
