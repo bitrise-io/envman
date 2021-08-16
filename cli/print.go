@@ -42,12 +42,8 @@ func convertToEnsJSONModel(envs []models.EnvironmentItemModel, expand, sensitive
 			return models.EnvsJSONListModel{}, err
 		}
 
-		if !sensitiveOnly {
-			if opts.IsSensitive != nil && *opts.IsSensitive {
-				continue
-			}
-		} else {
-			if opts.IsSensitive != nil && !*opts.IsSensitive {
+		if sensitiveOnly {
+			if opts.IsSensitive == nil || !*opts.IsSensitive {
 				continue
 			}
 		}
@@ -75,7 +71,7 @@ func print(c *cli.Context) error {
 	}
 
 	expand := c.Bool(ExpandKey)
-	sensitivesOnly := c.Bool(SensitiveOnlyKey)
+	sensitiveOnly := c.Bool(SensitiveOnlyKey)
 
 	// Read envs
 	environments, err := envman.ReadEnvs(envman.CurrentEnvStoreFilePath)
@@ -83,7 +79,7 @@ func print(c *cli.Context) error {
 		log.Fatalf("Failed to read envs, error: %s", err)
 	}
 
-	envsJSONList, err := convertToEnsJSONModel(environments, expand, sensitivesOnly)
+	envsJSONList, err := convertToEnsJSONModel(environments, expand, sensitiveOnly)
 	if err != nil {
 		log.Fatalf("Failed to convert envs, error: %s", err)
 	}
