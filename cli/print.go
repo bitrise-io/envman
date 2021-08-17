@@ -29,7 +29,7 @@ func printRawEnvs(envList models.EnvsJSONListModel) {
 	fmt.Println()
 }
 
-func convertToEnsJSONModel(envs []models.EnvironmentItemModel, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
+func convertToEnvsJSONModel(envs []models.EnvironmentItemModel, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
 	JSONModels := models.EnvsJSONListModel{}
 	for _, env := range envs {
 		key, value, err := env.GetKeyValuePair()
@@ -79,7 +79,7 @@ func print(c *cli.Context) error {
 		log.Fatalf("Failed to read envs, error: %s", err)
 	}
 
-	envsJSONList, err := convertToEnsJSONModel(environments, expand, sensitiveOnly)
+	envsJSONList, err := convertToEnvsJSONModel(environments, expand, sensitiveOnly)
 	if err != nil {
 		log.Fatalf("Failed to convert envs, error: %s", err)
 	}
