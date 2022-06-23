@@ -14,11 +14,28 @@ workflows:
     - golint:
     - errcheck:
     - go-test:
-    - codecov:
+    - script:
         run_if: .IsCI
+        title: Manual CodeCov
         inputs:
-        - other_options: -f ${GO_CODE_COVERAGE_REPORT_PATH}
-        - CODECOV_TOKEN: "$CODECOV_UPLOAD_TOKEN"
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+            curl -Os "https://uploader.codecov.io/latest/${CODECOV_OS}/codecov"
+            curl -Os "https://uploader.codecov.io/latest/${CODECOV_OS}/codecov.SHA256SUM"
+            curl -Os "https://uploader.codecov.io/latest/${CODECOV_OS}/codecov.SHA256SUM.sig"
+            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+            shasum -a 256 -c codecov.SHA256SUM
+            
+            chmod +x codecov
+
+            curl -H "Accept: application/json" "https://uploader.codecov.io/${CODECOV_OS}/latest" | grep -o '\"version\":\"v[0-9\.\_]\+\"' | head -1
+            
+            echo "${GO_CODE_COVERAGE_REPORT_PATH}"
+            ./codecov -Q "bitrise-step-3.2.0" -f "${GO_CODE_COVERAGE_REPORT_PATH}" -t "${CODECOV_UPLOAD_TOKEN}"
+
     - script:
         title: Run integration tests
         inputs:
