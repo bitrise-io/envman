@@ -6,6 +6,11 @@ app:
   envs:
   - BIN_NAME: envman
 
+trigger_map:
+  - push_branch: "*"
+    workflow: test
+  - tag: "*.*.*"
+    workflow: release
 workflows:
   test:
     title: Runs tests
@@ -54,7 +59,7 @@ workflows:
             unset content
             go test -v ./_tests/integration/...
 
-  create-binaries:
+  release:
     title: Create binaries
     steps:
     - script:
@@ -103,16 +108,3 @@ workflows:
             envman add --key LINUX_DEPLOY_PATH --value $DEPLOY_PATH
             cp $DEPLOY_PATH $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH
             echo "  Copy final Linux binary to: $BITRISE_DEPLOY_DIR/$BIN_NAME-$OS-$ARCH"
-
-  dep-update:
-    title: Dep update
-    steps:
-    - script:
-        title: Dependency update
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go get -u -v github.com/golang/dep/cmd/dep
-            dep ensure -v
-            dep ensure -v -update
