@@ -25,13 +25,14 @@ workflows:
   test:
     title: Runs tests
     steps:
-    - go-list:
+    - change-workdir:
         inputs:
-          - exclude: |-
-              */vendor
-    - golint:
-    - errcheck:
-    - go-test:
+          - path: "${SRC_DIR_IN_GOPATH}"
+    - git-clone: {}
+    - go-list: {}
+    - golint: {}
+    - errcheck: {}
+    - go-test: {}
     - script:
         run_if: .IsCI
         title: Manual CodeCov
