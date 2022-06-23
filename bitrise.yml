@@ -4,7 +4,17 @@ project_type: other
 
 app:
   envs:
-  - BIN_NAME: envman
+    - SRC_DIR_IN_GOPATH: "$GOPATH/src/github.com/bitrise-io/envman"
+    - opts:
+        is_expand: false
+      TARGET_OS: both
+    - opts:
+        is_expand: false
+      BIN_NAME: envman
+    - opts:
+        is_expand: false
+      PACKAGE_NAME: github.com/bitrise-io/envman
+    - LD_FLAGS: "-X ${PACKAGE_NAME}/version.BuildNumber=$BITRISE_BUILD_NUMBER -X ${PACKAGE_NAME}/version.Commit=$BITRISE_GIT_COMMIT"
 
 trigger_map:
   - push_branch: "*"
@@ -16,6 +26,9 @@ workflows:
     title: Runs tests
     steps:
     - go-list:
+        inputs:
+          - exclude: |-
+              */vendor
     - golint:
     - errcheck:
     - go-test:
