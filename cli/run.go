@@ -37,56 +37,51 @@ func commandEnvs(newEnvs []models.EnvironmentItemModel) ([]string, error) {
 	return os.Environ(), nil
 }
 
-func runCommandModel(cmdModel CommandModel) (int, error) {
-	cmdEnvs, err := commandEnvs(cmdModel.Environments)
-	if err != nil {
-		return 1, err
-	}
-
-	return command.RunCommandWithEnvsAndReturnExitCode(cmdEnvs, cmdModel.Command, cmdModel.Argumentums...)
-}
-
 func run(c *cli.Context) error {
 	if len(c.Args()) == 0 {
 		log.Fatal("[ENVMAN] - No command specified")
 	}
 
-	exitCode, err := RunCommand(CurrentEnvStoreFilePath, c.Args())
+	cmd, err := CreateCommand(CurrentEnvStoreFilePath, c.Args())
 	if err != nil {
 		log.Errorf("command failed: %s", err)
 	}
-
+	cmd.SetStdin(os.Stdin)
+	cmd.SetStdout(os.Stdout)
+	cmd.SetStderr(os.Stderr)
+	exitCode, err := cmd.RunAndReturnExitCode()
+	if err != nil {
+		log.Errorf("command failed: %s", err)
+	}
+	if err != nil && exitCode == 0 {
+		exitCode = 1
+	}
 	os.Exit(exitCode)
-
 	return nil
 }
 
-func RunCommand(envStorePth string, args []string) (int, error) {
+func CreateCommand(envStorePth string, args []string) (*command.Model, error) {
 	if len(args) == 0 {
-		return 1, fmt.Errorf("no command specified")
+		return nil, fmt.Errorf("no command specified")
 	}
 
 	doCmdEnvs, err := ReadEnvs(envStorePth)
 	if err != nil {
-		return 1, fmt.Errorf("failed to load EnvStore: %s", err)
+		return nil, fmt.Errorf("failed to load EnvStore: %s", err)
 	}
 
-	doCommand := args[0]
-
-	doArgs := []string{}
+	cmdName := args[0]
+	var cmdArgs []string
 	if len(args) > 1 {
-		doArgs = args[1:]
+		cmdArgs = args[1:]
 	}
 
-	cmdToExecute := CommandModel{
-		Command:      doCommand,
-		Environments: doCmdEnvs,
-		Argumentums:  doArgs,
+	cmdEnvs, err := commandEnvs(doCmdEnvs)
+	if err != nil {
+		return nil, err
 	}
 
-	exit, err := runCommandModel(cmdToExecute)
-	if err != nil && exit == 0 {
-		exit = 1
-	}
-	return exit, err
+	cmd := command.New(cmdName, cmdArgs...)
+	cmd.SetEnvs(cmdEnvs...)
+	return cmd, nil
 }
