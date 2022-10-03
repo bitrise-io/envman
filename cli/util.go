@@ -249,6 +249,15 @@ func ReadEnvs(pth string) ([]models.EnvironmentItemModel, error) {
 	return ParseEnvsYML(bytes)
 }
 
+// ReadOSEnvs ...
+func ReadOSEnvs(pth string) ([]string, error) {
+	envs, err := ReadEnvs(pth)
+	if err != nil {
+		return nil, err
+	}
+	return commandEnvs(envs)
+}
+
 // ReadEnvsOrCreateEmptyList ...
 func ReadEnvsOrCreateEmptyList(envStorePth string) ([]models.EnvironmentItemModel, error) {
 	envModels, err := ReadEnvs(envStorePth)

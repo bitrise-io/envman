@@ -65,7 +65,7 @@ func CreateCommand(envStorePth string, args []string) (*command.Model, error) {
 		return nil, fmt.Errorf("no command specified")
 	}
 
-	doCmdEnvs, err := ReadEnvs(envStorePth)
+	cmdEnvs, err := ReadOSEnvs(envStorePth)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load EnvStore: %s", err)
 	}
@@ -74,11 +74,6 @@ func CreateCommand(envStorePth string, args []string) (*command.Model, error) {
 	var cmdArgs []string
 	if len(args) > 1 {
 		cmdArgs = args[1:]
-	}
-
-	cmdEnvs, err := commandEnvs(doCmdEnvs)
-	if err != nil {
-		return nil, err
 	}
 
 	cmd := command.New(cmdName, cmdArgs...)
