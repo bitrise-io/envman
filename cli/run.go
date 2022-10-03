@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/bitrise-io/envman/env"
@@ -46,42 +47,46 @@ func runCommandModel(cmdModel CommandModel) (int, error) {
 }
 
 func run(c *cli.Context) error {
-	log.Debug("[ENVMAN] - Work path:", CurrentEnvStoreFilePath)
-
-	if len(c.Args()) > 0 {
-		doCmdEnvs, err := ReadEnvs(CurrentEnvStoreFilePath)
-		if err != nil {
-			log.Fatal("[ENVMAN] - Failed to load EnvStore:", err)
-		}
-
-		doCommand := c.Args()[0]
-
-		doArgs := []string{}
-		if len(c.Args()) > 1 {
-			doArgs = c.Args()[1:]
-		}
-
-		cmdToExecute := CommandModel{
-			Command:      doCommand,
-			Environments: doCmdEnvs,
-			Argumentums:  doArgs,
-		}
-
-		log.Debug("[ENVMAN] - Executing command:", cmdToExecute)
-
-		if exit, err := runCommandModel(cmdToExecute); err != nil {
-			log.Debug("[ENVMAN] - Failed to execute command:", err)
-			if exit == 0 {
-				log.Error("[ENVMAN] - Failed to execute command:", err)
-				exit = 1
-			}
-			os.Exit(exit)
-		}
-
-		log.Debug("[ENVMAN] - Command executed")
-	} else {
+	if len(c.Args()) == 0 {
 		log.Fatal("[ENVMAN] - No command specified")
 	}
 
+	exitCode, err := RunCommand(CurrentEnvStoreFilePath, c.Args())
+	if err != nil {
+		log.Errorf("command failed: %s", err)
+	}
+
+	os.Exit(exitCode)
+
 	return nil
+}
+
+func RunCommand(envStorePth string, args []string) (int, error) {
+	if len(args) == 0 {
+		return 1, fmt.Errorf("no command specified")
+	}
+
+	doCmdEnvs, err := ReadEnvs(envStorePth)
+	if err != nil {
+		return 1, fmt.Errorf("failed to load EnvStore: %s", err)
+	}
+
+	doCommand := args[0]
+
+	doArgs := []string{}
+	if len(args) > 1 {
+		doArgs = args[1:]
+	}
+
+	cmdToExecute := CommandModel{
+		Command:      doCommand,
+		Environments: doCmdEnvs,
+		Argumentums:  doArgs,
+	}
+
+	exit, err := runCommandModel(cmdToExecute)
+	if err != nil && exit == 0 {
+		exit = 1
+	}
+	return exit, err
 }

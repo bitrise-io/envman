@@ -250,11 +250,11 @@ func ReadEnvs(pth string) ([]models.EnvironmentItemModel, error) {
 }
 
 // ReadEnvsOrCreateEmptyList ...
-func ReadEnvsOrCreateEmptyList() ([]models.EnvironmentItemModel, error) {
-	envModels, err := ReadEnvs(CurrentEnvStoreFilePath)
+func ReadEnvsOrCreateEmptyList(envStorePth string) ([]models.EnvironmentItemModel, error) {
+	envModels, err := ReadEnvs(envStorePth)
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
-			err = InitAtPath(CurrentEnvStoreFilePath)
+			err = InitAtPath(envStorePth)
 			return []models.EnvironmentItemModel{}, err
 		}
 		return []models.EnvironmentItemModel{}, err
