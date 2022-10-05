@@ -22,7 +22,7 @@ func expandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
-func commandEnvs(newEnvs []models.EnvironmentItemModel) ([]string, error) {
+func osEnviron(newEnvs []models.EnvironmentItemModel) ([]string, error) {
 	result, err := env.GetDeclarationsSideEffects(newEnvs, &env.DefaultEnvironmentSource{})
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func CreateCommand(envStorePth string, args []string) (*command.Model, error) {
 		return nil, fmt.Errorf("no command specified")
 	}
 
-	cmdEnvs, err := ReadOSEnvs(envStorePth)
+	cmdEnvs, err := ReadOSEnv(envStorePth)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load EnvStore: %s", err)
 	}

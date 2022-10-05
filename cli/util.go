@@ -249,13 +249,13 @@ func ReadEnvs(pth string) ([]models.EnvironmentItemModel, error) {
 	return ParseEnvsYML(bytes)
 }
 
-// ReadOSEnvs ...
-func ReadOSEnvs(pth string) ([]string, error) {
+// ReadOSEnv ...
+func ReadOSEnv(pth string) ([]string, error) {
 	envs, err := ReadEnvs(pth)
 	if err != nil {
 		return nil, err
 	}
-	return commandEnvs(envs)
+	return osEnviron(envs)
 }
 
 // ReadEnvsOrCreateEmptyList ...
