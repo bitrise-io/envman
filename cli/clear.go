@@ -21,6 +21,7 @@ func clear(c *cli.Context) error {
 	return nil
 }
 
+// ClearEnvs ...
 func ClearEnvs(envStorePth string) error {
 	if isExists, err := pathutil.IsPathExists(envStorePth); err != nil {
 		return err

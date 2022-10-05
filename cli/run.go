@@ -40,6 +40,7 @@ func run(c *cli.Context) error {
 	return nil
 }
 
+// CreateCommand ...
 func CreateCommand(envStorePth string, args []string) (*command.Model, error) {
 	if len(args) == 0 {
 		return nil, fmt.Errorf("no command specified")

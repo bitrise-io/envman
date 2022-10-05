@@ -103,6 +103,7 @@ func add(c *cli.Context) error {
 	return nil
 }
 
+// AddEnv ...
 func AddEnv(envStorePth string, key string, value string, expand, replace, skipIfEmpty, sensitive bool) error {
 	// Load envs, or create if not exist
 	environments, err := ReadEnvsOrCreateEmptyList(envStorePth)

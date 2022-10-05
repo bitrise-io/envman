@@ -16,6 +16,7 @@ func initEnvStore(c *cli.Context) error {
 	return err
 }
 
+// Init ...
 func Init(envStorePth string, clear bool) error {
 	if clear {
 		if err := command.RemoveFile(envStorePth); err != nil {
