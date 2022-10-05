@@ -60,6 +60,10 @@ func convertToEnvsJSONModel(envs []models.EnvironmentItemModel, expand, sensitiv
 	return JSONModels, nil
 }
 
+func expandEnvsInString(inp string) string {
+	return os.ExpandEnv(inp)
+}
+
 func print(c *cli.Context) error {
 	// Input validation
 	format := c.String(FormatKey)

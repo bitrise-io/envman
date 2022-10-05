@@ -40,7 +40,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := osEnv(envs)
+		sessionEnvs, err := osEnviron(envs)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -82,7 +82,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := osEnv(envs)
+		sessionEnvs, err := osEnviron(envs)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -126,7 +126,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := osEnv(envs)
+		sessionEnvs, err := osEnviron(envs)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -170,7 +170,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2}
 
-		sessionEnvs, err := osEnv(envs)
+		sessionEnvs, err := osEnviron(envs)
 		require.Equal(t, nil, err)
 
 		env1Found := false
@@ -216,7 +216,7 @@ func TestCommandEnvs(t *testing.T) {
 
 		envs := []models.EnvironmentItemModel{env1, env2, env3}
 
-		sessionEnvs, err := osEnv(envs)
+		sessionEnvs, err := osEnviron(envs)
 		require.Equal(t, nil, err)
 
 		env3Found := false
@@ -256,7 +256,7 @@ func TestCommandEnvs(t *testing.T) {
 		}
 
 		// when
-		envs, err := osEnv(testEnvs)
+		envs, err := osEnviron(testEnvs)
 		envFmt := "%s=%s" // note: if this format mismatches elements of `envs`, test can be a false positive!
 		unset := fmt.Sprintf(envFmt, key, val)
 

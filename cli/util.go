@@ -2,7 +2,9 @@ package cli
 
 import (
 	"errors"
+	"os"
 
+	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/pathutil"
@@ -246,6 +248,21 @@ func ReadEnvs(pth string) ([]models.EnvironmentItemModel, error) {
 	}
 
 	return ParseEnvsYML(bytes)
+}
+
+func osEnviron(newEnvs []models.EnvironmentItemModel) ([]string, error) {
+	result, err := env.GetDeclarationsSideEffects(newEnvs, &env.DefaultEnvironmentSource{})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, command := range result.CommandHistory {
+		if err := env.ExecuteCommand(command); err != nil {
+			return nil, err
+		}
+	}
+
+	return os.Environ(), nil
 }
 
 // ReadOSEnv ...

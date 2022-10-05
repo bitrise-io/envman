@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/command"
 	log "github.com/sirupsen/logrus"
@@ -16,25 +15,6 @@ type CommandModel struct {
 	Command      string
 	Argumentums  []string
 	Environments []models.EnvironmentItemModel
-}
-
-func expandEnvsInString(inp string) string {
-	return os.ExpandEnv(inp)
-}
-
-func osEnviron(newEnvs []models.EnvironmentItemModel) ([]string, error) {
-	result, err := env.GetDeclarationsSideEffects(newEnvs, &env.DefaultEnvironmentSource{})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, command := range result.CommandHistory {
-		if err := env.ExecuteCommand(command); err != nil {
-			return nil, err
-		}
-	}
-
-	return os.Environ(), nil
 }
 
 func run(c *cli.Context) error {
