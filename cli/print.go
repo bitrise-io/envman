@@ -43,6 +43,7 @@ func print(c *cli.Context) error {
 	return nil
 }
 
+// EnvSet ...
 func EnvSet(envStorePth string, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
 	// Read envs
 	environments, err := ReadEnvs(envStorePth)
