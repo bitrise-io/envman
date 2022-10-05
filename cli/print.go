@@ -10,22 +10,51 @@ import (
 	"github.com/urfave/cli"
 )
 
-func printJSONEnvs(envList models.EnvsJSONListModel) error {
-	bytes, err := json.Marshal(envList)
-	if err != nil {
-		return err
+func print(c *cli.Context) error {
+	// Input validation
+	format := c.String(FormatKey)
+	if format == "" {
+		format = OutputFormatRaw
+	} else if !(format == OutputFormatRaw || format == OutputFormatJSON) {
+		log.Fatalf("Invalid format: %s", format)
 	}
 
-	fmt.Println(string(bytes))
+	expand := c.Bool(ExpandKey)
+	sensitiveOnly := c.Bool(SensitiveOnlyKey)
+
+	// Read envs
+	envSet, err := EnvSet(CurrentEnvStoreFilePath, expand, sensitiveOnly)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Print envs
+	switch format {
+	case OutputFormatRaw:
+		printRawEnvs(envSet)
+	case OutputFormatJSON:
+		if err := printJSONEnvs(envSet); err != nil {
+			log.Fatalf("Failed to print env list, err: %s", err)
+		}
+	default:
+		log.Fatalf("[STEPMAN] - Invalid format: %s", format)
+	}
+
 	return nil
 }
 
-func printRawEnvs(envList models.EnvsJSONListModel) {
-	fmt.Println()
-	for key, value := range envList {
-		fmt.Printf("%s: %s\n", key, value)
+func EnvSet(envStorePth string, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
+	// Read envs
+	environments, err := ReadEnvs(envStorePth)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read envs: %s", err)
 	}
-	fmt.Println()
+
+	envsJSONList, err := convertToEnvsJSONModel(environments, expand, sensitiveOnly)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert envs: %s", err)
+	}
+	return envsJSONList, nil
 }
 
 func convertToEnvsJSONModel(envs []models.EnvironmentItemModel, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
@@ -64,42 +93,20 @@ func expandEnvsInString(inp string) string {
 	return os.ExpandEnv(inp)
 }
 
-func print(c *cli.Context) error {
-	// Input validation
-	format := c.String(FormatKey)
-	if format == "" {
-		format = OutputFormatRaw
-	} else if !(format == OutputFormatRaw || format == OutputFormatJSON) {
-		log.Fatalf("Invalid format: %s", format)
-	}
-
-	expand := c.Bool(ExpandKey)
-	sensitiveOnly := c.Bool(SensitiveOnlyKey)
-
-	// Read envs
-	environments, err := ReadEnvs(CurrentEnvStoreFilePath)
+func printJSONEnvs(envList models.EnvsJSONListModel) error {
+	bytes, err := json.Marshal(envList)
 	if err != nil {
-		log.Fatalf("Failed to read envs, error: %s", err)
+		return err
 	}
 
-	envsJSONList, err := convertToEnvsJSONModel(environments, expand, sensitiveOnly)
-	if err != nil {
-		log.Fatalf("Failed to convert envs, error: %s", err)
-	}
-
-	// Print envs
-	switch format {
-	case OutputFormatRaw:
-		printRawEnvs(envsJSONList)
-		break
-	case OutputFormatJSON:
-		if err := printJSONEnvs(envsJSONList); err != nil {
-			log.Fatalf("Failed to print env list, err: %s", err)
-		}
-		break
-	default:
-		log.Fatalf("[STEPMAN] - Invalid format: %s", format)
-	}
-
+	fmt.Println(string(bytes))
 	return nil
+}
+
+func printRawEnvs(envList models.EnvsJSONListModel) {
+	fmt.Println()
+	for key, value := range envList {
+		fmt.Printf("%s: %s\n", key, value)
+	}
+	fmt.Println()
 }
