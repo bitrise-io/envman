@@ -219,8 +219,7 @@ func InitAtPath(pth string) error {
 			return err
 		}
 	} else {
-		errorMsg := "Path already exist: " + pth
-		return errors.New(errorMsg)
+		return errors.New("Path already exist: " + pth)
 	}
 	return nil
 }

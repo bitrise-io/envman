@@ -25,8 +25,7 @@ func ClearEnvs(envStorePth string) error {
 	if isExists, err := pathutil.IsPathExists(envStorePth); err != nil {
 		return err
 	} else if !isExists {
-		errMsg := "EnvStore not found in path:" + envStorePth
-		return errors.New(errMsg)
+		return errors.New("EnvStore not found in path:" + envStorePth)
 	}
 
 	return WriteEnvMapToFile(envStorePth, []models.EnvironmentItemModel{})
