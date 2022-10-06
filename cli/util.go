@@ -3,8 +3,6 @@ package cli
 import (
 	"errors"
 	"os"
-	"path"
-	"path/filepath"
 
 	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
@@ -20,8 +18,6 @@ var (
 
 	// ToolMode ...
 	ToolMode bool
-
-	defaultEnvStoreName = ".envstore.yml"
 )
 
 // -------------------
@@ -216,8 +212,7 @@ func WriteEnvMapToFile(pth string, envs []models.EnvironmentItemModel) error {
 	return fileutil.WriteBytesToFile(pth, bytes)
 }
 
-// InitAtPath ...
-func InitAtPath(pth string) error {
+func initAtPath(pth string) error {
 	if exist, err := pathutil.IsPathExists(pth); err != nil {
 		return err
 	} else if !exist {
@@ -283,15 +278,10 @@ func ReadEnvsOrCreateEmptyList(envStorePth string) ([]models.EnvironmentItemMode
 	envModels, err := ReadEnvs(envStorePth)
 	if err != nil {
 		if err.Error() == "No environment variable list found" {
-			err = InitAtPath(envStorePth)
+			err = initAtPath(envStorePth)
 			return []models.EnvironmentItemModel{}, err
 		}
 		return []models.EnvironmentItemModel{}, err
 	}
 	return envModels, nil
-}
-
-// DefaultEnvStorePath ...
-func DefaultEnvStorePath() (string, error) {
-	return filepath.Abs(path.Join("./", defaultEnvStoreName))
 }
