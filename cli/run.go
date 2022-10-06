@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/command"
 	log "github.com/sirupsen/logrus"
@@ -45,7 +46,7 @@ func createCommand(envStorePth string, args []string) (*command.Model, error) {
 		return nil, fmt.Errorf("no command specified")
 	}
 
-	cmdEnvs, err := ReadOSEnv(envStorePth)
+	cmdEnvs, err := ReadAndEvaluateEnvs(envStorePth, &env.DefaultEnvironmentSource{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to load EnvStore: %s", err)
 	}

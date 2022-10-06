@@ -2,7 +2,6 @@ package cli
 
 import (
 	"errors"
-	"os"
 
 	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
@@ -249,28 +248,25 @@ func ReadEnvs(pth string) ([]models.EnvironmentItemModel, error) {
 	return ParseEnvsYML(bytes)
 }
 
-func osEnviron(newEnvs []models.EnvironmentItemModel) ([]string, error) {
-	result, err := env.GetDeclarationsSideEffects(newEnvs, &env.DefaultEnvironmentSource{})
+func evaluateEnvs(newEnvs []models.EnvironmentItemModel, envSource env.EnvironmentSource) ([]string, error) {
+	result, err := env.GetDeclarationsSideEffects(newEnvs, envSource)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, command := range result.CommandHistory {
-		if err := env.ExecuteCommand(command); err != nil {
-			return nil, err
-		}
+	var envs []string
+	for key, value := range result.ResultEnvironment {
+		envs = append(envs, key+"="+value)
 	}
-
-	return os.Environ(), nil
+	return envs, nil
 }
 
-// ReadOSEnv ...
-func ReadOSEnv(pth string) ([]string, error) {
-	envs, err := ReadEnvs(pth)
+// ReadAndEvaluateEnvs ...
+func ReadAndEvaluateEnvs(envStorePth string, envSource env.EnvironmentSource) ([]string, error) {
+	envs, err := ReadEnvs(envStorePth)
 	if err != nil {
 		return nil, err
 	}
-	return osEnviron(envs)
+	return evaluateEnvs(envs, envSource)
 }
 
 // ReadEnvsOrCreateEmptyList ...
