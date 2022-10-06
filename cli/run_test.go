@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/bitrise-io/envman/env"
-
 	"github.com/bitrise-io/envman/models"
 	"github.com/bitrise-io/go-utils/pointers"
 	"github.com/stretchr/testify/require"
