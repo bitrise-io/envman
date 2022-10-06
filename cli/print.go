@@ -23,7 +23,7 @@ func print(c *cli.Context) error {
 	sensitiveOnly := c.Bool(SensitiveOnlyKey)
 
 	// Read envs
-	envSet, err := EnvSet(CurrentEnvStoreFilePath, expand, sensitiveOnly)
+	envSet, err := ReadEnvsJSONList(CurrentEnvStoreFilePath, expand, sensitiveOnly)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,8 +43,8 @@ func print(c *cli.Context) error {
 	return nil
 }
 
-// EnvSet ...
-func EnvSet(envStorePth string, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
+// ReadEnvsJSONList ...
+func ReadEnvsJSONList(envStorePth string, expand, sensitiveOnly bool) (models.EnvsJSONListModel, error) {
 	// Read envs
 	environments, err := ReadEnvs(envStorePth)
 	if err != nil {
