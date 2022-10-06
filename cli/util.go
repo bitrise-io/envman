@@ -3,6 +3,8 @@ package cli
 import (
 	"errors"
 	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/bitrise-io/envman/env"
 	"github.com/bitrise-io/envman/models"
@@ -18,6 +20,8 @@ var (
 
 	// ToolMode ...
 	ToolMode bool
+
+	defaultEnvStoreName = ".envstore.yml"
 )
 
 // -------------------
@@ -285,4 +289,9 @@ func ReadEnvsOrCreateEmptyList(envStorePth string) ([]models.EnvironmentItemMode
 		return []models.EnvironmentItemModel{}, err
 	}
 	return envModels, nil
+}
+
+// DefaultEnvStorePath ...
+func DefaultEnvStorePath() (string, error) {
+	return filepath.Abs(path.Join("./", defaultEnvStoreName))
 }
