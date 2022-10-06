@@ -13,8 +13,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-var errTimeout = errors.New("timeout")
-
 func add(c *cli.Context) error {
 	log.Debugln("[ENVMAN] Work path:", CurrentEnvStoreFilePath)
 

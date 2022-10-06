@@ -12,20 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExpandEnvsInString(t *testing.T) {
-	t.Log("Expand env")
-	{
-		require.Equal(t, nil, os.Setenv("MY_ENV_KEY", "key"))
-
-		inp := "${MY_ENV_KEY} of my home"
-		expanded := expandEnvsInString(inp)
-
-		key := os.Getenv("MY_ENV_KEY")
-		require.NotEqual(t, "", expanded)
-		require.Equal(t, key+" of my home", expanded)
-	}
-}
-
 func TestCommandEnvs(t *testing.T) {
 	t.Log("osEnv test")
 	{
