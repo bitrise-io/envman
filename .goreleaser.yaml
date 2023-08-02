@@ -16,6 +16,7 @@ builds:
   - goos: linux
     goarch: arm64
   ldflags:
+  - -X github.com/bitrise-io/envman/version.Version={{ .Version }}
   - -X github.com/bitrise-io/envman/version.Commit={{ .FullCommit }}
   - -X github.com/bitrise-io/envman/version.BuildNumber={{ index .Env "BITRISE_BUILD_NUMBER" }}
 
@@ -23,11 +24,11 @@ archives:
 # GitHub release should contain the raw binaries (no zip or tar.gz)
 - format: binary
   # Name format should match the curl install script
-  name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
-  replacements:
-    darwin: Darwin
-    linux: Linux
-    amd64: x86_64
+  name_template: >-
+    {{ .ProjectName }}-
+    {{- title .Os }}-
+    {{- if eq .Arch "amd64" }}x86_64
+    {{- else }}{{ .Arch }}{{ end }}
 
 release:
   github:
