@@ -95,6 +95,4 @@ workflows:
             #!/usr/bin/env bash
             set -ex
             asdf install
-            asdf reshim golang
-            envman unset GOROOT
-            go version
+            envman set GOROOT ""
