@@ -91,4 +91,4 @@ workflows:
     - script:
         title: Setup pinned Go version
         inputs:
-        - content: asdf install && asdf reshim golang
+        - content: asdf install && asdf reshim golang && go version
