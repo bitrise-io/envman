@@ -39,6 +39,9 @@ func TestRun(t *testing.T) {
 
 			gotOut, err := parseEnvRawOut(output)
 			require.NoError(t, err, "parseEnvRawOut()")
+
+			// Envman and this test process run in different folders,
+			// so we can't compare the PWD env var.
 			delete(gotOut, "PWD")
 
 			// Want envs
