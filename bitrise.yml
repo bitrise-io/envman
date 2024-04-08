@@ -21,14 +21,9 @@ workflows:
             set -ex
 
             curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.57.2
-            asdf reshim golang
+            # asdf reshim golang
             golangci-lint run
     - go-test: { }
-    - codecov:
-        run_if: .IsCI
-        inputs:
-        - other_options: -f ${GO_CODE_COVERAGE_REPORT_PATH}
-        - CODECOV_TOKEN: "$CODECOV_UPLOAD_TOKEN"
 
   run_integration_tests:
     steps:
