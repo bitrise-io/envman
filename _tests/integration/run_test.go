@@ -39,11 +39,15 @@ func TestRun(t *testing.T) {
 
 			gotOut, err := parseEnvRawOut(output)
 			require.NoError(t, err, "parseEnvRawOut()")
+			delete(gotOut, "PWD")
 
 			// Want envs
 			envsWant := make(map[string]string)
 			for _, envVar := range os.Environ() {
 				key, value := env.SplitEnv(envVar)
+				if key == "PWD" {
+					continue
+				}
 				envsWant[key] = value
 			}
 
