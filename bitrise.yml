@@ -11,6 +11,8 @@ workflows:
     after_run:
     - run_integration_tests
     title: Runs tests
+    before_run:
+      - _setup_go
     steps:
     - go-list: { }
     - script:
@@ -26,6 +28,8 @@ workflows:
     - go-test: { }
 
   run_integration_tests:
+    before_run:
+      - _setup_go
     steps:
     - script:
         title: Run integration tests
@@ -50,6 +54,8 @@ workflows:
     description: Creates Linux and Darwin binaries, then publishes a GitHub release
     envs:
     - GITHUB_TOKEN: $GIT_BOT_USER_ACCESS_TOKEN # Goreleaser expects this env var
+    before_run:
+      - _setup_go
     steps:
     - script:
         title: Goreleaser (create binaries + publish to GH)
@@ -65,6 +71,8 @@ workflows:
 
   test-binary-build:
     description: Tests the release build process by creating a snapshot release (without publishing)
+    before_run:
+      - _setup_go
     steps:
     - script:
         title: Goreleaser (create snapshot binaries)
@@ -77,3 +85,10 @@ workflows:
             set -ex
 
             goreleaser release --snapshot --rm-dist
+  
+  _setup_go:
+    steps:
+    - script:
+        title: Setup pinned Go version
+        inputs:
+        - content: asdf install
