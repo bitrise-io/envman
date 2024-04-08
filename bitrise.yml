@@ -95,4 +95,4 @@ workflows:
             #!/usr/bin/env bash
             set -ex
             asdf install
-            envman set GOROOT ""
+            envman add --key GOROOT --value ""
