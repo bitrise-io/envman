@@ -13,14 +13,17 @@ workflows:
     title: Runs tests
     steps:
     - go-list: { }
-    - golint: { }
-    - errcheck: { }
-    - go-test: { }
-    - codecov:
-        run_if: .IsCI
+    - script:
+        title: golangci-lint
         inputs:
-        - other_options: -f ${GO_CODE_COVERAGE_REPORT_PATH}
-        - CODECOV_TOKEN: "$CODECOV_UPLOAD_TOKEN"
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.57.2
+            asdf reshim golang
+            golangci-lint run
+    - go-test: { }
 
   run_integration_tests:
     steps:
