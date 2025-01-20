@@ -6,12 +6,21 @@ app:
   envs:
   - BIN_NAME: envman
 
+step_bundles:
+  setup-go:
+    steps:
+      - script:
+          title: Setup pinned Go version
+          inputs:
+            - content: asdf install
+
 workflows:
   test:
     after_run:
     - run_integration_tests
     title: Runs tests
     steps:
+    - bundle::setup-go: {}
     - go-list: { }
     - script:
         title: golangci-lint
@@ -20,7 +29,7 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.57.2
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.2
             asdf reshim golang
             golangci-lint run
     - go-test: { }
@@ -51,6 +60,7 @@ workflows:
     envs:
     - GITHUB_TOKEN: $GIT_BOT_USER_ACCESS_TOKEN # Goreleaser expects this env var
     steps:
+    - bundle::setup-go: {}
     - script:
         title: Goreleaser (create binaries + publish to GH)
         deps:
@@ -66,6 +76,7 @@ workflows:
   test-binary-build:
     description: Tests the release build process by creating a snapshot release (without publishing)
     steps:
+    - bundle::setup-go: {}
     - script:
         title: Goreleaser (create snapshot binaries)
         deps:
@@ -76,4 +87,4 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
-            goreleaser release --snapshot --rm-dist
+            goreleaser release --snapshot --clean
