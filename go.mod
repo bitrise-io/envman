@@ -1,4 +1,4 @@
-module github.com/bitrise-io/envman
+module github.com/bitrise-io/envman/v2
 
 go 1.22
 
