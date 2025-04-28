@@ -29,9 +29,10 @@ workflows:
             #!/usr/bin/env bash
             set -ex
 
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.2
+            INSTALL_DIR=$(go env GOPATH)/bin
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$INSTALL_DIR" v1.64.8
             asdf reshim golang
-            golangci-lint run
+            "$INSTALL_DIR"/golangci-lint run
     - go-test: { }
 
   run_integration_tests:
