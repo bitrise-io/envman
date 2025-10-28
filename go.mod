@@ -1,6 +1,6 @@
 module github.com/bitrise-io/envman/v2
 
-go 1.24.2
+go 1.25.3
 
 require (
 	github.com/bitrise-io/go-utils v1.0.13
