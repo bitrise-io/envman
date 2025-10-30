@@ -560,13 +560,14 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 				key, value, err := env.GetKeyValuePair()
 				require.NoError(t, err)
 
-				if key == "KEY_ONE" {
+				switch key {
+				case "KEY_ONE":
 					require.Equal(t, "first value", value)
 
 					options, err := env.GetOptions()
 					require.NoError(t, err)
 					require.Equal(t, EnvironmentItemOptionsModel{}, options)
-				} else if key == "KEY_TWO" {
+				case "KEY_TWO":
 					require.Equal(t, "second value, with options", value)
 
 					options, err := env.GetOptions()
@@ -577,7 +578,7 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 					isExpose, ok := isExposeValue.(bool)
 					require.Equal(t, true, ok)
 					require.Equal(t, true, isExpose)
-				} else {
+				default:
 					t.Fatalf("unexpected key found: %s", key)
 				}
 			}
