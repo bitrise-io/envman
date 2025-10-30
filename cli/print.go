@@ -15,7 +15,7 @@ func printCmd(c *cli.Context) error {
 	format := c.String(FormatKey)
 	if format == "" {
 		format = OutputFormatRaw
-	} else if !(format == OutputFormatRaw || format == OutputFormatJSON || format == OutputFormatEnvList) {
+	} else if format != OutputFormatRaw && format != OutputFormatJSON && format != OutputFormatEnvList {
 		log.Fatalf("Invalid format: %s", format)
 	}
 
