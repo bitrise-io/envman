@@ -4,7 +4,7 @@ github.com/bitrise-io/go-utils/command
 github.com/bitrise-io/go-utils/fileutil
 github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/pointers
-# github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.32.0.20260219145834-dc507fba552c
+# github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.33
 ## explicit; go 1.17
 github.com/bitrise-io/go-utils/v2/parseutil
 # github.com/bitrise-io/goinp v0.0.0-20240103152431-054ed78518ef
