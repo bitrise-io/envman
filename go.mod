@@ -4,6 +4,7 @@ go 1.25.3
 
 require (
 	github.com/bitrise-io/go-utils v1.0.13
+	github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.33
 	github.com/bitrise-io/goinp v0.0.0-20240103152431-054ed78518ef
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
