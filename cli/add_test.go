@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strconv"
 	"strings"
 	"testing"
 
@@ -76,4 +77,39 @@ func TestValidateEnv(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestValidateEnvWithEnvListOverride(t *testing.T) {
+	defaultConfig, err := envman.GetConfigs()
+	require.NoError(t, err)
+
+	// A value bigger than the default per-env byte limit.
+	bigValue := strings.Repeat("a", defaultConfig.EnvBytesLimitInKB*1024+1)
+
+	t.Run("rejected without an override", func(t *testing.T) {
+		_, err := validateEnv("key", bigValue, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("accepted when the override comes from envman's env list", func(t *testing.T) {
+		// The override lives in the env list envman works with (the envstore), not in the
+		// process environment, mirroring how it is set during a build.
+		envList := []models.EnvironmentItemModel{
+			{envman.EnvBytesLimitInKBEnvKey: strconv.Itoa(defaultConfig.EnvBytesLimitInKB * 2)},
+			{envman.EnvListBytesLimitInKBEnvKey: strconv.Itoa(defaultConfig.EnvListBytesLimitInKB * 2)},
+		}
+
+		validValue, err := validateEnv("key", bigValue, envList)
+		require.NoError(t, err)
+		require.Equal(t, bigValue, validValue)
+	})
+
+	t.Run("invalid override value in the env list returns an error", func(t *testing.T) {
+		envList := []models.EnvironmentItemModel{
+			{envman.EnvBytesLimitInKBEnvKey: "not-a-number"},
+		}
+
+		_, err := validateEnv("key", "a", envList)
+		require.Error(t, err)
+	})
 }

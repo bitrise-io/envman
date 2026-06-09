@@ -16,10 +16,12 @@ const (
 	defaultEnvBytesLimitInKB     = 256
 	defaultEnvListBytesLimitInKB = 256
 
-	// Environment variables to override the byte limits, take precedence over the config file.
-	// Useful when the config file is not writable/reachable, e.g. while running a script step.
-	envBytesLimitInKBEnvKey     = "ENVMAN_ENV_BYTES_LIMIT_IN_KB"
-	envListBytesLimitInKBEnvKey = "ENVMAN_ENV_LIST_BYTES_LIMIT_IN_KB"
+	// EnvBytesLimitInKBEnvKey and EnvListBytesLimitInKBEnvKey are the env keys to override the
+	// byte limits. Env-based overrides take precedence over the config file, so the limits stay
+	// overrideable when the config file is not writable/reachable, e.g. while running a script step.
+	// They are read both from the process environment and from envman's own env list (envstore).
+	EnvBytesLimitInKBEnvKey     = "ENVMAN_ENV_BYTES_LIMIT_IN_KB"
+	EnvListBytesLimitInKBEnvKey = "ENVMAN_ENV_LIST_BYTES_LIMIT_IN_KB"
 )
 
 // ConfigsModel ...
@@ -88,28 +90,33 @@ func GetConfigs() (ConfigsModel, error) {
 		}
 	}
 
-	// Environment variables take precedence over the config file, so the limits stay
+	// Process environment variables take precedence over the config file, so the limits stay
 	// overrideable even when the config file is not reachable (e.g. inside a script step).
-	if err := applyEnvVarOverrides(&configs); err != nil {
+	// Overrides coming from envman's own env list (see OverrideConfigsWithEnvs) take precedence
+	// over these, as that is where the override usually lives during a build.
+	if err := OverrideConfigsWithEnvs(&configs, os.LookupEnv); err != nil {
 		return ConfigsModel{}, err
 	}
 
 	return configs, nil
 }
 
-// applyEnvVarOverrides overrides the limits from environment variables when set.
-func applyEnvVarOverrides(configs *ConfigsModel) error {
-	if val, ok := os.LookupEnv(envBytesLimitInKBEnvKey); ok {
+// OverrideConfigsWithEnvs overrides the byte limits from env values resolved by lookup.
+// lookup mirrors os.LookupEnv: it returns the value and whether the key is set. This lets the
+// limits be overridden both from the process environment and from envman's own env list (envstore),
+// which is important when envman cannot reach its config file, e.g. while running a script step.
+func OverrideConfigsWithEnvs(configs *ConfigsModel, lookup func(key string) (string, bool)) error {
+	if val, ok := lookup(EnvBytesLimitInKBEnvKey); ok {
 		limit, err := strconv.Atoi(val)
 		if err != nil {
-			return fmt.Errorf("invalid value (%s) for %s: %s", val, envBytesLimitInKBEnvKey, err)
+			return fmt.Errorf("invalid value (%s) for %s: %s", val, EnvBytesLimitInKBEnvKey, err)
 		}
 		configs.EnvBytesLimitInKB = limit
 	}
-	if val, ok := os.LookupEnv(envListBytesLimitInKBEnvKey); ok {
+	if val, ok := lookup(EnvListBytesLimitInKBEnvKey); ok {
 		limit, err := strconv.Atoi(val)
 		if err != nil {
-			return fmt.Errorf("invalid value (%s) for %s: %s", val, envListBytesLimitInKBEnvKey, err)
+			return fmt.Errorf("invalid value (%s) for %s: %s", val, EnvListBytesLimitInKBEnvKey, err)
 		}
 		configs.EnvListBytesLimitInKB = limit
 	}

@@ -62,15 +62,15 @@ func TestGetConfigsEnvVarOverride(t *testing.T) {
 	require.NoError(t, os.Setenv("HOME", fakeHomePth))
 
 	unsetEnvs := func() {
-		require.NoError(t, os.Unsetenv(envBytesLimitInKBEnvKey))
-		require.NoError(t, os.Unsetenv(envListBytesLimitInKBEnvKey))
+		require.NoError(t, os.Unsetenv(EnvBytesLimitInKBEnvKey))
+		require.NoError(t, os.Unsetenv(EnvListBytesLimitInKBEnvKey))
 	}
 	defer unsetEnvs()
 
 	t.Run("env vars override the defaults when no config file exists", func(t *testing.T) {
 		unsetEnvs()
-		require.NoError(t, os.Setenv(envBytesLimitInKBEnvKey, "111"))
-		require.NoError(t, os.Setenv(envListBytesLimitInKBEnvKey, "222"))
+		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
+		require.NoError(t, os.Setenv(EnvListBytesLimitInKBEnvKey, "222"))
 
 		configs, err := GetConfigs()
 		require.NoError(t, err)
@@ -83,8 +83,8 @@ func TestGetConfigsEnvVarOverride(t *testing.T) {
 		require.NoError(t, saveConfigs(ConfigsModel{EnvBytesLimitInKB: 123, EnvListBytesLimitInKB: 321}))
 		defer func() { require.NoError(t, os.Remove(getEnvmanConfigsFilePath())) }()
 
-		require.NoError(t, os.Setenv(envBytesLimitInKBEnvKey, "111"))
-		require.NoError(t, os.Setenv(envListBytesLimitInKBEnvKey, "222"))
+		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
+		require.NoError(t, os.Setenv(EnvListBytesLimitInKBEnvKey, "222"))
 
 		configs, err := GetConfigs()
 		require.NoError(t, err)
@@ -97,7 +97,7 @@ func TestGetConfigsEnvVarOverride(t *testing.T) {
 		require.NoError(t, saveConfigs(ConfigsModel{EnvBytesLimitInKB: 123, EnvListBytesLimitInKB: 321}))
 		defer func() { require.NoError(t, os.Remove(getEnvmanConfigsFilePath())) }()
 
-		require.NoError(t, os.Setenv(envBytesLimitInKBEnvKey, "111"))
+		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
 
 		configs, err := GetConfigs()
 		require.NoError(t, err)
@@ -107,7 +107,7 @@ func TestGetConfigsEnvVarOverride(t *testing.T) {
 
 	t.Run("invalid env var value returns an error", func(t *testing.T) {
 		unsetEnvs()
-		require.NoError(t, os.Setenv(envBytesLimitInKBEnvKey, "not-a-number"))
+		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "not-a-number"))
 
 		_, err := GetConfigs()
 		require.Error(t, err)
