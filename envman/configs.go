@@ -92,35 +92,39 @@ func GetConfigs() (ConfigsModel, error) {
 
 	// Process environment variables take precedence over the config file, so the limits stay
 	// overrideable even when the config file is not reachable (e.g. inside a script step).
-	// Overrides coming from envman's own env list (see OverrideConfigsWithEnvs) take precedence
-	// over these, as that is where the override usually lives during a build.
-	if err := OverrideConfigsWithEnvs(&configs, os.LookupEnv); err != nil {
+	if err := applyEnvVarOverrides(&configs); err != nil {
 		return ConfigsModel{}, err
 	}
 
 	return configs, nil
 }
 
-// OverrideConfigsWithEnvs overrides the byte limits from env values resolved by lookup.
-// lookup mirrors os.LookupEnv: it returns the value and whether the key is set. This lets the
-// limits be overridden both from the process environment and from envman's own env list (envstore),
-// which is important when envman cannot reach its config file, e.g. while running a script step.
-func OverrideConfigsWithEnvs(configs *ConfigsModel, lookup func(key string) (string, bool)) error {
-	if val, ok := lookup(EnvBytesLimitInKBEnvKey); ok {
-		limit, err := strconv.Atoi(val)
+// applyEnvVarOverrides overrides the byte limits from the process environment when set.
+func applyEnvVarOverrides(configs *ConfigsModel) error {
+	if val, ok := os.LookupEnv(EnvBytesLimitInKBEnvKey); ok {
+		limit, err := LimitFromEnvValue(val, EnvBytesLimitInKBEnvKey)
 		if err != nil {
-			return fmt.Errorf("invalid value (%s) for %s: %s", val, EnvBytesLimitInKBEnvKey, err)
+			return err
 		}
 		configs.EnvBytesLimitInKB = limit
 	}
-	if val, ok := lookup(EnvListBytesLimitInKBEnvKey); ok {
-		limit, err := strconv.Atoi(val)
+	if val, ok := os.LookupEnv(EnvListBytesLimitInKBEnvKey); ok {
+		limit, err := LimitFromEnvValue(val, EnvListBytesLimitInKBEnvKey)
 		if err != nil {
-			return fmt.Errorf("invalid value (%s) for %s: %s", val, EnvListBytesLimitInKBEnvKey, err)
+			return err
 		}
 		configs.EnvListBytesLimitInKB = limit
 	}
 	return nil
+}
+
+// LimitFromEnvValue parses a byte-limit override value (in KB). key is only used for error context.
+func LimitFromEnvValue(value, key string) (int, error) {
+	limit, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("invalid value (%s) for %s: %s", value, key, err)
+	}
+	return limit, nil
 }
 
 // saveConfigs ...

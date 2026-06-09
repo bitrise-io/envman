@@ -125,21 +125,21 @@ func envListSizeInBytes(envs []models.EnvironmentItemModel) (int, error) {
 	return valueSizeInBytes, nil
 }
 
-// envListLookup returns an os.LookupEnv-style resolver backed by envman's env list (envstore),
-// so config overrides can be read from the env list envman works with, not just the process env.
-func envListLookup(envList []models.EnvironmentItemModel) (func(key string) (string, bool), error) {
-	values := make(map[string]string, len(envList))
+// effectiveLimitInKB returns the byte limit to enforce: when key is set in envman's env list
+// (envstore), that value is used in place of configLimit. The override is only consulted here,
+// it is not written back into the loaded config. This keeps the limits overrideable through the
+// envstore even when envman cannot reach/write its config file (e.g. while running a script step).
+func effectiveLimitInKB(envList []models.EnvironmentItemModel, key string, configLimit int) (int, error) {
 	for _, env := range envList {
-		key, value, err := env.GetKeyValuePair()
+		envKey, envValue, err := env.GetKeyValuePair()
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
-		values[key] = value
+		if envKey == key {
+			return envman.LimitFromEnvValue(envValue, key)
+		}
 	}
-	return func(key string) (string, bool) {
-		value, ok := values[key]
-		return value, ok
-	}, nil
+	return configLimit, nil
 }
 
 func validateEnv(key, value string, envList []models.EnvironmentItemModel) (string, error) {
@@ -152,34 +152,35 @@ func validateEnv(key, value string, envList []models.EnvironmentItemModel) (stri
 		return "", err
 	}
 
-	// The byte limits can also be overridden through envman's own env list (envstore), which
-	// takes precedence over the config file and the process environment. This keeps the limits
-	// overrideable during a build, when the override is set as an env var rather than in the
-	// config file and envman cannot reach/write that file (e.g. while running a script step).
-	lookup, err := envListLookup(envList)
+	// The byte limits can also be overridden through envman's own env list (envstore), used in
+	// place below. The envstore override takes precedence over the loaded config, keeping the
+	// limits overrideable during a build, when the override is set as an env var rather than in
+	// the config file and envman cannot reach/write that file (e.g. while running a script step).
+	envBytesLimitInKB, err := effectiveLimitInKB(envList, envman.EnvBytesLimitInKBEnvKey, configs.EnvBytesLimitInKB)
 	if err != nil {
 		return "", err
 	}
-	if err := envman.OverrideConfigsWithEnvs(&configs, lookup); err != nil {
+	envListBytesLimitInKB, err := effectiveLimitInKB(envList, envman.EnvListBytesLimitInKBEnvKey, configs.EnvListBytesLimitInKB)
+	if err != nil {
 		return "", err
 	}
 
 	valueSizeInBytes := len([]byte(value))
-	if configs.EnvBytesLimitInKB > 0 {
-		if valueSizeInBytes > configs.EnvBytesLimitInKB*1024 {
+	if envBytesLimitInKB > 0 {
+		if valueSizeInBytes > envBytesLimitInKB*1024 {
 			valueSizeInKB := (float64)(valueSizeInBytes) / 1024.0
-			return "", NewEnvVarValueTooLargeError(key, valueSizeInKB, (float64)(configs.EnvBytesLimitInKB))
+			return "", NewEnvVarValueTooLargeError(key, valueSizeInKB, (float64)(envBytesLimitInKB))
 		}
 	}
 
-	if configs.EnvListBytesLimitInKB > 0 {
+	if envListBytesLimitInKB > 0 {
 		envListSizeInBytes, err := envListSizeInBytes(envList)
 		if err != nil {
 			return "", err
 		}
-		if envListSizeInBytes+valueSizeInBytes > configs.EnvListBytesLimitInKB*1024 {
+		if envListSizeInBytes+valueSizeInBytes > envListBytesLimitInKB*1024 {
 			listSizeInKB := (float64)(envListSizeInBytes)/1024 + (float64)(valueSizeInBytes)/1024
-			return "", NewEnvVarListTooLargeError(listSizeInKB, (float64)(configs.EnvListBytesLimitInKB))
+			return "", NewEnvVarListTooLargeError(listSizeInKB, (float64)(envListBytesLimitInKB))
 		}
 	}
 	return value, nil
