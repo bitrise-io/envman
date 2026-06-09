@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strconv"
 
+	"github.com/bitrise-io/envman/v2/models"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/pathutil"
 )
@@ -55,7 +55,7 @@ func createDefaultConfigsModel() ConfigsModel {
 }
 
 // GetConfigs ...
-func GetConfigs() (ConfigsModel, error) {
+func GetConfigs(envList []models.EnvironmentItemModel) (ConfigsModel, error) {
 	configPth := getEnvmanConfigsFilePath()
 	configs := createDefaultConfigsModel()
 
@@ -90,7 +90,7 @@ func GetConfigs() (ConfigsModel, error) {
 
 	// Environment variables take precedence over the config file, so the limits stay
 	// overrideable even when the config file is not reachable (e.g. inside a script step).
-	if err := applyEnvVarOverrides(&configs); err != nil {
+	if err := applyEnvVarOverrides(&configs, envList); err != nil {
 		return ConfigsModel{}, err
 	}
 
@@ -98,26 +98,33 @@ func GetConfigs() (ConfigsModel, error) {
 }
 
 // applyEnvVarOverrides overrides the limits from environment variables when set.
-func applyEnvVarOverrides(configs *ConfigsModel) error {
-	if val, ok := os.LookupEnv(envBytesLimitInKBEnvKey); ok {
-		limit, err := strconv.Atoi(val)
-		if err != nil {
-			return fmt.Errorf("invalid value (%s) for %s: %s", val, envBytesLimitInKBEnvKey, err)
+func applyEnvVarOverrides(configs *ConfigsModel, envList []models.EnvironmentItemModel) error {
+	for _, env := range envList {
+		for key, value := range env {
+			if key == envBytesLimitInKBEnvKey {
+				intVal, ok := value.(int)
+				if !ok {
+					return fmt.Errorf("invalid value (%s) for %s: expected int", value, envBytesLimitInKBEnvKey)
+				}
+
+				configs.EnvBytesLimitInKB = intVal
+			}
+			if key == envListBytesLimitInKBEnvKey {
+				intVal, ok := value.(int)
+				if !ok {
+					return fmt.Errorf("invalid value (%s) for %s: expected int", value, envBytesLimitInKBEnvKey)
+				}
+
+				configs.EnvListBytesLimitInKB = intVal
+			}
 		}
-		configs.EnvBytesLimitInKB = limit
-	}
-	if val, ok := os.LookupEnv(envListBytesLimitInKBEnvKey); ok {
-		limit, err := strconv.Atoi(val)
-		if err != nil {
-			return fmt.Errorf("invalid value (%s) for %s: %s", val, envListBytesLimitInKBEnvKey, err)
-		}
-		configs.EnvListBytesLimitInKB = limit
 	}
 	return nil
 }
 
 // saveConfigs ...
-//  only used for unit testing at the moment
+//
+//	only used for unit testing at the moment
 func saveConfigs(configModel ConfigsModel) error {
 	if err := ensureEnvmanConfigDirExists(); err != nil {
 		return err
