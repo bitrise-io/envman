@@ -130,7 +130,7 @@ func validateEnv(key, value string, envList []models.EnvironmentItemModel) (stri
 		return "", errors.New("key is not specified, required")
 	}
 
-	configs, err := envman.GetConfigs()
+	configs, err := envman.GetConfigs(envList)
 	if err != nil {
 		return "", err
 	}
