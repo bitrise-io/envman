@@ -17,9 +17,10 @@ const (
 	defaultEnvListBytesLimitInKB = 256
 
 	// EnvBytesLimitInKBEnvKey and EnvListBytesLimitInKBEnvKey are the env keys to override the
-	// byte limits. Env-based overrides take precedence over the config file, so the limits stay
-	// overrideable when the config file is not writable/reachable, e.g. while running a script step.
-	// They are read both from the process environment and from envman's own env list (envstore).
+	// byte limits. When present in envman's env list (envstore), their values override the limits
+	// from the config file during validation, so the limits stay overrideable when the config file
+	// is not writable/reachable, e.g. while running a script step. The position of these keys in
+	// the env list does not matter; they are pulled out before the rest of the list is validated.
 	EnvBytesLimitInKBEnvKey     = "ENVMAN_ENV_BYTES_LIMIT_IN_KB"
 	EnvListBytesLimitInKBEnvKey = "ENVMAN_ENV_LIST_BYTES_LIMIT_IN_KB"
 )
@@ -90,32 +91,7 @@ func GetConfigs() (ConfigsModel, error) {
 		}
 	}
 
-	// Process environment variables take precedence over the config file, so the limits stay
-	// overrideable even when the config file is not reachable (e.g. inside a script step).
-	if err := applyEnvVarOverrides(&configs); err != nil {
-		return ConfigsModel{}, err
-	}
-
 	return configs, nil
-}
-
-// applyEnvVarOverrides overrides the byte limits from the process environment when set.
-func applyEnvVarOverrides(configs *ConfigsModel) error {
-	if val, ok := os.LookupEnv(EnvBytesLimitInKBEnvKey); ok {
-		limit, err := LimitFromEnvValue(val, EnvBytesLimitInKBEnvKey)
-		if err != nil {
-			return err
-		}
-		configs.EnvBytesLimitInKB = limit
-	}
-	if val, ok := os.LookupEnv(EnvListBytesLimitInKBEnvKey); ok {
-		limit, err := LimitFromEnvValue(val, EnvListBytesLimitInKBEnvKey)
-		if err != nil {
-			return err
-		}
-		configs.EnvListBytesLimitInKB = limit
-	}
-	return nil
 }
 
 // LimitFromEnvValue parses a byte-limit override value (in KB). key is only used for error context.

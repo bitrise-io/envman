@@ -50,8 +50,9 @@ func TestGetConfigs(t *testing.T) {
 	require.NoError(t, os.Remove(configPth))
 }
 
-func TestGetConfigsEnvVarOverride(t *testing.T) {
-	// fake home, to control the configs file
+func TestGetConfigsIgnoresProcessEnv(t *testing.T) {
+	// The byte-limit overrides are read from envman's env list during validation, not from the
+	// process environment, so GetConfigs must ignore these env vars.
 	fakeHomePth, err := pathutil.NormalizedOSTempDirPath("_FAKE_HOME")
 	require.NoError(t, err)
 	originalHome := os.Getenv("HOME")
@@ -61,55 +62,24 @@ func TestGetConfigsEnvVarOverride(t *testing.T) {
 	}()
 	require.NoError(t, os.Setenv("HOME", fakeHomePth))
 
-	unsetEnvs := func() {
+	require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
+	require.NoError(t, os.Setenv(EnvListBytesLimitInKBEnvKey, "222"))
+	defer func() {
 		require.NoError(t, os.Unsetenv(EnvBytesLimitInKBEnvKey))
 		require.NoError(t, os.Unsetenv(EnvListBytesLimitInKBEnvKey))
-	}
-	defer unsetEnvs()
+	}()
 
-	t.Run("env vars override the defaults when no config file exists", func(t *testing.T) {
-		unsetEnvs()
-		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
-		require.NoError(t, os.Setenv(EnvListBytesLimitInKBEnvKey, "222"))
+	configs, err := GetConfigs()
+	require.NoError(t, err)
+	require.Equal(t, defaultEnvBytesLimitInKB, configs.EnvBytesLimitInKB)
+	require.Equal(t, defaultEnvListBytesLimitInKB, configs.EnvListBytesLimitInKB)
+}
 
-		configs, err := GetConfigs()
-		require.NoError(t, err)
-		require.Equal(t, 111, configs.EnvBytesLimitInKB)
-		require.Equal(t, 222, configs.EnvListBytesLimitInKB)
-	})
+func TestLimitFromEnvValue(t *testing.T) {
+	limit, err := LimitFromEnvValue("512", EnvBytesLimitInKBEnvKey)
+	require.NoError(t, err)
+	require.Equal(t, 512, limit)
 
-	t.Run("env vars take precedence over the config file", func(t *testing.T) {
-		unsetEnvs()
-		require.NoError(t, saveConfigs(ConfigsModel{EnvBytesLimitInKB: 123, EnvListBytesLimitInKB: 321}))
-		defer func() { require.NoError(t, os.Remove(getEnvmanConfigsFilePath())) }()
-
-		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
-		require.NoError(t, os.Setenv(EnvListBytesLimitInKBEnvKey, "222"))
-
-		configs, err := GetConfigs()
-		require.NoError(t, err)
-		require.Equal(t, 111, configs.EnvBytesLimitInKB)
-		require.Equal(t, 222, configs.EnvListBytesLimitInKB)
-	})
-
-	t.Run("only the set env var overrides, the other falls back to the config file", func(t *testing.T) {
-		unsetEnvs()
-		require.NoError(t, saveConfigs(ConfigsModel{EnvBytesLimitInKB: 123, EnvListBytesLimitInKB: 321}))
-		defer func() { require.NoError(t, os.Remove(getEnvmanConfigsFilePath())) }()
-
-		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "111"))
-
-		configs, err := GetConfigs()
-		require.NoError(t, err)
-		require.Equal(t, 111, configs.EnvBytesLimitInKB)
-		require.Equal(t, 321, configs.EnvListBytesLimitInKB)
-	})
-
-	t.Run("invalid env var value returns an error", func(t *testing.T) {
-		unsetEnvs()
-		require.NoError(t, os.Setenv(EnvBytesLimitInKBEnvKey, "not-a-number"))
-
-		_, err := GetConfigs()
-		require.Error(t, err)
-	})
+	_, err = LimitFromEnvValue("not-a-number", EnvBytesLimitInKBEnvKey)
+	require.Error(t, err)
 }
