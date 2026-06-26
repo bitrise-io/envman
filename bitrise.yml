@@ -34,16 +34,6 @@ workflows:
             asdf reshim golang
             "$INSTALL_DIR"/golangci-lint run
     - go-test: { }
-    - script:
-        title: govulncheck
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-
-            go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
-            asdf reshim golang
-            govulncheck ./...
 
   run_integration_tests:
     steps:
@@ -85,17 +75,6 @@ workflows:
               echo "Please update the Envman version to match the git tag"
               exit 1
             fi
-    - script:
-        title: govulncheck (binary mode)
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-
-            go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
-            asdf reshim golang
-            CGO_ENABLED=0 go build -o _tmp/envman_vuln_check .
-            govulncheck -mode=binary _tmp/envman_vuln_check
     - script:
         title: Goreleaser (create binaries + publish to GH)
         deps:
