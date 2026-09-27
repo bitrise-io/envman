@@ -116,3 +116,91 @@ func TestGetConfigsEnvOverride(t *testing.T) {
 		}
 	})
 }
+
+func TestSetConfigLimits(t *testing.T) {
+	intPtr := func(i int) *int { return &i }
+
+	setupFakeHome := func(t *testing.T) string {
+		fakeHomePth, err := pathutil.NormalizedOSTempDirPath("_FAKE_HOME")
+		require.NoError(t, err)
+		originalHome := os.Getenv("HOME")
+		t.Cleanup(func() {
+			require.NoError(t, os.Setenv("HOME", originalHome))
+			require.NoError(t, os.RemoveAll(fakeHomePth))
+		})
+		require.NoError(t, os.Setenv("HOME", fakeHomePth))
+		// The env overrides must not leak in and mask the file value under test.
+		for _, key := range []string{EnvBytesLimitInKBEnvKey, EnvListBytesLimitInKBEnvKey} {
+			require.NoError(t, os.Unsetenv(key))
+		}
+		return fakeHomePth
+	}
+
+	t.Run("creates the file when none exists and restore removes it", func(t *testing.T) {
+		setupFakeHome(t)
+		configPth := getEnvmanConfigsFilePath()
+
+		restore, err := SetConfigLimits(ConfigLimitOverrides{
+			EnvBytesLimitInKB:     intPtr(512),
+			EnvListBytesLimitInKB: intPtr(1024),
+		})
+		require.NoError(t, err)
+
+		configs, err := GetConfigs()
+		require.NoError(t, err)
+		require.Equal(t, 512, configs.EnvBytesLimitInKB)
+		require.Equal(t, 1024, configs.EnvListBytesLimitInKB)
+
+		require.NoError(t, restore())
+		exists, err := pathutil.IsPathExists(configPth)
+		require.NoError(t, err)
+		require.False(t, exists, "restore should remove a file that did not exist before")
+	})
+
+	t.Run("writes 0 explicitly to disable a limit", func(t *testing.T) {
+		setupFakeHome(t)
+
+		restore, err := SetConfigLimits(ConfigLimitOverrides{EnvListBytesLimitInKB: intPtr(0)})
+		require.NoError(t, err)
+		t.Cleanup(func() { require.NoError(t, restore()) })
+
+		configs, err := GetConfigs()
+		require.NoError(t, err)
+		require.Equal(t, 0, configs.EnvListBytesLimitInKB, "0 must be persisted, not dropped to the default")
+	})
+
+	t.Run("merges with an existing file and preserves the untouched key", func(t *testing.T) {
+		setupFakeHome(t)
+		configPth := getEnvmanConfigsFilePath()
+
+		require.NoError(t, saveConfigs(ConfigsModel{EnvBytesLimitInKB: 100, EnvListBytesLimitInKB: 200}))
+		originalBytes, err := os.ReadFile(configPth)
+		require.NoError(t, err)
+
+		restore, err := SetConfigLimits(ConfigLimitOverrides{EnvListBytesLimitInKB: intPtr(1024)})
+		require.NoError(t, err)
+
+		configs, err := GetConfigs()
+		require.NoError(t, err)
+		require.Equal(t, 100, configs.EnvBytesLimitInKB, "untouched key should be preserved")
+		require.Equal(t, 1024, configs.EnvListBytesLimitInKB)
+
+		require.NoError(t, restore())
+		restoredBytes, err := os.ReadFile(configPth)
+		require.NoError(t, err)
+		require.JSONEq(t, string(originalBytes), string(restoredBytes), "restore should return the exact original content")
+	})
+
+	t.Run("no overrides is a no-op and does not create a file", func(t *testing.T) {
+		setupFakeHome(t)
+		configPth := getEnvmanConfigsFilePath()
+
+		restore, err := SetConfigLimits(ConfigLimitOverrides{})
+		require.NoError(t, err)
+		require.NoError(t, restore())
+
+		exists, err := pathutil.IsPathExists(configPth)
+		require.NoError(t, err)
+		require.False(t, exists)
+	})
+}
