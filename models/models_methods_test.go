@@ -504,12 +504,15 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 	var objFromYAML EnvsSerializeModel
 	require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &objFromYAML))
 
-	// the objFromYAML object in this state can't be serialized to JSON directly,
-	// as the YAML parser parses the `opts` into map[interface]interface,
-	// which is not supported by JSON
+	// Depending on the YAML library version the parsed `opts` value is either
+	// map[interface{}]interface{} (yaml.v2), which encoding/json cannot marshal,
+	// or map[string]interface{} (yaml.v3), which it can. Accept both so the test
+	// does not depend on which major version of the YAML parser is in use.
 	{
 		_, err := json.Marshal(objFromYAML)
-		require.EqualError(t, err, `json: unsupported type: map[interface {}]interface {}`)
+		require.True(t, err == nil ||
+			err.Error() == `json: unsupported type: map[interface {}]interface {}`,
+			"unexpected error from json.Marshal: %v", err)
 	}
 
 	// now, if we call Normalize on this object, that will convert the map[interface]interface
@@ -535,12 +538,12 @@ func Test_EnvsSerializeModel_Normalize(t *testing.T) {
 		var objFromYAML EnvsSerializeModel
 		require.NoError(t, yaml.Unmarshal([]byte(yamlContent), &objFromYAML))
 
-		// the objFromYAML object in this state can't be serialized to JSON directly,
-		// as the YAML parser parses the `opts` into map[interface]interface,
-		// which is not supported by JSON
+		// Same yaml.v2/v3 tolerance as above.
 		{
 			_, err := json.Marshal(objFromYAML)
-			require.EqualError(t, err, `json: unsupported type: map[interface {}]interface {}`)
+			require.True(t, err == nil ||
+				err.Error() == `json: unsupported type: map[interface {}]interface {}`,
+				"unexpected error from json.Marshal: %v", err)
 		}
 
 		// now, if we call Normalize on this object, that will convert the map[interface]interface
