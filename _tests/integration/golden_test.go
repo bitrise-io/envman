@@ -236,12 +236,12 @@ var (
 	stdlogPrefixPattern = regexp.MustCompile(`(?m)^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} `)
 	logrusTextTime      = regexp.MustCompile(`time="[^"]*"`)
 	stackTracePattern   = regexp.MustCompile(`(?s)\ngoroutine \d+ \[.*`)
-	panicPCPattern      = regexp.MustCompile(`pc=0x[0-9a-f]+`)
+	sigsegvPattern      = regexp.MustCompile(`code=0x[0-9a-f]+ addr=0x[0-9a-f]+ pc=0x[0-9a-f]+`)
 )
 
 func (n normalizer) normalize(s string) string {
 	s = stackTracePattern.ReplaceAllString(s, "\n<stack trace>\n")
-	s = panicPCPattern.ReplaceAllString(s, "pc=<pc>")
+	s = sigsegvPattern.ReplaceAllString(s, "code=<code> addr=<addr> pc=<pc>")
 	s = logrusTextTime.ReplaceAllString(s, `time="<time>"`)
 	s = ansiPattern.ReplaceAllString(s, "")
 	s = logrusTimePattern.ReplaceAllString(s, "$1[HH:MM:SS]")
